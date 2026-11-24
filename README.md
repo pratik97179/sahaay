@@ -1,6 +1,10 @@
 # Sahaay
 
-A multilingual medication companion that helps patients manage their medication routines and enables caregivers to assist remotely.
+A medication reminder app. Add your medicines with a photo, set one or more independent reminders for each, and get a notification when a reminder is due. All data stays on your device.
+
+Sahaay is a reminder tool only: it does not give medical advice or calculate doses.
+
+See the [product requirements](docs/sahaay_prd.md) and [v1 technical notes](docs/sahaay_v1_technical_notes.md).
 
 ## Getting Started
 
