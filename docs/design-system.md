@@ -62,6 +62,19 @@ Accessibility is a property of the design system, not something each feature mus
 
 Account for text scaling, colour contrast, touch targets, focus visibility, and reduced motion.
 
+### 2.5 Visual direction (v1)
+
+Sahaay is calm, quiet and spacious. Many users are older, unwell, tired or anxious, and often open the app at the moment a reminder fires. The interface must never hurry or startle them.
+
+- **Warm paper.** Soft warm surfaces in light and dark appearances; no cold or tinted near-black.
+- **Two voices.** A bold, large, condensed face for the few things that identify (page, section and item headings, and times); a softer, rounded reading face for everything else.
+- **One gentle accent.** A muted sage, used only for actions.
+- **Nothing looks urgent unless it is.** Only errors and destructive actions use a state colour.
+- **More space than feels necessary.** Sections are separated by space and soft tints, not borders.
+- **No medical judgement.** No adherence, "missed", "late" or health colours anywhere.
+
+The concrete values are recorded in §4–§9, component behaviour in §11.7, token names in §11.8, and the code structure in §13.1.
+
 ---
 
 ## 3. Content hierarchy
@@ -218,28 +231,34 @@ Typography follows the content hierarchy.
 
 Do not select typography based on arbitrary widget names or manually configured numeric values.
 
-Use the following roles.
+Sahaay has two voices:
 
-### 4.1 Typography roles
+- **Barlow Condensed** — the identifying voice. Bold, large and condensed. Used only for screen, section and item titles, and for times.
+- **Nunito** — the reading voice. Softer, rounded and wider. Used for everything else.
 
-| Role | Definition | Example |
-|---|---|---|
-| `type.pageHeading` | Identifies the current screen | Medicine Details |
-| `type.sectionHeading` | Identifies an independent content group | Reminders |
-| `type.itemHeading` | Identifies an individual entity | Paracetamol |
-| `type.primaryValue` | Emphasizes an important value within an item | 9:00 AM |
-| `type.body` | Normal readable content | User-provided instructions |
-| `type.bodyEmphasis` | Important content requiring greater emphasis | A key instruction |
-| `type.supporting` | Explains or qualifies another element | Every Monday and Thursday |
-| `type.fieldLabel` | Identifies an attribute or input | Start Date |
-| `type.fieldValue` | Displays an entered or read-only field value | 25 November 2026 |
-| `type.metadata` | Displays secondary contextual information | Daily |
-| `type.actionLabel` | Labels an interactive operation | Save |
-| `type.statusLabel` | Identifies an application or item state | Paused |
+Both are bundled as font files inside the design-system package. They are not downloaded at runtime.
+
+### 4.1 Shared text styles
+
+These are the design system's internal text styles. Components use them; feature code reaches them only through component tokens (§11.8). Sizes are in logical points at 100% text size, and will be fine-tuned in the component catalogue.
+
+| Style | Meaning | Face and weight | Size | Example |
+|---|---|---|---|---|
+| `screenTitle` | Names the current screen | Barlow Condensed ExtraBold | 48 | Medicines |
+| `sectionTitle` | Names a group of related content | Barlow Condensed Bold | 28 | Reminders |
+| `itemTitle` | Names one thing in a collection | Barlow Condensed Bold | 24 | Paracetamol |
+| `time` | A time that matters | Barlow Condensed Bold | 34 | 9:00 AM |
+| `body` | Normal reading text and entered values | Nunito Medium | 18 | After food |
+| `bodyStrong` | Reading text that must stand out | Nunito Bold | 18 | 2 tablets |
+| `note` | Explains or qualifies something | Nunito Regular | 16 | Every Monday and Thursday |
+| `label` | Names a field | Nunito SemiBold | 16 | Start date |
+| `detail` | Secondary information | Nunito Regular | 15 | Injectable |
+| `button` | Names an action | Nunito Bold | 17 | Save reminder |
+| `tag` | Names a state | Nunito Bold | 15 | Paused |
 
 ### 4.2 Typography contracts
 
-Each role represents a complete text style.
+Each style represents a complete text style.
 
 Its implementation defines:
 
@@ -250,106 +269,81 @@ Its implementation defines:
 - Letter spacing
 - Text scaling behaviour
 
-The relationships between the roles must remain consistent.
+The relationships between the styles must remain consistent.
 
 The hierarchy is:
 
-1. Page heading
-2. Section heading
-3. Item heading
-4. Primary value or emphasized body content
-5. Normal body content
-6. Supporting content
-7. Metadata
+1. Screen title
+2. Section title
+3. Item title
+4. Time or strong body text
+5. Body text
+6. Notes
+7. Details
 
-This is a hierarchy of visual emphasis, not a rule that every page must use all seven levels.
+This is a hierarchy of visual emphasis, not a rule that every screen must use all seven levels.
 
 ### 4.3 Typography rules
 
-- A page has one primary page heading.
-- Section headings must be subordinate to the page heading.
-- Item headings must be subordinate to their section heading.
-- Primary values may receive stronger emphasis than item headings when the value is the main information being communicated.
+- A screen has one screen title.
+- Section titles must be subordinate to the screen title.
+- Item titles must be subordinate to their section title.
+- A time may receive stronger emphasis than an item title when it is the main information being communicated.
 - Labels must remain distinguishable from their values.
-- Supporting content and metadata must not compete with primary content.
+- Notes and details must not compete with primary content.
 - Important information must not depend on font weight or size alone.
-- Text styles must support accessibility scaling.
+- Line height is about 1.1 for condensed styles and about 1.5 for Nunito styles.
+- Titles use a warm off-black; notes and details a softer warm grey. Never pure black.
+- Condensed text is never set in all capitals.
+- Every style follows the user's text size setting. Reading styles scale fully to at least 200%. `screenTitle` scales more gently (capped near 1.6×) and wraps; text never clips.
+- No text is smaller than 15.
 
-Do not create new typography roles for individual screens.
-
-Introduce a new role only when an actual content category cannot be represented by the existing hierarchy.
+Do not create new text styles for individual screens. Introduce one only when a real content category cannot be represented by the existing hierarchy.
 
 ---
 
 ## 5. Colour language
 
-Colours are defined according to the role they fulfil.
+Colours are defined by what they are for.
 
 Do not select a colour because it looks appropriate in isolation.
 
-### 5.1 Content colours
+### 5.1 Direction
 
-| Role | Definition |
+- **Warm paper.** Light: a soft warm off-white page, with cards one clear warm step deeper. Dark: a warm charcoal (not near-black), with cards one clear lighter warm step. Surfaces are defined on their own, not derived from a seed colour.
+- **One gentle accent: sage.** A low-saturation green, mid-dark in light (about `#4F6F5F`) and soft and pale in dark (about `#A9C4B4`). Used only for actions, selection and focus — never for status, doses or decoration.
+- **One state colour: danger.** A muted brick (about `#9A4A3C` light, `#E3A597` dark), used only for errors and destructive actions. There are no success, warning or information colours in v1: paused, saved and informational states use text colours with an icon and words. Add a state colour only when a real case needs it (§15).
+
+### 5.2 Shared colours
+
+These are the design system's internal colours. Components use them; feature code reaches them only through component tokens (§11.8).
+
+| Colour | Meaning |
 |---|---|
-| `color.content.primary` | Primary readable content |
-| `color.content.secondary` | Supporting readable content |
-| `color.content.quiet` | Low-emphasis contextual information |
-| `color.content.disabled` | Content that cannot currently be interacted with |
-| `color.content.inverse` | Content displayed against an inverse surface |
+| `page` | The screen background |
+| `card` | A card or grouped area on the page |
+| `cardPressed` | A card while it is being pressed |
+| `raised` | The one stronger surface on a screen, such as the take panel |
+| `field` | The background of an editable field |
+| `text` | Main readable text |
+| `textSoft` | Notes, details and labels |
+| `textDisabled` | Text that cannot currently be used |
+| `action` | The background of a primary action, and selection |
+| `actionPressed` | A primary action while it is being pressed |
+| `onAction` | Text and icons on `action` |
+| `danger` | Errors and destructive actions (text, icons, outlines) |
+| `focus` | The visible focus ring |
+| `scrim` | The dimmed layer behind sheets and dialogs |
+| `shadow` | The soft shadow under floating things (light appearance only) |
 
-### 5.2 Surface colours
+### 5.3 Colour rules
 
-| Role | Definition |
-|---|---|
-| `color.surface.page` | Main application background |
-| `color.surface.content` | Default content background |
-| `color.surface.container` | Background of grouped content |
-| `color.surface.raised` | Background for visually elevated content |
-| `color.surface.input` | Editable input background |
-| `color.surface.selected` | Background for selected content |
-| `color.surface.disabled` | Background for disabled components |
-| `color.surface.overlay` | Background for transient overlays |
-
-### 5.3 Action colours
-
-| Role | Definition |
-|---|---|
-| `color.action.primary` | Main interactive action |
-| `color.action.secondary` | Supporting interactive action |
-| `color.action.destructive` | Destructive operation |
-| `color.action.disabled` | Disabled action |
-
-Each action role must define both its background and foreground treatment.
-
-### 5.4 Boundary colours
-
-| Role | Definition |
-|---|---|
-| `color.boundary.subtle` | Low-emphasis visual separation |
-| `color.boundary.default` | Standard component boundary |
-| `color.boundary.emphasized` | Strong visual boundary |
-| `color.boundary.focus` | Visible keyboard or accessibility focus |
-
-### 5.5 State colours
-
-| Role | Definition |
-|---|---|
-| `color.state.success` | Successful operation |
-| `color.state.warning` | Attention required |
-| `color.state.danger` | Error or destructive condition |
-| `color.state.information` | Informational feedback |
-
-State colours must include appropriate foreground and background mappings.
-
-Do not communicate important states using colour alone.
-
-### 5.6 Colour rules
-
-- Colour roles must retain their meaning across the entire application.
-- Light and dark appearances must map to the same semantic roles.
+- Colours keep their meaning across the entire application.
+- Light and dark appearances resolve the same names.
 - Components must not select arbitrary palette shades.
-- Text and icon foregrounds must remain accessible against their backgrounds.
-- Colour must reinforce hierarchy, not replace it.
+- All text and icon pairs meet WCAG AA (4.5:1 for text), checked in both appearances.
+- Colour must reinforce hierarchy, not replace it. Do not communicate a state with colour alone.
+- No colour is ever used to judge a dose or a treatment.
 
 ---
 
@@ -357,122 +351,108 @@ Do not communicate important states using colour alone.
 
 Spacing communicates relationships between elements.
 
-Instead of exposing arbitrary spacing values to feature developers, define spacing according to the relationship between the elements.
+Instead of exposing arbitrary spacing values to feature developers, spacing is defined by the relationship between the elements.
 
-### 6.1 Spacing relationships
+### 6.1 Shared spacing
 
-| Role | Definition |
-|---|---|
-| `space.pageInset` | Distance between the viewport boundary and the page's main content |
-| `space.sectionSeparation` | Distance between two independent sections |
-| `space.sectionHeadingContent` | Distance between a section heading and its content |
-| `space.itemSeparation` | Distance between sibling items |
-| `space.itemInset` | Internal spacing between an item's boundary and its content |
-| `space.fieldSeparation` | Distance between adjacent fields |
-| `space.fieldLabelControl` | Distance between a field label and its input |
-| `space.inlineSeparation` | Distance between related inline elements |
-| `space.contentInset` | Internal spacing within a generic content container |
+A spacious rhythm on a 4-point grid. These are internal; components own them (§6.2).
+
+| Spacing | Meaning | Value |
+|---|---|---|
+| `screenEdge` | Between the screen edge and its content | 24 |
+| `betweenSections` | Between two independent sections | 64 |
+| `underSectionTitle` | Between a section title and its content | 20 |
+| `betweenItems` | Between sibling items | 16 |
+| `insideCard` | Between a card's edge and its content | 24 |
+| `betweenFields` | Between adjacent fields | 28 |
+| `underLabel` | Between a field label and its control | 8 |
+| `besideIcon` | Between an icon and its text, or related inline elements | 12 |
+
+Spacing does not grow with text size in v1; revisit if testing at 200% shows crowding.
 
 ### 6.2 Spacing ownership
 
 | Element | Owner |
 |---|---|
-| Screen margins | Page layout |
-| Separation between sections | Section layout |
-| Heading-to-content spacing | Section |
+| Screen margins | Screen |
+| Separation between sections | Section |
+| Title-to-content spacing | Section |
 | Internal card padding | Card component |
-| Separation between list entries | List layout |
-| Label-to-input spacing | Field component |
-| Input-to-helper-text spacing | Field component |
+| Separation between list entries | List or grid |
+| Label-to-control spacing | Field component |
+| Control-to-error spacing | Field component |
 | Icon-to-label spacing | Interactive component |
 
-Feature code should compose layouts rather than repeatedly specify padding and margins.
+Feature code composes layouts rather than specifying padding and margins.
 
 ### 6.3 Layout rules
 
 - Related elements must appear visually grouped.
-- Independent content groups must have clear separation.
+- Independent content groups are separated by space and soft surface tints, not borders.
 - Internal component spacing must remain consistent.
 - Avoid unnecessary nested padding.
 - Avoid using arbitrary empty containers to create visual gaps.
 - Layout must adapt to available screen space.
 
-The actual spacing scale is centrally configured and must not be exposed as the primary feature-development API.
-
 ---
 
 ## 7. Shapes and geometry
 
-Shapes communicate component identity and interaction.
+Shapes communicate component identity and interaction. Developers select the appropriate component rather than configure its corner radius.
 
-Developers should select the appropriate component rather than configure its corner radius.
+Soft and round, with continuous (superellipse) corners everywhere:
 
-Define centrally maintained shape roles:
+| Shape | Used for | Radius |
+|---|---|---|
+| `card` | Cards and grouped areas | 24 |
+| `panel` | The take panel | 24 |
+| `field` | Editable fields | 16 |
+| `photo` | Medicine photos | 20 |
+| `dialog` | Dialogs | 32 |
+| `sheet` | Bottom sheets | 32 (top corners) |
+| `button`, `chip`, `tag` | Buttons, compact choices, state tags | fully rounded |
 
-| Role | Intended usage |
-|---|---|
-| `shape.card` | Standard content card |
-| `shape.panel` | Grouped content container |
-| `shape.control` | Buttons and interactive controls |
-| `shape.input` | Editable fields |
-| `shape.chip` | Compact labels and selections |
-| `shape.dialog` | Dialog containers |
-| `shape.sheet` | Bottom sheets |
-| `shape.media` | Images and media containers |
-| `shape.pill` | Fully rounded elements |
-
-The component determines which shape it uses.
-
-Avoid arbitrary shape overrides inside features.
-
-A new shape should be introduced only when a meaningful visual distinction exists.
+Avoid shape overrides inside features. Add a shape only when a meaningful visual distinction exists.
 
 ---
 
 ## 8. Elevation and depth
 
-Depth establishes visual relationships between content planes.
+Depth shows which things sit above others. Shadows are never decoration.
 
-Use the following roles:
-
-| Role | Intended usage |
-|---|---|
-| `depth.base` | Normal page content |
-| `depth.container` | Content grouped above the page background |
-| `depth.raised` | Elevated content |
-| `depth.floating` | Floating interactive elements |
-| `depth.overlay` | Dialogs and modal surfaces |
-
-Do not use shadows as decoration.
-
-Use surface contrast and boundaries where they communicate hierarchy more effectively.
+| Depth | Used for | Treatment |
+|---|---|---|
+| `flat` | Cards and panels | A warm surface step only; no shadow |
+| `frost` | The top bar | A translucent, frosted material over scrolling content. Solid page colour when high contrast is on. |
+| `floating` | Dialogs, sheets, the add action | One soft, wide, low-opacity warm shadow. In dark appearance, a lighter surface instead. |
 
 ---
 
 ## 9. Motion language
 
-Motion communicates transitions and changes in application state.
+Motion communicates transitions and changes in application state. Things people do many times a day stay still or nearly still.
 
-Define reusable motion roles:
+Motion is the one shared token group that feature code may use directly (`context.sahaay.motion`):
 
-| Role | Intended usage |
-|---|---|
-| `motion.interaction` | Immediate feedback from user interaction |
-| `motion.expand` | Expanding content |
-| `motion.collapse` | Collapsing content |
-| `motion.appear` | Newly appearing content |
-| `motion.dismiss` | Content being removed |
-| `motion.transition` | Navigation or layout transitions |
+| Token | Used for | Duration | Curve |
+|---|---|---|---|
+| `motion.press` | Press feedback (a tint change) | 100 ms | ease-out |
+| `motion.appear` | Content appearing (an error, a tag) | 200 ms | strong ease-out, `Cubic(0.23, 1, 0.32, 1)` |
+| `motion.disappear` | Content leaving | 150 ms | ease-in |
+| `motion.expand` | Content opening | 250 ms | ease-out; grows from its own edge |
+| `motion.collapse` | Content closing | 250 ms | ease-out |
+| `sheet.spring` | Sheets and dialogs | spring | critically damped (no bounce); tracks the finger; interruptible |
 
-Each role centrally defines its timing and animation curve.
+Page transitions use the platform default.
 
 Rules:
 
-- Motion must have a purpose.
-- Avoid unnecessary decorative animation.
-- Frequently updating content should not trigger excessive animation.
-- Respect reduced-motion preferences.
-- Functionality must never depend on an animation completing.
+- Every motion has a purpose: feedback, orientation or continuity. Never decoration.
+- Press feedback is a tint change, not a ripple or a scale.
+- Nothing animates from scale 0, and nothing moves linearly.
+- Exits are faster than entrances.
+- With reduced motion on (`MediaQuery.disableAnimationsOf`), every movement becomes a short cross-fade or an instant change. The tokens resolve this themselves.
+- Functionality never depends on an animation completing.
 
 ---
 
@@ -500,79 +480,131 @@ Rules:
 
 ## 11. Component system
 
-Reusable components provide the main interface to the design system.
+Reusable components are the main interface to the design system. A component encapsulates its typography, spacing, shape, colours and interaction states.
 
-A component must encapsulate its normal typography, spacing, shape, colours, and interaction states.
+Components take plain values — strings, images and callbacks — and never the app's domain types (`Medicine`, `Reminder`). Features pass their data in.
 
-### 11.1 Page components
+### 11.1 Layout
 
-- `PageLayout`
-- `PageHeader`
-- `PageActions`
+- `Screen` — the screen background, side insets, screen title and optional subtitle, and the frosted top bar that repeats the title once it scrolls away.
+- `Section` — a section title, its content, and the gap to the next section.
 
-`PageLayout` owns overall screen layout and insets.
+### 11.2 Items
 
-`PageHeader` owns page heading presentation.
+- `Card` — a pressable card on the page.
+- `PhotoTile` — a medicine in the grid: a square photo, then its name and form.
+- `TimeCard` — a reminder in a list: its time, schedule, note and an optional state tag.
+- `TakePanel` — the raised panel at the top of a reminder screen: photo, name, quantity and instruction.
 
-### 11.2 Content components
+### 11.3 Fields
 
-- `ContentSection`
-- `MedicineCard`
-- `ReminderCard`
-- `ContentList`
-- `EmptyState`
+- `TextField` — a labelled text input.
+- `PickerField` — a labelled field that opens a picker sheet.
+- Picker sheets: time wheel, choice rows, weekday rows, day-of-month grid, month calendar, month-and-day wheel.
 
-`ContentSection` represents the content hierarchy defined in this document.
+### 11.4 Actions
 
-It owns its heading-to-content relationship and separation from neighboring sections.
+- `PrimaryButton` — the single filled sage pill for a form's main action.
+- `ActionRow` — a full-width row with an icon and a label.
+- `SwitchRow` — a row with a switch and an optional state note.
+- `DangerRow` — a destructive row, alone in its own group.
 
-`MedicineCard` and `ReminderCard` own their respective entity presentation.
+### 11.5 Feedback
 
-### 11.3 Form components
-
-- `FormField`
-- `TextInput`
-- `DateInput`
-- `TimeInput`
-- `SelectionControl`
-- `FieldGroup`
-
-Form components own their labels, controls, helper text, and internal spacing.
-
-### 11.4 Action components
-
-- `PrimaryButton`
-- `SecondaryButton`
-- `DestructiveButton`
-- `IconButton`
-- `InlineAction`
-
-Each component defines its interaction states and visual treatment.
-
-### 11.5 Feedback components
-
-- `Dialog`
-- `BottomSheet`
-- `Snackbar`
-- `LoadingIndicator`
-- `ErrorState`
-- `StatusIndicator`
-
-Components must have predictable behavior and accessibility support.
+- `Tag` — a neutral state label with an icon and a word.
+- `ConfirmDialog` — confirms a destructive action.
+- `Snackbar` — a quiet confirmation such as "Reminder saved".
+- `EmptyState` and `ErrorState`.
 
 ### 11.6 Component rules
 
 - Avoid wrappers that merely rename existing framework components.
-- Build reusable components when they enforce consistency or encapsulate meaningful behavior.
+- Build reusable components when they enforce consistency or encapsulate meaningful behaviour.
 - Keep variants intentional and limited.
-- Components must consume the central design system.
-- Feature code should not override the component's visual decisions without a documented reason.
+- Components consume only the design system's own tokens.
+- Feature code does not override a component's visual decisions without a documented reason.
+
+### 11.7 Behaviour decisions (v1)
+
+**Actions**
+
+- Each form has one primary action: a filled sage pill.
+- Other actions on a detail screen are full-width rows (56 pt or taller) with an icon and a label, such as "Edit reminder ›".
+- Pause and resume is a "Notify me" switch row. When it is off, the row says "Paused — won't notify until you turn it back on".
+- The destructive action sits alone in its own group at the bottom, as a brick-coloured row, and always asks for confirmation.
+
+**Medicine grid**
+
+- Square photo tiles, with the condensed name and the form below each.
+- The number of columns follows the room available: a tile never gets narrower than a minimum width that grows with text size (about 160 pt × text scale). Phones show one or two columns; wider screens show more.
+- Names wrap and are never cut off. An unnamed medicine shows the generic label.
+
+**Reminder card**
+
+- The time leads. Below it: the schedule, then the quantity and instruction.
+- A paused reminder shows a neutral "Paused" tag with an icon and the word. It is never dimmed.
+
+**Reminder screen** (also the notification entry screen)
+
+1. The take panel: photo, name, quantity and instruction.
+2. After a section gap, the schedule.
+3. Then the action rows.
+
+No "missed", "late" or snooze. An empty quantity or instruction is simply left out.
+
+**Pickers** — every picker opens from a field in a bottom sheet:
+
+| Field | Picker |
+|---|---|
+| Time | A wheel; follows the device's 12- or 24-hour setting. |
+| Repeat type | Choice rows. |
+| Weekdays | Full-name check rows. |
+| Days of the month | A 7-column grid; 31 is explained as "last day of the month". |
+| Dates | A month calendar with the full chosen date shown. |
+| Yearly | A month-and-day wheel. |
+| End date | Offers "No end date"; nothing before the start date can be chosen. |
+
+### 11.8 Component tokens
+
+Tokens are grouped by the component they belong to, and read as `context.sahaay.<component>.<part>`. Each one points to a shared value from §4–§9, so two components that should match cannot drift apart.
+
+| Component | Tokens |
+|---|---|
+| `screen` | `background`, `edge`, `title`, `subtitle`, `sectionGap` |
+| `topBar` | `frost`, `solidBackground`, `title`, `icon` |
+| `section` | `title`, `titleGap` |
+| `card` | `background`, `pressedBackground`, `shape`, `padding`, `gap` |
+| `photoTile` | `photoShape`, `name`, `detail`, `minWidth`, `gap` |
+| `timeCard` | `time`, `schedule`, `note`, `background`, `pressedBackground`, `shape`, `padding` |
+| `takePanel` | `background`, `shape`, `padding`, `photoShape`, `name`, `instruction` |
+| `field` | `label`, `labelGap`, `background`, `value`, `placeholder`, `icon`, `shape`, `gap`, `errorText`, `errorOutline` |
+| `button` | `background`, `pressedBackground`, `label`, `shape`, `minHeight`, `disabledBackground`, `disabledLabel` |
+| `row` | `background`, `pressedBackground`, `label`, `icon`, `chevron`, `minHeight`, `groupGap` |
+| `switchRow` | `trackOn`, `trackOff`, `thumb`, `stateNote` |
+| `dangerRow` | `label`, `icon` |
+| `tag` | `background`, `label`, `icon`, `shape` |
+| `sheet` | `background`, `shape`, `handle`, `scrim`, `shadow`, `spring` |
+| `dialog` | `background`, `shape`, `title`, `message`, `scrim`, `shadow` |
+| `snackbar` | `background`, `message` |
+| `emptyState` | `icon`, `message` |
+| `errorState` | `icon`, `message` |
+| `focus` | `ring` |
+| `motion` | `press`, `appear`, `disappear`, `expand`, `collapse` (§9) |
+
+Example (illustration):
+
+```dart
+final t = context.sahaay;
+Text(time, style: t.timeCard.time);
+```
+
+Names describe what something is for, in plain words. Never name a token after how it looks (`blueAccent`, `headingBold`) or after a framework's internal vocabulary (`surfaceContainerHigh`).
 
 ---
 
 ## 12. Responsive design
 
-Responsive behavior must depend on available layout space, not assumptions about device models.
+Responsive behaviour depends on available layout space, not assumptions about device models.
 
 Define layout environments:
 
@@ -587,7 +619,7 @@ Rules:
 - Respect system insets.
 - Avoid unnecessary fixed dimensions.
 - Allow text to wrap.
-- Maintain usable touch targets.
+- Maintain touch targets of at least 48 pt.
 - Support accessibility text scaling.
 - Do not stretch content indefinitely on wide screens.
 
@@ -595,7 +627,7 @@ Rules:
 
 ## 13. Theme architecture
 
-Themes determine how design-system roles resolve.
+Themes determine how tokens resolve.
 
 Support:
 
@@ -603,33 +635,72 @@ Support:
 - Dark appearance
 - System appearance preference
 
-The semantic API must remain unchanged across appearances.
+The token names remain unchanged across appearances. Feature code must not contain raw visual values or branch on appearance.
 
-Theme configuration owns:
+### 13.1 Code architecture
 
-- Typography definitions
-- Colour mappings
-- Shape definitions
-- Component styling
-- Elevation
-- Motion configuration
+The design system is its own Dart package, `packages/sahaay_design/`, with its own `pubspec.yaml`. The app and the Widgetbook catalogue depend on it by path. It is built fresh and does not depend on the app or on the earlier `lib/design_system/`.
 
-Feature code must not contain theme-specific raw visual values or manually branch on appearance.
+Layers, each depending only on the ones above it:
+
+```text
+packages/sahaay_design/
+  lib/
+    src/foundations/  raw values: palette, font families, radii, durations (private)
+    src/tokens/       shared values (§4–§9) and component tokens (§11.8), light and dark
+    src/theme/        ThemeData and Material component themes built from the tokens
+    src/components/   layout/, items/, fields/, actions/, feedback/
+    sahaay_design.dart  public API: the theme, `context.sahaay`, and the components
+  fonts/              Barlow Condensed and Nunito
+```
+
+Rules:
+
+- **Public API.** Only `sahaay_design.dart` is imported from outside. Foundations and shared values stay private; feature code uses components, component tokens and the shared `motion` group.
+- **Access.** Tokens are read through `context.sahaay`. They are carried in `ThemeExtension`s, so they follow the theme, switch with light and dark, and rebuild dependants.
+- **Accessibility inside the tokens.** Reduced motion, high contrast (the solid top bar) and text scaling are resolved by the design system, not by features.
+- **No domain types.** The package never imports the app. Feature-specific items (for example, a medicine tile built from a `Medicine`) live in their feature and are composed from design-system components.
+- **Enforcement.** A test fails if code under `lib/features/` imports `sahaay_design/src/`, or uses `Color(`, `Colors.`, `fontSize:` or `TextStyle(`. An exception needs a comment explaining why.
+- **Migration.** Screens move to the new package one reviewed slice at a time. The old `lib/design_system/` is deleted once nothing uses it.
 
 ---
 
 ## 14. Implementation constraints
 
-1. Define UI structure using the Page → Section → Item → Field hierarchy.
-2. Use typography roles according to content meaning.
-3. Do not create arbitrary typography styles inside feature widgets.
-4. Use semantic colour roles instead of raw palette values.
-5. Let layout and reusable components own spacing.
-6. Let components own their standard geometry and interaction appearance.
-7. Centralize theme configuration.
-8. Avoid unnecessary semantic tokens and component variants.
-9. Do not create new roles just to accommodate a single arbitrary design choice.
+1. Define UI structure using the Page → Section → Item → Field hierarchy (§3). The `Screen` component implements a Page.
+2. Use components and component tokens according to content meaning.
+3. Do not create text styles inside feature widgets.
+4. Do not use raw colours or palette values in features.
+5. Let screens, sections and components own spacing.
+6. Let components own their geometry and interaction appearance.
+7. Keep theme configuration inside the design-system package.
+8. Avoid unnecessary tokens and component variants.
+9. Do not create new tokens just to accommodate a single arbitrary design choice.
 10. Maintain accessibility across every component and theme.
+
+### 14.1 Component catalogue (Widgetbook)
+
+Components are catalogued in Widgetbook. It is a separate app in `widgetbook/`, which depends on `sahaay_design` (and on `sahaay` for feature items) by path, so Widgetbook never ships with the app. Use cases are generated from annotations.
+
+Each component lists its meaningful use cases: default, selected, disabled, error, empty, loading and pressed, where they apply. Keep variants few and intentional.
+
+The catalogue is checked under these addons:
+
+- light and dark theme
+- text scale at 100%, 130% and 200%
+- small, standard and large devices
+- reduced motion
+
+Proposed structure (provisional):
+
+- Foundations
+- Layout
+- Items
+- Fields
+- Actions
+- Feedback
+
+---
 
 ## 15. Design-system evolution
 
