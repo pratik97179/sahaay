@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/design_system/design_system.dart';
 
@@ -73,6 +74,45 @@ void main() {
       expect(find.byIcon(Icons.check), findsOneWidget);
       expect(textColor('One'), colors.contentPrimary);
       expect(textColor('Two'), colors.contentPrimary);
+    });
+  }
+
+  for (final (name, theme) in [
+    ('light', SahaayTheme.light()),
+    ('dark', SahaayTheme.dark()),
+  ]) {
+    testWidgets('$name: chip labels use full-strength text', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: theme,
+          home: Scaffold(
+            body: Row(
+              children: [
+                ChoiceChip(
+                  label: const Text('On'),
+                  selected: true,
+                  onSelected: (_) {},
+                ),
+                FilterChip(
+                  label: const Text('Off'),
+                  selected: false,
+                  onSelected: (_) {},
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final colors = theme.extension<SahaayColors>()!;
+      Color? renderedColor(String label) => tester
+          .renderObject<RenderParagraph>(find.text(label))
+          .text
+          .style
+          ?.color;
+
+      expect(renderedColor('On'), colors.contentPrimary);
+      expect(renderedColor('Off'), colors.contentPrimary);
     });
   }
 }

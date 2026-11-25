@@ -43,6 +43,7 @@ abstract final class SahaayTheme {
         ),
       ),
       segmentedButtonTheme: _segmentedButtonTheme(colors, typography),
+      chipTheme: _chipTheme(colors, typography, shapes),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: scheme.surfaceContainerHighest,
@@ -85,6 +86,27 @@ abstract final class SahaayTheme {
       ),
     );
   }
+
+  /// Choice and filter chips, such as repeat type, weekdays and days of the
+  /// month. The selected chip uses the selected surface with full-strength
+  /// text, and shows a checkmark wherever the layout allows, so selection
+  /// does not rely on colour alone.
+  static ChipThemeData _chipTheme(
+    SahaayColors colors,
+    SahaayTypography typography,
+    SahaayShapes shapes,
+  ) => ChipThemeData(
+    shape: shapes.chip,
+    selectedColor: colors.surfaceSelected,
+    checkmarkColor: colors.contentPrimary,
+    labelStyle: typography.actionLabel.copyWith(
+      color: WidgetStateColor.resolveWith(
+        (states) => states.contains(WidgetState.disabled)
+            ? colors.contentDisabled
+            : colors.contentPrimary,
+      ),
+    ),
+  );
 }
 
 /// Access to design-system roles from widgets.

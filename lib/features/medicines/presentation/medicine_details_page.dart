@@ -4,17 +4,24 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../design_system/design_system.dart';
-import '../../reminders/presentation/medicine_reminders_section.dart';
 import '../domain/medicine.dart';
 import '../medicines_providers.dart';
 import 'medicine_labels.dart';
 import 'medicine_photo.dart';
 
 /// One medicine: its photo, details and reminders (PRD §5.3, §5.4).
+///
+/// The reminders feature supplies [reminders], so this feature does not
+/// depend on it; reminders depend on medicines, not the other way round.
 class MedicineDetailsPage extends ConsumerWidget {
-  const MedicineDetailsPage({required this.medicineId, super.key});
+  const MedicineDetailsPage({
+    required this.medicineId,
+    required this.reminders,
+    super.key,
+  });
 
   final String medicineId;
+  final Widget reminders;
 
   Future<void> _delete(BuildContext context, WidgetRef ref, Medicine m) async {
     final confirmed = await confirmDestructiveAction(
@@ -59,7 +66,7 @@ class MedicineDetailsPage extends ConsumerWidget {
               ],
             ),
           ),
-          MedicineRemindersSection(medicineId: medicine.id),
+          reminders,
           DestructiveButton(
             label: 'Delete medicine',
             icon: Icons.delete_outline,

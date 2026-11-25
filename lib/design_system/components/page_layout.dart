@@ -8,12 +8,17 @@ class PageLayout extends StatefulWidget {
   const PageLayout({
     required this.heading,
     required this.children,
+    this.supportingText,
     this.primaryAction,
     this.actions = const [],
     super.key,
   });
 
   final String heading;
+
+  /// A short line below the heading giving context, such as which medicine a
+  /// reminder belongs to.
+  final String? supportingText;
   final List<Widget> children;
   final Widget? primaryAction;
   final List<Widget> actions;
@@ -68,7 +73,11 @@ class _PageLayoutState extends State<PageLayout> {
                   spacing.pageInset * 6,
                 ),
                 children: [
-                  PageHeader(key: _headerKey, heading: widget.heading),
+                  PageHeader(
+                    key: _headerKey,
+                    heading: widget.heading,
+                    supportingText: widget.supportingText,
+                  ),
                   SizedBox(height: spacing.sectionSeparation),
                   ...widget.children,
                 ],
@@ -81,17 +90,28 @@ class _PageLayoutState extends State<PageLayout> {
   }
 }
 
-/// The page's single primary heading.
+/// The page's single primary heading, with optional supporting text.
 class PageHeader extends StatelessWidget {
-  const PageHeader({required this.heading, super.key});
+  const PageHeader({required this.heading, this.supportingText, super.key});
 
   final String heading;
+  final String? supportingText;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      header: true,
-      child: Text(heading, style: context.typography.pageHeading),
+    final supporting = supportingText;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(heading, style: context.typography.pageHeading),
+        ),
+        if (supporting != null) ...[
+          SizedBox(height: context.spacing.fieldLabelControl),
+          Text(supporting, style: context.typography.supporting),
+        ],
+      ],
     );
   }
 }
