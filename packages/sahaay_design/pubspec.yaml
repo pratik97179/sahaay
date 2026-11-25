@@ -1,0 +1,38 @@
+name: sahaay_design
+description: Sahaay's design system — tokens, theme and components.
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.13.7
+
+resolution: workspace
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  # Licences ship with the fonts, as the SIL Open Font License requires.
+  assets:
+    - fonts/barlow_condensed/OFL.txt
+    - fonts/nunito/OFL.txt
+
+  fonts:
+    # The identifying voice: screen, section and item titles, and times.
+    - family: BarlowCondensed
+      fonts:
+        - asset: fonts/barlow_condensed/BarlowCondensed-Bold.ttf
+          weight: 700
+        - asset: fonts/barlow_condensed/BarlowCondensed-ExtraBold.ttf
+          weight: 800
+    # The reading voice. A variable font: weights are set with the `wght`
+    # axis in the text styles, not with `FontWeight` alone.
+    - family: Nunito
+      fonts:
+        - asset: fonts/nunito/Nunito-Variable.ttf
