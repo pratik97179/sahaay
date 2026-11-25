@@ -5,9 +5,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/app/app.dart';
 import 'package:sahaay/core/database/app_database.dart';
 import 'package:sahaay/core/database/database_provider.dart';
+import 'package:sahaay/core/time/clock.dart';
 import 'package:sahaay/features/medicines/medicines_providers.dart';
 
 import 'fakes.dart';
+
+/// The fixed "now" of widget tests: Tuesday 10 March 2026, 8:00 AM.
+final testNow = DateTime(2026, 3, 10, 8);
 
 /// Pumps the whole app over an in-memory database and fake device services.
 Future<void> pumpTestApp(
@@ -15,6 +19,7 @@ Future<void> pumpTestApp(
   required AppDatabase db,
   FakePhotoCapture? capture,
   FakePhotoStorage? photos,
+  DateTime? now,
 }) async {
   // A typical phone screen (360 x 780 logical pixels).
   tester.view
@@ -25,6 +30,7 @@ Future<void> pumpTestApp(
     ProviderScope(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
+        clockProvider.overrideWithValue(() => now ?? testNow),
         photoCaptureProvider.overrideWithValue(capture ?? FakePhotoCapture()),
         medicinePhotoStorageProvider.overrideWithValue(
           photos ?? FakePhotoStorage(),
