@@ -1,6 +1,6 @@
 # Sahaay — Product Requirements Document (PRD)
 
-**Version:** 0.2 (v1 scope)  
+**Version:** 0.3 (v1 scope)  
 **Status:** Draft  
 **Product:** Sahaay  
 **Category:** Medication Reminders
@@ -34,11 +34,11 @@ A medicine represents an item the user wants to create reminders for.
 
 A medicine has:
 - An optional name.
-- A photo captured by the user.
+- A photo captured by the user with the device camera (required).
 - A medicine form:
   - Oral / edible
   - Injectable
-- One or more associated reminders.
+- Zero or more associated reminders. A medicine whose last reminder is deleted is kept and shows that it has no reminders.
 
 The medicine is created once. Its associated reminders reuse the same medicine information and photo.
 
@@ -50,7 +50,7 @@ Each reminder:
 - Belongs to one medicine.
 - Has exactly one time of day.
 - Has its own schedule (recurrence, start date, optional end date).
-- Can have its own quantity or instruction entered by the user.
+- Can have its own optional quantity and optional instruction, entered by the user as two separate free-text fields.
 - Can be edited, paused, or deleted independently.
 
 Multiple reminders belonging to the same medicine must not interfere with one another.
@@ -103,12 +103,16 @@ Each reminder must have its own schedule and configured time.
 - An **end date** is optional. If set, no notifications are generated after it. If not set, the reminder repeats until paused or deleted.
 
 **Month handling:**
-- Monthly and yearly recurrences treat a month as an atomic calendar unit. "Every N months" advances by N calendar months, not by a fixed number of days.
-- If a selected date does not exist in a given month (e.g. the 31st in April, or 29 February in a non-leap year), the reminder fires on the last day of that month. *(Proposed; confirm.)*
+- Monthly and yearly recurrences treat a month as an atomic calendar unit. "Every N months" advances by N calendar months from the start date's month, not by a fixed number of days.
+- A selected day of the month fires on that day in every applicable month. If a month is shorter than the selected day, the reminder fires on that month's last day instead.
+- Clamping never carries over: each month is computed from the originally selected day. Example for day 31: 31 Jan → 28 Feb (29 in a leap year) → 31 Mar → 30 Apr → 31 May.
+- Selecting day 31 therefore means "the last day of every month".
+- Yearly reminders follow the same rule: 29 February fires on 28 February in non-leap years.
+- Weekly recurrence may combine selected weekdays with an every-N-weeks interval (e.g. Monday and Thursday every 2 weeks). Monthly recurrence may combine selected dates with an every-N-months interval.
 
 ### FR-04: Reminder-Specific Information
 
-The user may enter a quantity or instruction for an individual reminder.
+The user may enter, for an individual reminder, an optional quantity and an optional instruction. These are two separate free-text fields.
 
 This information can differ between reminders belonging to the same medicine.
 
@@ -125,7 +129,7 @@ When a reminder becomes due, the application must send a notification.
 The notification must:
 - Be text only (no photo or video).
 - Identify the associated medicine (its name, or a generic label if no name was given).
-- Include the reminder's quantity or instruction, if entered.
+- Include the reminder's quantity and instruction, if entered.
 - Correspond to the specific reminder that became due.
 
 Tapping the notification must open the dedicated entry screen for that reminder, showing the medicine's photo, form, and the reminder's details.
@@ -171,7 +175,7 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 3. User captures a photo.
 4. User selects the medicine form.
 5. User creates one or more reminders.
-6. For each reminder, the user configures its recurrence, time, start date, optional end date, and any optional quantity or instruction.
+6. For each reminder, the user configures its recurrence, time, start date, optional end date, and optional quantity and optional instruction.
 7. User saves the medicine and its reminders.
 
 ### 5.2 Receive a Reminder
@@ -202,7 +206,7 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 3. Every reminder has exactly one time; multiple daily times are separate reminders.
 4. Every reminder has an independently configurable schedule.
 5. Every recurring reminder has a start date; the end date is optional.
-6. Reminder-specific quantity or instructions must not be shared implicitly across sibling reminders.
+6. Reminder-specific quantity and instruction must not be shared implicitly across sibling reminders.
 7. Editing, pausing, or deleting one reminder must not affect sibling reminders.
 8. Deleting a medicine removes all its reminders and its photo.
 9. The medicine photo belongs to the medicine and is reused by its reminders.
@@ -223,6 +227,8 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 - Video media, and media inside notifications.
 - Cloud sync, accounts, backup and restore.
 - Time zone and travel handling (deferred; see §10).
+- Snooze.
+- Picking a medicine photo from the gallery.
 
 ## 8. Acceptance Criteria
 
@@ -231,7 +237,7 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 | AC-01 | A user can add a medicine with an optional name, a photo, and a medicine form. |
 | AC-02 | A user can create multiple reminders for one medicine. |
 | AC-03 | Each reminder supports the agreed recurrence patterns. |
-| AC-04 | Each reminder keeps its own schedule, start date, optional end date, and optional quantity or instruction. |
+| AC-04 | Each reminder keeps its own schedule, start date, optional end date, optional quantity, and optional instruction. |
 | AC-05 | A due reminder produces a text notification for the correct medicine and reminder. |
 | AC-06 | Tapping a notification opens that reminder's entry screen with the medicine photo. |
 | AC-07 | Editing one reminder does not change other reminders. |
@@ -239,19 +245,21 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 | AC-09 | Deleting one reminder leaves the medicine and sibling reminders intact. |
 | AC-10 | Deleting a medicine removes all its associated reminders and its photo. |
 | AC-11 | No notifications are generated before a reminder's start date or after its end date. |
-| AC-12 | A monthly reminder on a date missing from a month fires on that month's last day. |
+| AC-12 | A monthly or yearly reminder whose selected day is missing from a month fires on that month's last day, and the next month uses the originally selected day again. |
 | AC-13 | All data persists locally across app restarts and device reboots. |
 | AC-14 | The application does not calculate or recommend medical instructions. |
 
 ## 9. Open Product Decisions
 
-**Notification interaction (snooze):** Whether a notification supports only tapping and dismissing, or also offers a "Snooze" action button (e.g. remind again in 10 minutes). Snooze would delay only that one occurrence and would not change the reminder's schedule. This decision does not introduce dose tracking or a mark-as-taken workflow.
+None currently.
+
+**Resolved:** Snooze is out of scope for v1. Notifications support tapping (opens the reminder) and dismissing only.
 
 ## 10. Deferred to Later Versions
 
 - Time zone and daylight-saving behaviour when the user travels.
 - Edit medicine (name, photo, form).
 - Home screen and medicine list design details.
-- Notification permission and permission-denied flows.
+- Notification permission-denied flows. v1 requests notification permission when the first reminder is saved; on Android it also requests exact-alarm permission.
 - A "pause until" date.
 - Multilingual support and caregiver features (mentioned in the README, not in this PRD).

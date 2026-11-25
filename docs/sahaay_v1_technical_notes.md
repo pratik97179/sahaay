@@ -73,3 +73,6 @@ Android specifics: `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPL
 ## 5. Snooze (open decision)
 
 If chosen: an Android/iOS notification action "Snooze 10 min" schedules a one-off notification for the same reminder; the reminder's schedule is not changed and nothing is recorded as taken/missed. Cost: notification action handling (including when the app is killed) and a background isolate entry point on Android. Recommendation: skip for v1, add later if users ask.
+
+---
+> **Status:** superseded where it conflicts with `docs/architecture.md`, the PRD (v0.3) or the decision records in `docs/adr/`. Kept for history.
