@@ -14,10 +14,13 @@ See the [product requirements](docs/sahaay_prd.md) and [v1 technical notes](docs
 git clone <repository-url>
 cd sahaay
 flutter pub get
+dart run build_runner build
 flutter run
 ```
 
 ## Development
+
+Generated files (`*.g.dart`) are not committed; rerun `dart run build_runner build` after changing database tables.
 
 ```bash
 dart format .
