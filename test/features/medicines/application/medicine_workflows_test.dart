@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/core/database/app_database.dart';
+import 'package:sahaay/core/database/transaction_runner.dart';
 import 'package:sahaay/features/medicines/application/add_medicine.dart';
 import 'package:sahaay/features/medicines/application/delete_medicine.dart';
 import 'package:sahaay/features/medicines/data/drift_medicine_repository.dart';
@@ -67,6 +68,7 @@ void main() {
       final add = AddMedicine(
         medicines: medicines,
         photos: photos,
+        transactions: DriftTransactionRunner(db),
         newId: () => 'm1',
       );
 
@@ -87,6 +89,7 @@ void main() {
       final add = AddMedicine(
         medicines: medicines,
         photos: photos,
+        transactions: DriftTransactionRunner(db),
         newId: () => 'm1',
       );
 
@@ -105,6 +108,7 @@ void main() {
       final add = AddMedicine(
         medicines: _FailingInsertRepository(medicines),
         photos: photos,
+        transactions: DriftTransactionRunner(db),
         newId: () => 'm1',
       );
 
@@ -114,6 +118,51 @@ void main() {
       );
       expect(storedPhotos(), isEmpty);
       expect(await medicines.find('m1'), isNull);
+    });
+
+    group('with records saved alongside, such as reminders', () {
+      late AddMedicine add;
+
+      setUp(() {
+        add = AddMedicine(
+          medicines: medicines,
+          photos: photos,
+          transactions: DriftTransactionRunner(db),
+          newId: () => 'm1',
+        );
+      });
+
+      test('saves them for the new medicine', () async {
+        final id = await add(
+          form: MedicineForm.oral,
+          capturedPhotoPath: captured.path,
+          alsoSave: (medicineId) async {
+            await reminders.save(aReminder(id: 'r1', medicineId: medicineId));
+            await reminders.save(aReminder(id: 'r2', medicineId: medicineId));
+          },
+        );
+
+        expect(await medicines.find(id), isNotNull);
+        expect(await reminders.findForMedicine(id), hasLength(2));
+      });
+
+      test('saves nothing when one of them fails (PRD §5.1)', () async {
+        await expectLater(
+          add(
+            form: MedicineForm.oral,
+            capturedPhotoPath: captured.path,
+            alsoSave: (medicineId) async {
+              await reminders.save(aReminder(id: 'r1', medicineId: medicineId));
+              throw StateError('disk full');
+            },
+          ),
+          throwsStateError,
+        );
+
+        expect(await medicines.find('m1'), isNull);
+        expect(await reminders.findAll(), isEmpty);
+        expect(storedPhotos(), isEmpty);
+      });
     });
   });
 
@@ -126,6 +175,7 @@ void main() {
       add = AddMedicine(
         medicines: medicines,
         photos: photos,
+        transactions: DriftTransactionRunner(db),
         newId: () => 'm${++n}',
       );
       delete = DeleteMedicine(medicines: medicines, photos: photos);

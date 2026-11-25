@@ -3,10 +3,14 @@ import 'package:go_router/go_router.dart';
 import '../features/medicines/presentation/add_medicine_page.dart';
 import '../features/medicines/presentation/medicine_details_page.dart';
 import '../features/medicines/presentation/medicines_page.dart';
+import '../features/reminders/application/reminder_draft.dart';
+import '../features/reminders/presentation/draft_reminder_page.dart';
 import '../features/reminders/presentation/edit_reminder_page.dart';
 import '../features/reminders/presentation/medicine_reminders_section.dart';
+import '../features/reminders/presentation/new_medicine_reminders.dart';
 import '../features/reminders/presentation/new_reminder_page.dart';
 import '../features/reminders/presentation/reminder_page.dart';
+import '../features/reminders/reminders_providers.dart';
 import 'routes.dart';
 
 GoRouter createRouter() => GoRouter(
@@ -19,7 +23,18 @@ GoRouter createRouter() => GoRouter(
         // Listed before `medicines/:id` so "new" is not read as an id.
         GoRoute(
           path: 'medicines/new',
-          builder: (context, state) => const AddMedicinePage(),
+          builder: (context, state) => AddMedicinePage(
+            createExtras: (ref) => NewMedicineReminders(
+              createReminder: ref.read(createReminderProvider),
+            ),
+          ),
+          routes: [
+            GoRoute(
+              path: 'reminder',
+              builder: (context, state) =>
+                  DraftReminderPage(initial: state.extra as ReminderDraft?),
+            ),
+          ],
         ),
         GoRoute(
           path: 'medicines/:id',
