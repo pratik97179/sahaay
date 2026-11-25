@@ -83,15 +83,14 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(
-                padding: EdgeInsets.only(bottom: spacing.fieldSeparation),
+              LabeledField(
+                label: 'Name',
                 child: TextField(
                   controller: _name,
                   enabled: !_busy,
                   textCapitalization: TextCapitalization.sentences,
-                  decoration: const InputDecoration(
-                    labelText: 'Name (optional)',
-                  ),
+                  textInputAction: TextInputAction.done,
+                  decoration: const InputDecoration(hintText: 'Optional'),
                 ),
               ),
               LabeledField(
@@ -148,7 +147,6 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
                   ],
                   selected: {?_form},
                   emptySelectionAllowed: true,
-                  showSelectedIcon: false,
                   onSelectionChanged: _busy
                       ? null
                       : (selection) =>

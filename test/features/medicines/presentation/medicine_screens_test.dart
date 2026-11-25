@@ -36,8 +36,23 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> tapDeleteMedicine(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.text('Delete medicine'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete medicine'));
+    await tester.pumpAndSettle();
+  }
+
   Future<void> tapSave(WidgetTester tester) async {
-    await tester.ensureVisible(find.text('Save medicine'));
+    await tester.scrollUntilVisible(
+      find.text('Save medicine'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tester.pumpAndSettle();
     await tester.tap(find.text('Save medicine'));
     await tester.pumpAndSettle();
@@ -89,6 +104,9 @@ void main() {
   group('Add medicine', () {
     testWidgets('requires a photo and a form before saving', (tester) async {
       await openAddMedicine(tester);
+
+      expect(find.text('Name'), findsOneWidget);
+      expect(find.text('Optional'), findsOneWidget);
 
       await tapSave(tester);
 
@@ -210,10 +228,7 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Delete medicine'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Delete medicine'));
-      await tester.pumpAndSettle();
+      await tapDeleteMedicine(tester);
       expect(find.text('Delete Paracetamol?'), findsOneWidget);
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
@@ -229,6 +244,23 @@ void main() {
       await disposeTestApp(tester);
     });
 
+    testWidgets('asks about "this medicine" when it has no name', (
+      tester,
+    ) async {
+      await runDb(tester, () => medicines.insert(aMedicine(name: null)));
+      await pumpTestApp(tester, db: db, photos: photos);
+      await tester.tap(find.text('Unnamed medicine'));
+      await tester.pumpAndSettle();
+
+      await tapDeleteMedicine(tester);
+
+      expect(find.text('Delete this medicine?'), findsOneWidget);
+
+      await tester.tap(find.text('Cancel'));
+      await tester.pumpAndSettle();
+      await disposeTestApp(tester);
+    });
+
     testWidgets('keeps the medicine when deletion is cancelled', (
       tester,
     ) async {
@@ -240,10 +272,7 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      await tester.ensureVisible(find.text('Delete medicine'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Delete medicine'));
-      await tester.pumpAndSettle();
+      await tapDeleteMedicine(tester);
       await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
 

@@ -19,7 +19,7 @@ class MedicineDetailsPage extends ConsumerWidget {
   Future<void> _delete(BuildContext context, WidgetRef ref, Medicine m) async {
     final confirmed = await confirmDestructiveAction(
       context,
-      title: 'Delete ${m.displayName}?',
+      title: m.name == null ? 'Delete this medicine?' : 'Delete ${m.name}?',
       message:
           'This deletes the medicine, its photo and all of its reminders. '
           "This can't be undone.",
