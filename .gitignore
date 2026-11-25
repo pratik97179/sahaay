@@ -63,3 +63,9 @@ app.*.map.json
 # Generated files
 *.g.dart
 *.freezed.dart
+
+# Claude related files
+CLAUDE.md
+CLAUDE.local.md
+.claude/
+.mcp.json
