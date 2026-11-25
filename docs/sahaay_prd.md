@@ -90,8 +90,8 @@ The application must support the following recurrence patterns:
 |---|---|
 | One-time | Specific date and time |
 | Daily | Every day or every N days |
-| Weekly | Selected weekdays or every N weeks |
-| Monthly | Selected date(s) or every N months |
+| Weekly | Selected weekdays, optionally every N weeks |
+| Monthly | Selected date(s), optionally every N months |
 | Yearly | Selected month and date |
 
 The schedule configuration must present only the options relevant to the selected recurrence pattern.
@@ -262,4 +262,4 @@ None currently.
 - Home screen and medicine list design details.
 - Notification permission-denied flows. v1 requests notification permission when the first reminder is saved; on Android it also requests exact-alarm permission.
 - A "pause until" date.
-- Multilingual support and caregiver features (mentioned in the README, not in this PRD).
+- Multilingual support and caregiver features.

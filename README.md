@@ -4,11 +4,19 @@ A medication reminder app. Add your medicines with a photo, set one or more inde
 
 Sahaay is a reminder tool only: it does not give medical advice or calculate doses.
 
-See the [product requirements](docs/sahaay_prd.md) and [v1 technical notes](docs/sahaay_v1_technical_notes.md).
+## Documentation
+
+- [Product requirements](docs/sahaay_prd.md) (the source of truth for scope)
+- [Architecture](docs/architecture.md)
+- [Design system](docs/design-system.md)
+- [Implementation plan](docs/implementation-plan.md)
+- [Testing strategy](docs/testing-strategy.md)
+- [Technology decisions](docs/adr/0001-technology-choices.md)
+- [v1 technical notes](docs/sahaay_v1_technical_notes.md)
 
 ## Getting Started
 
-**Prerequisites:** Flutter SDK, Dart SDK, Android Studio or Xcode.
+**Prerequisites:** Flutter SDK, Dart SDK, Android Studio or Xcode. Only Android and iOS are supported.
 
 ```bash
 git clone <repository-url>
