@@ -30,7 +30,11 @@ class MedicineRemindersSection extends ConsumerWidget {
             AsyncData(value: final list) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                for (final reminder in list) ReminderCard(reminder: reminder),
+                for (final reminder in list)
+                  ReminderCard(
+                    reminder: reminder,
+                    onTap: () => context.push(AppRoutes.reminder(reminder.id)),
+                  ),
               ],
             ),
             AsyncError() => const ErrorState(
