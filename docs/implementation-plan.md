@@ -535,13 +535,14 @@ Before committing:
 4. Check that unrelated user changes are excluded.
 5. Stage only files belonging to the increment.
 6. Create the commit with the agreed message format.
+7. Give me the commit command to run in your converstaion panel only.
 
 After committing:
 
 - Report the commit hash.
 - Summarize the implementation.
 - Report checks performed.
-- Continue to the next meaningful increment unless blocked.
+- Give push command and wait for implementing next meaningful commit
 
 Do not amend, rebase, reset, force-push, or push without explicit instruction.
 
