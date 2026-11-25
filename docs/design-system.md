@@ -62,6 +62,19 @@ Accessibility is a property of the design system, not something each feature mus
 
 Account for text scaling, colour contrast, touch targets, focus visibility, and reduced motion.
 
+### 2.5 Visual direction (v1)
+
+Sahaay is calm, quiet and spacious. Many users are older, unwell, tired or anxious, and often open the app at the moment a reminder fires. The interface must never hurry or startle them.
+
+- **Warm paper.** Soft warm surfaces in light and dark appearances; no cold or tinted near-black.
+- **Two voices.** A bold, large, condensed face for the few things that identify (page, section and item headings, and times); a softer, rounded reading face for everything else.
+- **One gentle accent.** A muted sage, used only for actions.
+- **Nothing looks urgent unless it is.** Only errors and destructive actions use a state colour.
+- **More space than feels necessary.** Sections are separated by space and soft tints, not borders.
+- **No medical judgement.** No adherence, "missed", "late" or health colours anywhere.
+
+The concrete decisions are recorded in each section below under "v1 decisions".
+
 ---
 
 ## 3. Content hierarchy
@@ -279,6 +292,37 @@ Do not create new typography roles for individual screens.
 
 Introduce a new role only when an actual content category cannot be represented by the existing hierarchy.
 
+### 4.4 v1 decisions
+
+Two bundled typefaces (font files shipped as assets, not downloaded at runtime):
+
+- **Barlow Condensed** — the identifying voice. Used only for `pageHeading`, `sectionHeading`, `itemHeading` and `primaryValue` (times).
+- **Nunito** — the reading voice. Used for every other role.
+
+Scale (logical points at 100% text size; to be fine-tuned in the component catalogue):
+
+| Role | Face and weight | Size |
+|---|---|---|
+| `type.pageHeading` | Barlow Condensed ExtraBold | 48 |
+| `type.sectionHeading` | Barlow Condensed Bold | 28 |
+| `type.itemHeading` | Barlow Condensed Bold | 24 |
+| `type.primaryValue` | Barlow Condensed Bold | 34 |
+| `type.body`, `type.fieldValue` | Nunito Medium | 18 |
+| `type.bodyEmphasis` | Nunito Bold | 18 |
+| `type.supporting` | Nunito Regular | 16 |
+| `type.fieldLabel` | Nunito SemiBold | 16 |
+| `type.metadata` | Nunito Regular | 15 |
+| `type.actionLabel` | Nunito Bold | 17 |
+| `type.statusLabel` | Nunito Bold | 15 |
+
+Rules:
+
+- Line height about 1.1 for condensed roles and about 1.5 for Nunito roles.
+- Headings use a warm off-black; supporting text and metadata a softer warm grey. Never pure black.
+- Condensed text is never set in all capitals.
+- Every role follows the user's text size setting. Body roles scale fully to at least 200%. `pageHeading` scales more gently (capped near 1.6×) and wraps; text never clips.
+- No text is smaller than 15.
+
 ---
 
 ## 5. Colour language
@@ -351,6 +395,13 @@ Do not communicate important states using colour alone.
 - Text and icon foregrounds must remain accessible against their backgrounds.
 - Colour must reinforce hierarchy, not replace it.
 
+### 5.7 v1 decisions
+
+- **Surfaces — warm paper.** Light: a soft warm off-white page; cards one clear warm step deeper. Dark: a warm charcoal (not near-black); cards one clear lighter warm step. Surfaces are defined independently of the accent, not derived from a seed colour.
+- **Accent — sage.** A low-saturation green, mid-dark in light (about `#4F6F5F`) and soft and pale in dark (about `#A9C4B4`). Used only for `color.action.primary`, selection and `color.boundary.focus` — never for status, doses or decoration.
+- **State — danger only.** A muted brick (about `#9A4A3C` light, `#E3A597` dark) for errors and destructive actions. `color.state.success`, `color.state.warning` and `color.state.information` are not used in v1; paused, saved and informational states use content colours with an icon and words. Reintroduce a state role only when a real case needs it (§15).
+- All text and icon pairs meet WCAG AA (4.5:1 for text). Exact values are tuned together with the surfaces and verified in both appearances.
+
 ---
 
 ## 6. Layout and spacing
@@ -399,6 +450,24 @@ Feature code should compose layouts rather than repeatedly specify padding and m
 
 The actual spacing scale is centrally configured and must not be exposed as the primary feature-development API.
 
+### 6.4 v1 decisions
+
+Spacious rhythm, on a 4-point grid:
+
+| Role | Value |
+|---|---|
+| `space.pageInset` | 24 |
+| `space.sectionSeparation` | 64 |
+| `space.sectionHeadingContent` | 20 |
+| `space.itemSeparation` | 16 |
+| `space.itemInset` | 24 |
+| `space.fieldSeparation` | 28 |
+| `space.fieldLabelControl` | 8 |
+| `space.inlineSeparation` | 12 |
+| `space.contentInset` | 24 |
+
+Spacing does not grow with text size in v1; revisit if testing at 200% shows crowding.
+
 ---
 
 ## 7. Shapes and geometry
@@ -427,6 +496,20 @@ Avoid arbitrary shape overrides inside features.
 
 A new shape should be introduced only when a meaningful visual distinction exists.
 
+### 7.1 v1 decisions
+
+Soft and round, with continuous (superellipse) corners on every role:
+
+| Role | Radius |
+|---|---|
+| `shape.card` | 24 |
+| `shape.panel` | 24 |
+| `shape.input` | 16 |
+| `shape.media` | 20 |
+| `shape.dialog` | 32 |
+| `shape.sheet` | 32 (top corners) |
+| `shape.control`, `shape.chip`, `shape.pill` | fully rounded |
+
 ---
 
 ## 8. Elevation and depth
@@ -446,6 +529,12 @@ Use the following roles:
 Do not use shadows as decoration.
 
 Use surface contrast and boundaries where they communicate hierarchy more effectively.
+
+### 8.1 v1 decisions
+
+- Cards and panels are flat: separated from the page by a warm surface step only.
+- The top bar is a translucent, frosted material over scrolling content. When high contrast is on, it becomes a solid page-coloured bar.
+- Only floating elements (dialogs, sheets, the add action) use one soft, wide, low-opacity warm shadow. In dark appearance, a lighter surface replaces the shadow.
 
 ---
 
@@ -473,6 +562,26 @@ Rules:
 - Frequently updating content should not trigger excessive animation.
 - Respect reduced-motion preferences.
 - Functionality must never depend on an animation completing.
+
+### 9.1 v1 decisions
+
+Soft and purposeful. Things people do many times a day stay still or nearly still.
+
+| Role | Duration | Curve |
+|---|---|---|
+| `motion.interaction` (press feedback) | 100 ms | ease-out |
+| `motion.appear` | 200 ms | strong ease-out, `Cubic(0.23, 1, 0.32, 1)` |
+| `motion.dismiss` | 150 ms | ease-in |
+| `motion.expand` / `motion.collapse` | 250 ms | ease-out; grows from its own edge |
+| `motion.transition` (pages) | platform default | platform default |
+| Sheets and dialogs | spring | critically damped (no bounce); tracks the finger; interruptible |
+
+Rules:
+
+- Press feedback is a tint change, not a ripple or scale.
+- Nothing animates from scale 0, and nothing animates linearly.
+- Exits are faster than entrances.
+- With reduced motion on, every movement becomes a short cross-fade or an instant change.
 
 ---
 
@@ -568,6 +677,47 @@ Components must have predictable behavior and accessibility support.
 - Components must consume the central design system.
 - Feature code should not override the component's visual decisions without a documented reason.
 
+### 11.7 v1 decisions
+
+**Actions**
+
+- Each form has one primary action: a filled sage pill.
+- Other actions on a detail screen are full-width list rows (56 pt or taller) with an icon and a label, such as "Edit reminder ›".
+- Pause and resume is a "Notify me" switch row. When it is off, the row says "Paused — won't notify until you turn it back on".
+- The destructive action sits alone in its own group at the bottom, as a brick-coloured row, and always asks for confirmation.
+
+**Medicine item**
+
+- A grid of square photo tiles, with the condensed name and the form below each.
+- The number of columns follows the room available: a tile never gets narrower than a minimum width that grows with text size (about 160 pt × text scale). Phones show one or two columns; wider screens show more.
+- Names wrap and are never cut off. An unnamed medicine shows the generic label.
+
+**Reminder item**
+
+- The time (`type.primaryValue`) leads.
+- Below it: the schedule in `type.supporting`, then the quantity and instruction in `type.metadata`.
+- A paused reminder shows a neutral "Paused" tag with an icon and the word. It is never dimmed.
+
+**Reminder screen** (also the notification entry screen)
+
+1. A raised "take" panel holding the photo, the name, and the quantity and instruction.
+2. After a section gap, the schedule.
+3. Then the action rows.
+
+No "missed", "late" or snooze. An empty quantity or instruction is simply left out.
+
+**Pickers** — every picker opens from a field in a bottom sheet:
+
+| Field | Picker |
+|---|---|
+| Time | A wheel; follows the device's 12- or 24-hour setting. |
+| Repeat type | Choice rows. |
+| Weekdays | Full-name check rows. |
+| Days of the month | A 7-column grid; 31 is explained as "last day of the month". |
+| Dates | A month calendar with the full chosen date shown. |
+| Yearly | A month-and-day wheel. |
+| End date | Offers "No end date"; nothing before the start date can be chosen. |
+
 ---
 
 ## 12. Responsive design
@@ -630,6 +780,28 @@ Feature code must not contain theme-specific raw visual values or manually branc
 8. Avoid unnecessary semantic tokens and component variants.
 9. Do not create new roles just to accommodate a single arbitrary design choice.
 10. Maintain accessibility across every component and theme.
+
+### 14.1 Component catalogue (Widgetbook)
+
+Components are catalogued in Widgetbook. It is a separate app in `widgetbook/`, which depends on `sahaay` by path, so Widgetbook never ships with the app. Use cases are generated from annotations.
+
+Each component lists its meaningful use cases: default, selected, disabled, error, empty, loading and pressed, where they apply. Keep variants few and intentional.
+
+The catalogue is checked under these addons:
+
+- light and dark theme
+- text scale at 100%, 130% and 200%
+- small, standard and large devices
+- reduced motion
+
+Proposed structure (provisional):
+
+- Foundations
+- Layout
+- Fields
+- Rows and actions
+- Feedback
+- Items
 
 ## 15. Design-system evolution
 
