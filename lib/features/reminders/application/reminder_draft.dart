@@ -58,15 +58,25 @@ final class ReminderDraft {
       ReminderDraft(repeat: RepeatType.daily, startDate: today);
 
   /// The draft of an existing reminder, for editing it.
-  factory ReminderDraft.fromReminder(Reminder reminder) {
-    final schedule = reminder.schedule;
+  factory ReminderDraft.fromReminder(Reminder reminder) =>
+      ReminderDraft.fromDetails(
+        ReminderDetails(
+          schedule: reminder.schedule,
+          quantity: reminder.quantity,
+          instruction: reminder.instruction,
+        ),
+      );
+
+  /// The draft of details entered earlier, for editing them again.
+  factory ReminderDraft.fromDetails(ReminderDetails details) {
+    final schedule = details.schedule;
     final base = ReminderDraft(
       repeat: RepeatType.once,
       startDate: schedule.startDate,
       time: schedule.time,
       endDate: schedule.endDate,
-      quantity: reminder.quantity ?? '',
-      instruction: reminder.instruction ?? '',
+      quantity: details.quantity ?? '',
+      instruction: details.instruction ?? '',
     );
     return switch (schedule.recurrence) {
       OneTimeRecurrence() => base,

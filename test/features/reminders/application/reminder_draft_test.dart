@@ -253,6 +253,27 @@ void main() {
       });
     }
 
+    test('round-trips details entered earlier, before they are saved', () {
+      final details = ReminderDraft.initial(today)
+          .copyWith(
+            repeat: RepeatType.weekly,
+            weekdays: {2, 5},
+            interval: () => 2,
+            time: nine,
+            quantity: '1 tablet',
+          )
+          .toDetails(now)!;
+
+      final again = ReminderDraft.fromDetails(details).toDetails(now)!;
+
+      expect(
+        again.schedule.recurrence,
+        WeeklyRecurrence(weekdays: {2, 5}, interval: 2),
+      );
+      expect(again.schedule.time, nine);
+      expect(again.quantity, '1 tablet');
+    });
+
     test('leaves quantity and instruction empty when there are none', () {
       final draft = ReminderDraft.fromReminder(aReminder());
 

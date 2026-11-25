@@ -36,6 +36,7 @@ final addMedicineProvider = Provider<AddMedicine>(
   (ref) => AddMedicine(
     medicines: ref.watch(medicineRepositoryProvider),
     photos: ref.watch(medicinePhotoStorageProvider),
+    transactions: ref.watch(transactionRunnerProvider),
     newId: const Uuid().v4,
   ),
 );

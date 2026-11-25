@@ -2,6 +2,7 @@
 abstract final class AppRoutes {
   static const medicines = '/';
   static const addMedicine = '/medicines/new';
+  static const newMedicineReminder = '/medicines/new/reminder';
   static String medicine(String id) => '/medicines/$id';
   static String newReminder(String medicineId) =>
       '/medicines/$medicineId/reminders/new';

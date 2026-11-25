@@ -31,8 +31,8 @@ class MedicineRemindersSection extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 for (final reminder in list)
-                  ReminderCard(
-                    reminder: reminder,
+                  ReminderCard.reminder(
+                    reminder,
                     onTap: () => context.push(AppRoutes.reminder(reminder.id)),
                   ),
               ],

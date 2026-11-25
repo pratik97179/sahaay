@@ -8,11 +8,15 @@ import '../../../app/routes.dart';
 import '../../../design_system/design_system.dart';
 import '../domain/medicine.dart';
 import '../medicines_providers.dart';
+import 'add_medicine_extras.dart';
 import 'medicine_labels.dart';
 
-/// Add-medicine flow (PRD §5.1, FR-01): optional name, camera photo, form.
+/// Add-medicine flow (PRD §5.1, FR-01): optional name, camera photo, form,
+/// and whatever [createExtras] adds, such as reminders.
 class AddMedicinePage extends ConsumerStatefulWidget {
-  const AddMedicinePage({super.key});
+  const AddMedicinePage({this.createExtras, super.key});
+
+  final CreateAddMedicineExtras? createExtras;
 
   @override
   ConsumerState<AddMedicinePage> createState() => _AddMedicinePageState();
@@ -24,10 +28,12 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
   MedicineForm? _form;
   bool _showErrors = false;
   bool _busy = false;
+  late final AddMedicineExtras? _extras = widget.createExtras?.call(ref);
 
   @override
   void dispose() {
     _name.dispose();
+    _extras?.dispose();
     super.dispose();
   }
 
@@ -56,6 +62,7 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
         name: _name.text,
         form: form,
         capturedPhotoPath: photoPath,
+        alsoSave: _extras?.saveFor,
       );
       if (mounted) context.pushReplacement(AppRoutes.medicine(id));
     } on Exception {
@@ -156,6 +163,7 @@ class _AddMedicinePageState extends ConsumerState<AddMedicinePage> {
             ],
           ),
         ),
+        ?_extras?.buildSection(context, enabled: !_busy),
         FilledButton(
           onPressed: _busy ? null : _save,
           child: const Text('Save medicine'),
