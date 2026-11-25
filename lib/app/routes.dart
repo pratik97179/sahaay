@@ -5,4 +5,6 @@ abstract final class AppRoutes {
   static String medicine(String id) => '/medicines/$id';
   static String newReminder(String medicineId) =>
       '/medicines/$medicineId/reminders/new';
+  static String reminder(String id) => '/reminders/$id';
+  static String editReminder(String id) => '/reminders/$id/edit';
 }

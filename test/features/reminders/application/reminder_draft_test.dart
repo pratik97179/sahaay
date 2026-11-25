@@ -3,6 +3,8 @@ import 'package:sahaay/features/reminders/application/reminder_draft.dart';
 import 'package:sahaay/features/reminders/domain/calendar.dart';
 import 'package:sahaay/features/reminders/domain/recurrence.dart';
 
+import '../../../support/builders.dart';
+
 void main() {
   final today = LocalDate(2026, 3, 10);
   final now = LocalDateTime(today, LocalTime(8, 0));
@@ -214,6 +216,48 @@ void main() {
           .toDetails(now)!;
 
       expect(details.schedule.startDate, LocalDate(2026, 1, 1));
+    });
+  });
+
+  group('editing an existing reminder', () {
+    final recurrences = <Recurrence>[
+      const OneTimeRecurrence(),
+      DailyRecurrence(interval: 15),
+      WeeklyRecurrence(weekdays: {1, 4}, interval: 2),
+      MonthlyRecurrence(days: {1, 31}, interval: 3),
+      YearlyRecurrence(month: 2, day: 29),
+    ];
+
+    for (final recurrence in recurrences) {
+      test('round-trips ${recurrence.runtimeType} unchanged', () {
+        final end = recurrence is OneTimeRecurrence
+            ? null
+            : LocalDate(2027, 1, 31);
+        final reminder = aReminder(
+          recurrence: recurrence,
+          time: LocalTime(21, 30),
+          start: LocalDate(2026, 4, 1),
+          end: end,
+          quantity: '2 tablets',
+          instruction: 'After food',
+        );
+
+        final details = ReminderDraft.fromReminder(reminder).toDetails(now)!;
+
+        expect(details.schedule.recurrence, recurrence);
+        expect(details.schedule.time, LocalTime(21, 30));
+        expect(details.schedule.startDate, LocalDate(2026, 4, 1));
+        expect(details.schedule.endDate, end);
+        expect(details.quantity, '2 tablets');
+        expect(details.instruction, 'After food');
+      });
+    }
+
+    test('leaves quantity and instruction empty when there are none', () {
+      final draft = ReminderDraft.fromReminder(aReminder());
+
+      expect(draft.quantity, '');
+      expect(draft.instruction, '');
     });
   });
 }

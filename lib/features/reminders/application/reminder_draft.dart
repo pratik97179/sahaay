@@ -1,5 +1,6 @@
 import '../domain/calendar.dart';
 import '../domain/recurrence.dart';
+import '../domain/reminder.dart';
 import '../domain/reminder_schedule.dart';
 
 /// The recurrence patterns the user can choose from (PRD FR-03).
@@ -55,6 +56,41 @@ final class ReminderDraft {
   /// days are left for the user to choose.
   factory ReminderDraft.initial(LocalDate today) =>
       ReminderDraft(repeat: RepeatType.daily, startDate: today);
+
+  /// The draft of an existing reminder, for editing it.
+  factory ReminderDraft.fromReminder(Reminder reminder) {
+    final schedule = reminder.schedule;
+    final base = ReminderDraft(
+      repeat: RepeatType.once,
+      startDate: schedule.startDate,
+      time: schedule.time,
+      endDate: schedule.endDate,
+      quantity: reminder.quantity ?? '',
+      instruction: reminder.instruction ?? '',
+    );
+    return switch (schedule.recurrence) {
+      OneTimeRecurrence() => base,
+      DailyRecurrence(:final interval) => base.copyWith(
+        repeat: RepeatType.daily,
+        interval: () => interval,
+      ),
+      WeeklyRecurrence(:final weekdays, :final interval) => base.copyWith(
+        repeat: RepeatType.weekly,
+        weekdays: weekdays,
+        interval: () => interval,
+      ),
+      MonthlyRecurrence(:final days, :final interval) => base.copyWith(
+        repeat: RepeatType.monthly,
+        monthDays: days,
+        interval: () => interval,
+      ),
+      YearlyRecurrence(:final month, :final day) => base.copyWith(
+        repeat: RepeatType.yearly,
+        yearlyMonth: month,
+        yearlyDay: () => day,
+      ),
+    };
+  }
 
   final RepeatType repeat;
   final LocalTime? time;
