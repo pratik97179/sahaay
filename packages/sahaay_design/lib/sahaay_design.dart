@@ -5,8 +5,16 @@
 /// and, as they are built, the theme and components.
 library;
 
+export 'src/components/fields/picker_field.dart';
+export 'src/components/fields/text_input_field.dart';
+export 'src/components/items/item_card.dart' show ItemCard;
+export 'src/components/items/photo_tile.dart';
+export 'src/components/items/take_panel.dart';
+export 'src/components/items/time_card.dart';
 export 'src/components/layout/screen.dart';
 export 'src/components/layout/section.dart';
+export 'src/components/sheets/picker_sheet.dart' show showSahaaySheet;
+export 'src/components/sheets/pickers.dart';
 export 'src/licenses.dart' show registerSahaayDesignLicenses;
 export 'src/theme/sahaay_theme.dart';
 export 'src/tokens/components.dart';

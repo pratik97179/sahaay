@@ -494,16 +494,41 @@ Components take plain values — strings, images and callbacks — and never the
 
 ### 11.2 Items
 
-- `Card` — a pressable card on the page.
-- `PhotoTile` — a medicine in the grid: a square photo, then its name and form.
+- `ItemCard` — a card on the page; pressable when given `onTap`. Named so it never clashes with Material's `Card`. Its tokens are the `card` group.
+- `PhotoTile` — a medicine in the grid: a square photo, then its name and a detail such as the form. Laid out by `PhotoTileGrid`.
 - `TimeCard` — a reminder in a list: its time, schedule, note and an optional state tag.
-- `TakePanel` — the raised panel at the top of a reminder screen: photo, name, quantity and instruction.
+- `TakePanel` — the raised panel at the top of a reminder screen: a 4:3 photo, the name, then the quantity and instruction.
+
+Behaviour shared by items:
+
+- **Press feedback.** A pressable card deepens its tint (`card.pressedBackground`) over `motion.press`; there is no ripple and no scale. A photo tile has no card surface, so it dims slightly (to 72% opacity) while pressed.
+- **One button per item.** A pressable card or tile is a single button for screen readers; a photo tile reads as its name and detail ("Test 2, Injectable").
+- **Photos never break the layout.** A photo that can't be loaded is replaced by a quiet placeholder at the same size.
+- **Internal gaps** between a photo and its text, or a time and its tag, use the shared spacing values (§6.1), not other components' tokens.
 
 ### 11.3 Fields
 
-- `TextField` — a labelled text input.
-- `PickerField` — a labelled field that opens a picker sheet.
-- Picker sheets: time wheel, choice rows, weekday rows, day-of-month grid, month calendar, month-and-day wheel.
+- `TextInputField` — a labelled text input. Named so it never clashes with Material's `TextField`.
+- `PickerField` — a labelled field that looks like a text input and opens a picker sheet. Screen readers hear its label and current value ("Time, 9:00 AM").
+- Picker sheets, each opened by a function that returns the choice, or `null` when dismissed:
+
+| Function | Shows | Returns |
+|---|---|---|
+| `showTimeWheelSheet` | A time wheel; follows the device's 12- or 24-hour setting | `TimeOfDay` |
+| `showChoiceSheet` | Rows with a check on the chosen one; tapping a row chooses and closes | the chosen value |
+| `showMultiChoiceSheet` | Rows that check and uncheck (weekdays); Done is disabled while nothing is chosen | a set of values |
+| `showDayOfMonthSheet` | A 7-column grid of 31 days, with a footnote | a set of days |
+| `showCalendarSheet` | A month calendar with the chosen date written out in full; optional "no date" choice | `DateChoice` (a date, or none) |
+| `showMonthDaySheet` | Month and day wheels; February offers the 29th | month and day |
+| `showSahaaySheet` | Any content in the sheet frame | whatever the sheet pops |
+
+Behaviour shared by fields and sheets:
+
+- **Errors** appear under the control with an icon and words, grow in over `motion.appear`, are announced to screen readers, and give the control a brick outline.
+- **All words** — titles, labels, button text, footnotes, month names, the formatted date — are passed in by the feature, so the design system holds no product copy and stays ready for other languages.
+- **Sheets** rise along the no-bounce spring (a 350 ms curve sampled from `sheet.spring`), close faster (250 ms, ease-in), and can be dragged down and flung away, tracking the finger. With reduced motion they appear and disappear at once. Content scrolls when it is taller than the screen, so 200% text never clips.
+- **Wheel rows** grow with the user's text size.
+- **Known limit:** the month calendar uses Flutter's `CalendarDatePicker`, whose day cells are about 40 pt — below the 48 pt target. Replace it with a custom grid if testing on devices shows people struggle.
 
 ### 11.4 Actions
 
@@ -539,7 +564,7 @@ Components take plain values — strings, images and callbacks — and never the
 **Medicine grid**
 
 - Square photo tiles, with the condensed name and the form below each.
-- The number of columns follows the room available: a tile never gets narrower than a minimum width that grows with text size (about 160 pt × text scale). Phones show one or two columns; wider screens show more.
+- The number of columns follows the room available: a tile never gets narrower than `photoTile.minWidth` (160) scaled by the user's text size. A 390 pt phone shows two columns at 100% text and one at 200%; a tablet shows four or more. Rows are separated by twice the tile gap so each name stays with its photo.
 - Names wrap and are never cut off. An unnamed medicine shows the generic label.
 
 **Reminder card**
@@ -563,7 +588,7 @@ No "missed", "late" or snooze. An empty quantity or instruction is simply left o
 | Repeat type | Choice rows. |
 | Weekdays | Full-name check rows. |
 | Days of the month | A 7-column grid; 31 is explained as "last day of the month". |
-| Dates | A month calendar with the full chosen date shown. |
+| Dates | A month calendar with the full chosen date shown (cells currently about 40 pt; see §11.3). |
 | Yearly | A month-and-day wheel. |
 | End date | Offers "No end date"; nothing before the start date can be chosen. |
 
@@ -728,9 +753,9 @@ Proposed structure (provisional):
 | 3 | Tokens, `context.sahaay`, accessibility resolution | done |
 | 4 | `SahaayTheme` | done |
 | 5a | Layout: `Screen`, `Section` | done |
-| 5b | Items: `Card`, `PhotoTile`, `TimeCard`, `TakePanel` | next |
-| 5c | Fields and picker sheets | |
-| 5d | Actions: `PrimaryButton`, `ActionRow`, `SwitchRow`, `DangerRow` | |
+| 5b | Items: `ItemCard`, `PhotoTile`, `PhotoTileGrid`, `TimeCard`, `TakePanel` | done |
+| 5c | Fields: `TextInputField`, `PickerField`, and the picker sheets | done |
+| 5d | Actions: `PrimaryButton`, `ActionRow`, `SwitchRow`, `DangerRow` | next |
 | 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | |
 | 6 | Widgetbook catalogue | |
 | 7 | Screens switch to the package; `lib/design_system/` removed | |
