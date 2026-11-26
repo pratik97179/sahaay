@@ -29,6 +29,13 @@ Reminder
   instruction   String?                          // free text, never interpreted
   isPaused      bool
   createdAt / updatedAt
+
+Print                                            // PRD 0.4, §3.3: made only by the person
+  id            String (UUID)
+  reminderId    String  -> Reminder.id (ON DELETE CASCADE)
+  day           Date                             // the day the dose was for
+  printedAt     DateTime                         // when the person made it
+  unique (reminderId, day)
 ```
 
 Notes:
@@ -56,7 +63,10 @@ Android specifics: `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPL
 
 ## 4. Screens (minimum for v1)
 
-1. Medicine list (home)
+The screens are being redesigned (`docs/design-system.md` §18). Agreed so far: the home is **Today**, a stepping time ruler of the day's reminders, and **History** shows past prints as a flipbook and a calendar (PRD 0.4, FR-12 and FR-13). The list below is the original minimum and still describes what each screen must offer.
+
+0. Today (home) and History (PRD 0.4)
+1. Medicine list
 2. Add medicine (name, photo, form, reminder list)
 3. Reminder editor (recurrence-dependent fields, time, start/end date, quantity, instruction)
 4. Medicine detail (photo, reminders with pause/edit/delete, delete medicine)
@@ -64,4 +74,4 @@ Android specifics: `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPL
 
 ## 5. Snooze (decided: not in v1)
 
-PRD 0.3 puts snooze out of scope for v1. If it comes back later, the design would be a notification action ("Snooze 10 min") that schedules one extra notification for the same reminder. The reminder's schedule stays the same, and nothing is recorded as taken or missed. The cost: handling the notification action even when the app has been killed, plus a background isolate entry point on Android.
+The PRD (from 0.3) puts snooze out of scope for v1. If it comes back later, the design would be a notification action ("Snooze 10 min") that schedules one extra notification for the same reminder. The reminder's schedule stays the same, and it records nothing: only the person's own print marks a dose taken (PRD FR-11). The cost: handling the notification action even when the app has been killed, plus a background isolate entry point on Android.

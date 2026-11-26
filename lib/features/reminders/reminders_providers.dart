@@ -28,6 +28,11 @@ final reminderProvider = StreamProvider.autoDispose.family<Reminder?, String>(
   (ref, id) => ref.watch(reminderRepositoryProvider).watch(id),
 );
 
+/// Every reminder, ordered by time of day.
+final allRemindersProvider = StreamProvider.autoDispose<List<Reminder>>(
+  (ref) => ref.watch(reminderRepositoryProvider).watchAll(),
+);
+
 /// The reminders of one medicine, ordered by time of day.
 final medicineRemindersProvider = StreamProvider.autoDispose
     .family<List<Reminder>, String>(

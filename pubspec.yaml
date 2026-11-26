@@ -21,6 +21,11 @@ version: 1.0.0+1
 environment:
   sdk: ^3.13.7
 
+# Local packages resolved together with the app (one lockfile).
+workspace:
+  - packages/sahaay_design
+  - widgetbook
+
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
 # consider running `flutter pub upgrade --major-versions`. Alternatively,
@@ -42,6 +47,8 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
   uuid: ^4.6.0
+  sahaay_design:
+    path: packages/sahaay_design
 
 dev_dependencies:
   flutter_test:

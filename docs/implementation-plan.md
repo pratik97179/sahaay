@@ -451,6 +451,32 @@ Validate complete application workflows and address integration failures.
 
 ---
 
+## 10a. Phase 8 — Prints, Today and History (PRD 0.4)
+
+### Objective
+
+Let the person record that they took a dose, see today's reminders on a time ruler, and look back at earlier days.
+
+### Scope
+
+- A `Print` record (reminder, day, time made), stored locally and deleted with its reminder or medicine.
+- Making and undoing a print by holding the photo (FR-11); only for due, unpaused reminders and earlier days.
+- Today: the stepping time ruler (FR-12).
+- History: the flipbook and calendar of printed days, opening any day's ruler (FR-13).
+
+### Requirements
+
+- Prints are created and removed only by the person's action. Nothing infers, totals or scores them.
+- Prints never change reminders, schedules, notifications, or doses.
+- The screens are built with the redesigned design system (`docs/design-system.md` §18); they wait for it.
+
+### Completion criteria
+
+- AC-15 to AC-20 pass.
+- Domain tests cover which reminders can be printed on a day; persistence tests cover cascading deletes.
+
+---
+
 ## 11. Product scope restrictions
 
 The following must not be implemented as part of v1 unless the PRD is explicitly revised:
@@ -464,8 +490,8 @@ The following must not be implemented as part of v1 unless the PRD is explicitly
 - Drug interaction checking.
 - Automatic medication schedule changes.
 - Treatment completion inference.
-- Dose tracking.
-- Medication adherence analytics.
+- Inferred dose tracking (a dose counts as taken only when the person makes a print, PRD FR-11).
+- Medication adherence analytics, scores, streaks, or "missed" warnings.
 - Travel and time-zone handling.
 - Caregiver functionality.
 - Multilingual functionality.
