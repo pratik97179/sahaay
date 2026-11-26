@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../design_system/design_system.dart';
+import 'app_theme.dart';
 import 'router.dart';
 
 class SahaayApp extends StatefulWidget {
@@ -24,8 +24,8 @@ class _SahaayAppState extends State<SahaayApp> {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Sahaay',
-      theme: SahaayTheme.light(),
-      darkTheme: SahaayTheme.dark(),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
       routerConfig: _router,
     );
   }

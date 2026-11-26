@@ -47,6 +47,8 @@ dependencies:
   path_provider: ^2.1.6
   path: ^1.9.1
   uuid: ^4.6.0
+  sahaay_design:
+    path: packages/sahaay_design
 
 dev_dependencies:
   flutter_test:

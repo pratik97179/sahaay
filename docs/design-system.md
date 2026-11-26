@@ -786,7 +786,13 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | 5x | No fixed sizes (§12.1): measured floating action, fitted bar title, icons that scale with text, adaptive day grid, Sahaay's own month calendar, wheels sized to the screen | done |
 | 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | done |
 | 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
-| 7 | Screens switch to the package; `lib/design_system/` removed | next |
+| 7a | App shell: the app uses the new theme (`AppTheme`, carrying the old theme's values until every screen has moved) and registers the font licences at start-up | done |
+| 7b | Medicines home | next |
+| 7c | Medicine screen and its reminders section | |
+| 7d | Reminder screen | |
+| 7e | Add medicine | |
+| 7f | Reminder editor | |
+| 7g | `lib/design_system/` and its tests removed; feature enforcement test | |
 
 ---
 
