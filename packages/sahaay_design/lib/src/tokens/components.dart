@@ -73,6 +73,7 @@ final class ScreenTokens {
     required this.edge,
     required this.title,
     required this.subtitle,
+    required this.subtitleGap,
     required this.sectionGap,
     required this.titleMaxScale,
   });
@@ -83,6 +84,9 @@ final class ScreenTokens {
   final double edge;
   final TextStyle title;
   final TextStyle subtitle;
+
+  /// Space between the title and the subtitle.
+  final double subtitleGap;
 
   /// Space between two sections.
   final double sectionGap;
@@ -96,6 +100,7 @@ final class ScreenTokens {
         edge: _snap(a.edge, b.edge, t),
         title: _s(a.title, b.title, t),
         subtitle: _s(a.subtitle, b.subtitle, t),
+        subtitleGap: _snap(a.subtitleGap, b.subtitleGap, t),
         sectionGap: _snap(a.sectionGap, b.sectionGap, t),
         titleMaxScale: _snap(a.titleMaxScale, b.titleMaxScale, t),
       );

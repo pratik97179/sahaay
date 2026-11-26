@@ -5,6 +5,8 @@
 /// and, as they are built, the theme and components.
 library;
 
+export 'src/components/layout/screen.dart';
+export 'src/components/layout/section.dart';
 export 'src/licenses.dart' show registerSahaayDesignLicenses;
 export 'src/theme/sahaay_theme.dart';
 export 'src/tokens/components.dart';

@@ -47,6 +47,7 @@ final class SahaayTokens extends ThemeExtension<SahaayTokens> {
         edge: Spacing.screenEdge,
         title: s.screenTitle,
         subtitle: s.note,
+        subtitleGap: Spacing.underLabel,
         sectionGap: Spacing.betweenSections,
         titleMaxScale: 1.6,
       ),
