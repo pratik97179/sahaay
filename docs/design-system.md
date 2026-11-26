@@ -887,7 +887,7 @@ A critique of the built design (impeccable's method, 25 of 36) found it generic:
 
 ### 18.2 How we work
 
-1. Explore with throwaway prototypes (a Flutter web app run locally, outside the repository) and iterate until a decision is made.
+1. Explore with prototypes (small Flutter web apps run locally) and iterate until a decision is made. The Today and History prototype is kept in `prototypes/day_and_history/` as the reference for the details below; it is not part of the app or the pub workspace.
 2. Settle a **design philosophy**, then a **design language**.
 3. Update the existing `sahaay_design` package to it. It stays one package; nothing new is created alongside it.
 4. Then move the app's screens to it (§14.2, steps 7b–7g). Until then the app's current screens are left as they are.
@@ -897,6 +897,17 @@ Every agreed decision is recorded here and in every other document it affects.
 References used: Stoic (journal app: monochrome, its own pictograms, a lowercase voice), Wonderous (chained and staggered motion), the iOS Messages photo stack (swipe and spread-to-grid motion), and the product owner's flipbook and calendar mockup.
 
 ### 18.3 Agreed so far
+
+**Philosophy:** the app is built around the **time of day**. Today is a ruler of the day, History is organised by days, and on the ruler screen the colour follows the hour.
+
+**Design language**
+
+- **Time-of-day colour only on the ruler screen** (Today, and any past day's ruler). The whole screen's colour shifts smoothly with the time of the reminder under the needle: peach in the morning, light in the afternoon, lilac in the evening, deep blue at night. It is never a health or status colour.
+- **Every other screen** (History, the medicine list, adding a medicine, and so on) is a steady **warm off-white**, like paper. History moves from the prototype's blue-grey to this.
+- **Dark mode follows the phone.** The other screens turn a soft warm dark grey with light text; the ruler screen keeps its time-of-day colours.
+- **Typeface: Figtree** (SIL Open Font License), bold for titles such as "november.", with a gentle lowercase voice where it suits ("your prints, day by day.").
+- **Icons: Sahaay's own, drawn.** About ten are needed (back, add, edit, pause, delete, camera, history, calendar and a few more). No Material or other stock icon set.
+- **No default buttons.** Each action gets the small control that suits it: information shown on the object itself (the time written on a print), the smallest control that does the job (the icon switch instead of two text pills), physical actions where natural (hold to print, swipe the card, hold to switch views). A full-size button only when nothing else would be clear. Controls are designed per screen, in prototypes.
 
 **Today (home)**
 
@@ -928,10 +939,34 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - `flutter_animate`, used only inside `sahaay_design` behind Sahaay's own helpers (enter, stagger, pop), with Sahaay's motion tokens and Reduce Motion handled inside. Agreed, but on hold until the motion work resumes.
 - Wonderous's structure (chains, stagger, swap) is borrowed; its slower showcase timings are not.
 
-### 18.4 Open
+### 18.4 Rejected along the way, and why
 
-- The design philosophy and design language: typefaces (Figtree was used in prototypes only), the colours of each hour, dark mode, the icon set.
+- **Recolouring the built design** (Daylight with rounded cards and pills): still read as a Google template. The structure had to change, not the paint.
+- **A full-bleed photo as the screen background:** the previous, framed version was better.
+- **The photo in a circle:** replaced by a rounded frame.
+- **A 24-hour dial you spin:** not obvious what to do with it. Replaced by the stepping horizontal ruler.
+- **A tick badge in the photo's corner, or a pill with text, for "taken":** stock patterns. Replaced by the print.
+- **"Ink" (ink filling the photo) and "Flip" (the photo turning over) for taken:** the print was preferred.
+- **History as a winding string of days:** first too cramped, then needed scrolling. Replaced by the flipbook and calendar.
+- **Buttons to page through the flipbook, and swiping anywhere on screen:** only the top card itself is swiped.
+- **Swiping right to bring back the previous card:** a real stack doesn't do that; either way sends the top card to the bottom.
+- **A full-width text switch, then an upright switch beside the book:** too big, then awkward. Replaced by the small icon switch under the book.
+- **Mobbin research:** the Mobbin MCP refuses on the current plan, so references came from Stoic's App Store screenshots, the Wonderous source, screen recordings and the product owner's mockup.
+
+### 18.5 Next steps
+
+The safest path agreed in conversation is to build the new UI **beside** the old one and switch over when it is complete (option A; to be confirmed with the branch to use):
+
+1. Tidy the small pieces of logic that sit in UI files (add-medicine validation, a reminder-date rule, the add-medicine reminders hook that also builds widgets, wording helpers).
+2. Add the missing logic, one slice each: reminders on a given day across all medicines; prints (table, repository, the "can be printed" rule, a database upgrade with a migration test); the month summary for History.
+3. Update `sahaay_design` to the new language: Figtree, the colours, the drawn icons, and the new components (ruler, print, stack, calendar, switch), each in Widgetbook with tests.
+4. Build the new screens behind a switch in `lib/app/`, one slice each: Today, the reminder screen, History, then the rest once designed.
+5. Flip the switch, then delete the old screens and `lib/design_system/`.
+
+### 18.6 Open
+
 - The other screens in the new style: the medicine list, adding a medicine, the reminder screen in detail, editing a reminder.
+- The exact colours of each hour and of the warm off-white and dark grey, and their contrast checks.
 - History's month switching (the arrows on the "Nov" pill), and History across months.
 - Accessibility of the ruler and History: large text, VoiceOver (a plain list behind them), Reduce Motion.
 
