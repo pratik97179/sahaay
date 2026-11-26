@@ -790,7 +790,8 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
 | 7a | App shell: the app uses the new theme (`AppTheme`, carrying the old theme's values until every screen has moved) and registers the font licences at start-up | done |
 | M | **Makeover** (§18): prototypes, then design philosophy, then design language, then the existing `sahaay_design` package updated to it | in progress |
-| M1 | The prototype's Today, reminder page and History, ported exactly into `lib/features/day/` on real data, with Today as the home screen. Prints are saved (`prints` table, database version 2 with an upgrade test; deleting a reminder or medicine removes them). Additions the prototype didn't need: an empty day ("nothing for today.", "add a medicine"), "no prints yet this month." in History, a scroll fallback so nothing overflows on small screens or large text, and a status bar that follows the page. Every day screen uses the 1 pm colour while the time-of-day colour is on hold. `sahaay_design` gains Figtree and `DayLight`. Not yet: History in warm off-white and dark mode, drawn icons, a way to the medicines list once one exists, Widgetbook entries | in progress |
+| M1 | The prototype's Today, reminder page and History, ported exactly into `lib/features/day/` on real data, with Today as the home screen. Prints are saved (`prints` table, database version 2 with an upgrade test; deleting a reminder or medicine removes them). Additions the prototype didn't need: an empty day ("nothing for today.", "add a medicine"), "no prints yet this month." in History, a scroll fallback so nothing overflows on small screens or large text, and a status bar that follows the page. Every day screen uses the 1 pm colour while the time-of-day colour is on hold. `sahaay_design` gains Figtree and `DayLight`. Not yet: History in warm off-white and dark mode, drawn icons, Widgetbook entries | in progress |
+| M2 | Your medicines (§18.3): the shelf of rounded prints with the day strip and what's next, the drawn **add** button, and Today's **medicines** button. Replaces the old medicines list (`medicines_page.dart`, `medicine_card.dart` removed). Not yet: the medicine page and Add medicine in the new style | in progress |
 | 7b | Medicines home | paused until the makeover |
 | 7c | Medicine screen and its reminders section | paused |
 | 7d | Reminder screen | paused |
@@ -918,7 +919,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - While it moves, the time ticks through the hours and the name and instruction fade out; once it settles they slide back in.
 - The **medicine photo** sits above the needle in a **rounded, continuous-corner frame**: never a circle, never a full-screen background. It does not move sideways while the ruler is dragged. Changing reminder: the current photo shrinks into its bottom centre and the next grows out of it.
 - The other reminders show on the ruler as small marks: a tiny print (printed), a ring (due, not printed), a small dot (still to come). Nothing is drawn at the needle.
-- A **"now"** mark on today's ruler. A date line and a greeting at the top, and a **History** button (a small stack of prints, drawn) at the top right.
+- A **"now"** mark on today's ruler. A date line and a greeting at the top, and at the top right two drawn buttons with a word under each: **medicines** (a small bottle) and **history** (a small stack of prints). They sit level with the first line of the header, the same place on every screen that has header buttons, and wrap onto two rows with large text.
 - Tapping the photo opens the reminder screen: the photo grows into it, and dragging down returns.
 - Today's ruler starts fresh each day; earlier days are reached through History.
 
@@ -936,12 +937,22 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - **Switching:** hold the stack and the cards press in a little, then every print flies out to its day in the calendar, one after another, straightening as it goes. Hold a day in the calendar and everything presses in, then the prints gather back into the stack with that day on top.
 - A small **view switch** below the book: two square segments (a drawn stack and a drawn grid) on a soft track. Its thumb follows the transition itself, whether the view was switched there or by holding.
 
+**Your medicines** (agreed 2026-11-26)
+
+- Reached from Today's **medicines** button. Header: "‹ today", "your medicines.", "tap one to see its reminders." ("add the first one with its photo." when there are none).
+- **add** is a drawn button at the top right, level with the first header line like Today's buttons: a capsule with a round tablet carrying a plus, the word "add" under it. Not a plain plus in a box, and not a list card.
+- Each medicine is a **print on a shelf**: cream paper with rounded corners (18; the photo inside 12), set at a slight alternating tilt, two to a row on a phone and more on wider screens.
+- On each print: the **photo**; the **name** with a small drawn **form mark** (a capsule for oral, a syringe for injectable); a **day strip**, a thin midnight-to-midnight line marked at 6 am, noon and 6 pm, with a dot at each reminder's time (a hollow ring when paused) and a faint tick at now; and one plain line saying **what's next** ("next · today 9:00 am", "next · Thu 7:30 am", "paused", "no reminders yet").
+- Tapping a print opens the medicine.
+
 **Motion**
 
 - `flutter_animate`, used only inside `sahaay_design` behind Sahaay's own helpers (enter, stagger, pop), with Sahaay's motion tokens and Reduce Motion handled inside. Agreed, but on hold until the motion work resumes.
 - Wonderous's structure (chains, stagger, swap) is borrowed; its slower showcase timings are not.
 
 ### 18.4 Rejected along the way, and why
+
+- **Medicine list as one medicine at a time, or as a tight contact sheet:** the shelf of prints was chosen. **An "add a medicine" card as the first print, then a dashed one:** moved to a header button for consistency with Today. **A plain plus, or a plus in a box, for add; a tablet with a score line:** a box reads as a stock button, and a line through a tablet reads as a minus or a "no" sign.
 
 - **Recolouring the built design** (Daylight with rounded cards and pills): still read as a Google template. The structure had to change, not the paint.
 - **A full-bleed photo as the screen background:** the previous, framed version was better.

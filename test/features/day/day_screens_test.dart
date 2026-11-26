@@ -58,11 +58,15 @@ void main() {
   }
 
   Future<void> swipeRuler(WidgetTester tester, double dx) async {
+    await tester.ensureVisible(find.byKey(const ValueKey('ruler')));
+    await tester.pumpAndSettle();
     await tester.drag(find.byKey(const ValueKey('ruler')), Offset(dx, 0));
     await tester.pumpAndSettle();
   }
 
   Future<void> holdPhoto(WidgetTester tester) async {
+    await tester.ensureVisible(find.byType(HoldPhoto));
+    await tester.pumpAndSettle();
     final g = await tester.startGesture(
       tester.getCenter(find.byType(HoldPhoto)),
     );
@@ -142,6 +146,8 @@ void main() {
   testWidgets('tapping the photo opens the reminder', (tester) async {
     await openToday(tester);
 
+    await tester.ensureVisible(find.byType(HoldPhoto));
+    await tester.pumpAndSettle();
     await tester.tap(find.byType(HoldPhoto));
     await tester.pumpAndSettle();
 
@@ -189,7 +195,8 @@ void main() {
     expect(find.text('nothing for today.'), findsOneWidget);
     await tester.tap(find.text('add a medicine'));
     await tester.pumpAndSettle();
-    expect(find.text('No medicines yet.'), findsOneWidget);
+    expect(find.text('your medicines.'), findsOneWidget);
+    expect(find.text('add the first one with its photo.'), findsOneWidget);
 
     await disposeTestApp(tester);
   });

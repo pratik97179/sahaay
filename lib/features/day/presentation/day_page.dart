@@ -248,12 +248,35 @@ class _DayRulerState extends State<_DayRuler>
                                             ],
                                           ),
                                         ),
-                                        HistoryButton(
-                                          light: light,
-                                          onTap: () => Navigator.of(context)
-                                              .push(
-                                                growRoute(const HistoryPage()),
+                                        // Side by side; with large text they
+                                        // wrap instead of overflowing.
+                                        ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxWidth:
+                                                MediaQuery.sizeOf(context)
+                                                    .width *
+                                                0.5,
+                                          ),
+                                          child: Wrap(
+                                            alignment: WrapAlignment.end,
+                                            children: [
+                                              MedicinesButton(
+                                                light: light,
+                                                onTap: () => context.push(
+                                                  AppRoutes.medicines,
+                                                ),
                                               ),
+                                              HistoryButton(
+                                                light: light,
+                                                onTap: () =>
+                                                    Navigator.of(context).push(
+                                                      growRoute(
+                                                        const HistoryPage(),
+                                                      ),
+                                                    ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ],
                                     )

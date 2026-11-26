@@ -431,6 +431,157 @@ class HistoryButton extends StatelessWidget {
   );
 }
 
+/// A small drawn medicine bottle: the way to the person's medicines.
+class MedicinesButton extends StatelessWidget {
+  const MedicinesButton({required this.light, required this.onTap, super.key});
+  final Light light;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Your medicines',
+    excludeSemantics: true,
+    child: GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CustomPaint(painter: _Bottle(light.ink)),
+            ),
+            const SizedBox(height: 4),
+            Text('medicines', style: f(13, FontWeight.w700, light.ink)),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+/// A small drawn capsule and a tablet with a plus: adds a medicine. Same size
+/// as the history and medicines buttons.
+class AddMedicineButton extends StatelessWidget {
+  const AddMedicineButton({
+    required this.light,
+    required this.onTap,
+    super.key,
+  });
+  final Light light;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Add a medicine',
+    excludeSemantics: true,
+    child: GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CustomPaint(painter: _AddPrint(light.ink)),
+            ),
+            const SizedBox(height: 4),
+            Text('add', style: f(13, FontWeight.w700, light.ink)),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _AddPrint extends CustomPainter {
+  _AddPrint(this.ink);
+  final Color ink;
+  @override
+  void paint(Canvas canvas, Size s) {
+    const paper = Color(0xFFFBFAF6);
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = ink;
+
+    // A capsule, set at an angle: one half ink, one half cream.
+    canvas.save();
+    canvas.translate(s.width * 0.38, s.height * 0.36);
+    canvas.rotate(-0.7);
+    final w = s.width * 0.62, h = s.height * 0.27;
+    final capsule = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset.zero, width: w, height: h),
+      Radius.circular(h / 2),
+    );
+    canvas.drawRRect(capsule, Paint()..color = paper);
+    canvas.save();
+    canvas.clipRRect(capsule);
+    canvas.drawRect(
+      Rect.fromLTRB(-w / 2, -h / 2, 0, h / 2),
+      Paint()..color = ink,
+    );
+    canvas.restore();
+    canvas.drawRRect(capsule, stroke);
+    canvas.restore();
+
+    // A round tablet below it with a plus on it: add a medicine.
+    final c = Offset(s.width * 0.72, s.height * 0.72);
+    final r = s.width * 0.2;
+    canvas.drawCircle(c, r, Paint()..color = ink);
+    final arm = r * 0.5;
+    final plus = Paint()
+      ..strokeWidth = 2.2
+      ..strokeCap = StrokeCap.round
+      ..color = paper;
+    canvas
+      ..drawLine(c.translate(-arm, 0), c.translate(arm, 0), plus)
+      ..drawLine(c.translate(0, -arm), c.translate(0, arm), plus);
+  }
+
+  @override
+  bool shouldRepaint(_AddPrint old) => old.ink != ink;
+}
+
+class _Bottle extends CustomPainter {
+  _Bottle(this.ink);
+  final Color ink;
+  @override
+  void paint(Canvas canvas, Size s) {
+    final w = s.width, h = s.height;
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeJoin = StrokeJoin.round
+      ..color = ink;
+    // The cap, then the body with a label band.
+    final cap = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.32, h * 0.1, w * 0.36, h * 0.16),
+      const Radius.circular(2.5),
+    );
+    canvas.drawRRect(cap, Paint()..color = ink);
+    final body = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.24, h * 0.3, w * 0.52, h * 0.6),
+      const Radius.circular(6),
+    );
+    canvas.drawRRect(body, Paint()..color = const Color(0xFFFBFAF6));
+    canvas.drawRRect(body, stroke);
+    canvas.drawRect(
+      Rect.fromLTWH(w * 0.24, h * 0.48, w * 0.52, h * 0.22),
+      Paint()..color = ink,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Bottle old) => old.ink != ink;
+}
+
 class PrintStack extends CustomPainter {
   PrintStack(this.ink);
   final Color ink;

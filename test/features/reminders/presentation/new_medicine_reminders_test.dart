@@ -36,7 +36,7 @@ void main() {
   /// Opens Add medicine and fills in the required photo and form.
   Future<void> startAddingMedicine(WidgetTester tester) async {
     await pumpTestApp(tester, db: db, capture: FakePhotoCapture());
-    await tester.tap(find.text('Add medicine'));
+    await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
     await tester.enterText(find.byType(TextField), 'Paracetamol');
     await tapVisible(tester, find.text('Take photo'));
@@ -188,7 +188,7 @@ void main() {
     tester,
   ) async {
     await pumpTestApp(tester, db: db, capture: FakePhotoCapture());
-    await tester.tap(find.text('Add medicine'));
+    await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
     await addDraftReminder(tester);
 

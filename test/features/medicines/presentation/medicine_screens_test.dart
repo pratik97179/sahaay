@@ -32,7 +32,7 @@ void main() {
     FakePhotoCapture? camera,
   }) async {
     await pumpTestApp(tester, db: db, photos: photos, capture: camera);
-    await tester.tap(find.text('Add medicine'));
+    await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
   }
 
@@ -76,10 +76,10 @@ void main() {
       await pumpTestApp(tester, db: db, photos: photos);
 
       expect(find.text('Paracetamol'), findsOneWidget);
-      expect(find.text('Oral / edible'), findsOneWidget);
       expect(find.text('Unnamed medicine'), findsOneWidget);
-      expect(find.text('Injectable'), findsOneWidget);
-      expect(find.text('No medicines yet.'), findsNothing);
+      expect(find.bySemanticsLabel('Oral'), findsOneWidget);
+      expect(find.bySemanticsLabel('Injectable'), findsOneWidget);
+      expect(find.text('add the first one with its photo.'), findsNothing);
 
       await disposeTestApp(tester);
     });
@@ -146,7 +146,7 @@ void main() {
       // Back goes to the list, not to the add form.
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Medicines'), findsOneWidget);
+      expect(find.text('your medicines.'), findsOneWidget);
       expect(find.text('Insulin'), findsOneWidget);
 
       await disposeTestApp(tester);
@@ -233,7 +233,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
 
-      expect(find.text('No medicines yet.'), findsOneWidget);
+      expect(find.text('add the first one with its photo.'), findsOneWidget);
       expect(await runDb(tester, () => medicines.find('m1')), isNull);
       expect(
         await runDb(tester, () => reminders.findForMedicine('m1')),
