@@ -723,7 +723,7 @@ packages/sahaay_design/
   .gitignore          build output stays out of version control
 ```
 
-The package joins the app through a pub workspace: the root `pubspec.yaml` lists it under `workspace:` and the package declares `resolution: workspace`, so one `flutter pub get` and one lockfile cover both. Widgetbook joins the same workspace later.
+The package joins the app through a pub workspace: the root `pubspec.yaml` lists it under `workspace:` and the package declares `resolution: workspace`, so one `flutter pub get` and one lockfile cover all three. The Widgetbook catalogue (`widgetbook/`, §14.1) is the third member.
 
 Rules:
 
@@ -754,25 +754,22 @@ Rules:
 
 ### 14.1 Component catalogue (Widgetbook)
 
-Components are catalogued in Widgetbook. It is a separate app in `widgetbook/`, which depends on `sahaay_design` (and on `sahaay` for feature items) by path, so Widgetbook never ships with the app. Use cases are generated from annotations.
+Components are catalogued in Widgetbook. It is a separate app in `widgetbook/`, a member of the same pub workspace, which depends on `sahaay_design` by path and on `widgetbook` only. It never ships with Sahaay; it is a development tool that runs in Chrome (`cd widgetbook && flutter run -d chrome`) and is not hosted anywhere. Feature items (for example, a medicine tile) join it when the screens move to the package (§14.2, step 7).
 
-Each component lists its meaningful use cases: default, selected, disabled, error, empty, loading and pressed, where they apply. Keep variants few and intentional.
+The catalogue is written by hand in `widgetbook/lib/catalogue/`, one file per folder. A component change that adds or removes a use case updates the catalogue in the same commit. It shows components only through the public API; foundations are shown through component tokens.
 
-The catalogue is checked under these addons:
+Each component lists its meaningful use cases: default, selected, disabled, error, empty, loading and pressed, where they apply. Keep variants few and intentional. Knobs are used only where they help: editable copy, a long-text switch for checking wrapping, enabled, and a tile count. Picker sheets and the dialog are shown the way a screen opens them, from a field or a row.
 
-- light and dark theme
-- text scale at 100%, 130% and 200%
-- small, standard and large devices
-- reduced motion
+Addons:
 
-Proposed structure (provisional):
+- device: small (iPhone SE), standard (iPhone 13) and large (iPhone 13 Pro Max)
+- theme: light and dark
+- text scale: 100% to 200%
+- reduced motion: Sahaay's own addon, because Widgetbook has none; it sets `disableAnimations` so `context.sahaay` resolves reduced motion (§9)
 
-- Foundations
-- Layout
-- Items
-- Fields
-- Actions
-- Feedback
+Structure: Foundations (text, colour), Layout, Items, Fields (including the picker sheets), Actions, Feedback.
+
+A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in light and dark. It is not a device or text-size matrix.
 
 ### 14.2 Build progress
 
@@ -788,8 +785,8 @@ Proposed structure (provisional):
 | 5d | Actions: `PrimaryButton`, `ActionGroup`, `ActionRow`, `SwitchRow`, `DangerRow` | done |
 | 5x | No fixed sizes (§12.1): measured floating action, fitted bar title, icons that scale with text, adaptive day grid, Sahaay's own month calendar, wheels sized to the screen | done |
 | 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | done |
-| 6 | Widgetbook catalogue | next |
-| 7 | Screens switch to the package; `lib/design_system/` removed | |
+| 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
+| 7 | Screens switch to the package; `lib/design_system/` removed | next |
 
 ---
 
@@ -850,7 +847,7 @@ This section records why the design system is built the way it is. It replaces a
 | Domain | Components take strings, images and callbacks, never `Medicine` or `Reminder` | Keeps dependencies one-way; feature-specific items live in their feature. |
 | Typefaces | Barlow Condensed and Nunito (SIL Open Font License), bundled in the package | Sahaay is local-only, so fonts must not download at runtime; `google_fonts` is not used. Adds about 500 KB. |
 | Continuous corners | Flutter's built-in `RoundedSuperellipseBorder` | No package needed. |
-| Catalogue | Widgetbook as a separate app with generated use cases | Never ships with the app; use cases stay in step with components. |
+| Catalogue | Widgetbook as a separate web app in the workspace, written by hand | Never ships with the app. `widgetbook_generator` 3.24.0 needs `build` 4 and `analyzer` below 14, while the app's `build_runner` (used by Drift) is on `build` 5 and `analyzer` 14; using the generator would mean downgrading the app's code generation. Web needs no signing and is never hosted. |
 
 **Options considered and not taken.**
 
@@ -858,9 +855,13 @@ This section records why the design system is built the way it is. It replaces a
 - A runtime design-system service beside `Theme`: duplicates `Theme`, and Material widgets would not read it.
 - Purpose-named shared tokens as the public API (`colors.page`, `text.body`): readable, but component-grouped names were preferred.
 - Widgetbook inside the app package: it would ship as an app dependency.
+- Generated use cases (`widgetbook_generator`): blocked by the `build` 4 / `build` 5 conflict above. Worth revisiting when the generator supports `build` 5.
+- Widgetbook outside the workspace with its own lockfile: avoids the conflict but splits dependency resolution.
+- Running the catalogue on macOS or iPhone: needs signing and, on a phone, leaves little room for the addon panels.
 
 **Consequences.**
 
-- The repository has a second package now and a third (`widgetbook/`) later, each analysed and tested on its own.
-- `widgetbook`, `widgetbook_annotation` and `widgetbook_generator` are added only when the catalogue is built, after checking compatibility.
+- The repository has three workspace members (the app, `packages/sahaay_design/`, `widgetbook/`), each analysed and tested on its own.
+- Only `widgetbook` (3.25.0) is added, to the catalogue alone; the app's dependencies are unchanged.
+- The catalogue is kept in step by hand, in the same commit as the component change.
 - A test blocks raw colours, text styles and imports of the package's `src/` from feature code.
