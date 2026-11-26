@@ -10,4 +10,8 @@ abstract final class Typefaces {
   /// The reading voice: softer, rounded and wider. A variable font, so its
   /// weight is set with the `wght` axis.
   static const reading = 'Nunito';
+
+  /// The makeover's single typeface (§18.3): bold for titles, a gentle
+  /// lowercase voice elsewhere. A variable font, set with the `wght` axis.
+  static const figtree = 'Figtree';
 }

@@ -22,6 +22,7 @@ flutter:
   assets:
     - fonts/barlow_condensed/OFL.txt
     - fonts/nunito/OFL.txt
+    - fonts/figtree/OFL.txt
 
   fonts:
     # The identifying voice: screen, section and item titles, and times.
@@ -36,3 +37,8 @@ flutter:
     - family: Nunito
       fonts:
         - asset: fonts/nunito/Nunito-Variable.ttf
+    # The makeover's typeface (docs/design-system.md §18.3). A variable font:
+    # weights are set with the `wght` axis as well as `FontWeight`.
+    - family: Figtree
+      fonts:
+        - asset: fonts/figtree/Figtree-Variable.ttf

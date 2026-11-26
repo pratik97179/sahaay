@@ -47,7 +47,24 @@ class Reminders extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-@DriftDatabase(tables: [Medicines, Reminders])
+/// The person's own record that they took one reminder's dose on one day
+/// (PRD §3.3, FR-11). Made and removed only by the person.
+@DataClassName('PrintRow')
+class Prints extends Table {
+  TextColumn get reminderId =>
+      text().references(Reminders, #id, onDelete: KeyAction.cascade)();
+
+  /// The day it is for, as an ISO date (yyyy-MM-dd).
+  TextColumn get day => text()();
+
+  /// When the person made it, as local wall-clock time.
+  DateTimeColumn get madeAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {reminderId, day};
+}
+
+@DriftDatabase(tables: [Medicines, Reminders, Prints])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -55,12 +72,16 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.local() => AppDatabase(driftDatabase(name: 'sahaay'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      // 2: prints (PRD 0.4). Existing medicines and reminders are kept.
+      if (from < 2) await m.createTable(prints);
+    },
     beforeOpen: (details) async {
-      // Required for ON DELETE CASCADE from medicines to reminders.
+      // Required for ON DELETE CASCADE from medicines to reminders to prints.
       await customStatement('PRAGMA foreign_keys = ON');
     },
   );

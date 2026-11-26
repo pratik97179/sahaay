@@ -7,6 +7,9 @@ abstract interface class ReminderRepository {
 
   Stream<Reminder?> watch(String id);
 
+  /// Every reminder, ordered by time of day.
+  Stream<List<Reminder>> watchAll();
+
   Future<Reminder?> find(String id);
 
   Future<List<Reminder>> findForMedicine(String medicineId);

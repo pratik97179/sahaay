@@ -1,5 +1,6 @@
 import 'package:go_router/go_router.dart';
 
+import '../features/day/presentation/day_page.dart';
 import '../features/medicines/presentation/add_medicine_page.dart';
 import '../features/medicines/presentation/medicine_details_page.dart';
 import '../features/medicines/presentation/medicines_page.dart';
@@ -13,48 +14,54 @@ import '../features/reminders/presentation/reminder_page.dart';
 import '../features/reminders/reminders_providers.dart';
 import 'routes.dart';
 
-GoRouter createRouter() => GoRouter(
-  initialLocation: AppRoutes.medicines,
+GoRouter createRouter({String initialLocation = AppRoutes.today}) => GoRouter(
+  initialLocation: initialLocation,
   routes: [
     GoRoute(
-      path: AppRoutes.medicines,
-      builder: (context, state) => const MedicinesPage(),
+      path: AppRoutes.today,
+      builder: (context, state) => const DayPage(),
       routes: [
-        // Listed before `medicines/:id` so "new" is not read as an id.
         GoRoute(
-          path: 'medicines/new',
-          builder: (context, state) => AddMedicinePage(
-            createExtras: (ref) => NewMedicineReminders(
-              createReminder: ref.read(createReminderProvider),
-            ),
-          ),
+          path: 'medicines',
+          builder: (context, state) => const MedicinesPage(),
           routes: [
+            // Listed before `:id` so "new" is not read as an id.
             GoRoute(
-              path: 'reminder',
-              builder: (context, state) =>
-                  DraftReminderPage(initial: state.extra as ReminderDraft?),
+              path: 'new',
+              builder: (context, state) => AddMedicinePage(
+                createExtras: (ref) => NewMedicineReminders(
+                  createReminder: ref.read(createReminderProvider),
+                ),
+              ),
+              routes: [
+                GoRoute(
+                  path: 'reminder',
+                  builder: (context, state) =>
+                      DraftReminderPage(initial: state.extra as ReminderDraft?),
+                ),
+              ],
+            ),
+            GoRoute(
+              path: ':id',
+              builder: (context, state) {
+                final id = state.pathParameters['id']!;
+                return MedicineDetailsPage(
+                  medicineId: id,
+                  reminders: MedicineRemindersSection(medicineId: id),
+                );
+              },
+              routes: [
+                GoRoute(
+                  path: 'reminders/new',
+                  builder: (context, state) =>
+                      NewReminderPage(medicineId: state.pathParameters['id']!),
+                ),
+              ],
             ),
           ],
         ),
-        GoRoute(
-          path: 'medicines/:id',
-          builder: (context, state) {
-            final id = state.pathParameters['id']!;
-            return MedicineDetailsPage(
-              medicineId: id,
-              reminders: MedicineRemindersSection(medicineId: id),
-            );
-          },
-          routes: [
-            GoRoute(
-              path: 'reminders/new',
-              builder: (context, state) =>
-                  NewReminderPage(medicineId: state.pathParameters['id']!),
-            ),
-          ],
-        ),
-        // A reminder's entry screen. Nested under the medicines list so a
-        // notification that opens it directly still has somewhere to go back.
+        // A reminder's entry screen. Nested under Today so a notification
+        // that opens it directly still has somewhere to go back.
         GoRoute(
           path: 'reminders/:id',
           builder: (context, state) =>

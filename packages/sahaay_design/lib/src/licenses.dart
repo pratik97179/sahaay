@@ -15,4 +15,5 @@ void registerSahaayDesignLicenses() {
 const _licenses = [
   ('Barlow Condensed', 'packages/sahaay_design/fonts/barlow_condensed/OFL.txt'),
   ('Nunito', 'packages/sahaay_design/fonts/nunito/OFL.txt'),
+  ('Figtree', 'packages/sahaay_design/fonts/figtree/OFL.txt'),
 ];

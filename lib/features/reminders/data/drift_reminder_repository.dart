@@ -26,6 +26,11 @@ final class DriftReminderRepository implements ReminderRepository {
       );
 
   @override
+  Stream<List<Reminder>> watchAll() => _ordered().watch().map(
+    (rows) => rows.map(ReminderRowMapper.toDomain).toList(),
+  );
+
+  @override
   Stream<Reminder?> watch(String id) =>
       (_db.select(_db.reminders)..where((t) => t.id.equals(id)))
           .watchSingleOrNull()

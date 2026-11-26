@@ -790,6 +790,7 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
 | 7a | App shell: the app uses the new theme (`AppTheme`, carrying the old theme's values until every screen has moved) and registers the font licences at start-up | done |
 | M | **Makeover** (§18): prototypes, then design philosophy, then design language, then the existing `sahaay_design` package updated to it | in progress |
+| M1 | The prototype's Today, reminder page and History, ported exactly into `lib/features/day/` on real data, with Today as the home screen. Prints are saved (`prints` table, database version 2 with an upgrade test; deleting a reminder or medicine removes them). Additions the prototype didn't need: an empty day ("nothing for today.", "add a medicine"), "no prints yet this month." in History, a scroll fallback so nothing overflows on small screens or large text, and a status bar that follows the page. Every day screen uses the 1 pm colour while the time-of-day colour is on hold. `sahaay_design` gains Figtree and `DayLight`. Not yet: History in warm off-white and dark mode, drawn icons, a way to the medicines list once one exists, Widgetbook entries | in progress |
 | 7b | Medicines home | paused until the makeover |
 | 7c | Medicine screen and its reminders section | paused |
 | 7d | Reminder screen | paused |
@@ -903,6 +904,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 **Design language**
 
 - **Time-of-day colour only on the ruler screen** (Today, and any past day's ruler). The whole screen's colour shifts smoothly with the time of the reminder under the needle: peach in the morning, light in the afternoon, lilac in the evening, deep blue at night. It is never a health or status colour.
+  - **On hold (2026-11-26).** Seen on a phone, the shifting colour didn't explain itself: it follows the reminder under the needle rather than the real time (stepping to a morning reminder at night turns the screen peach), and people read it as a status (the near-grey afternoon looked "disabled" on a paused reminder). Until a clearer approach is chosen, every day screen (Today, earlier days, the reminder screen and History) uses the 1 pm colour. Options raised: follow the real time, carry the colour on the ruler only, or a recognisable sky.
 - **Every other screen** (History, the medicine list, adding a medicine, and so on) is a steady **warm off-white**, like paper. History moves from the prototype's blue-grey to this.
 - **Dark mode follows the phone.** The other screens turn a soft warm dark grey with light text; the ruler screen keeps its time-of-day colours.
 - **Typeface: Figtree** (SIL Open Font License), bold for titles such as "november.", with a gentle lowercase voice where it suits ("your prints, day by day.").
@@ -928,7 +930,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 
 **History**
 
-- Opens from Today by fading in and growing from the centre. Header: "‹ today", "november.", "your prints, day by day." on a pale blue-grey page.
+- Opens from Today by fading in and growing from the centre. Header: "‹ today", "november.", "your prints, day by day." on a pale blue-grey page (for now the 1 pm colour, as above).
 - **Flipbook:** the month's printed days as white print cards (photo inset, "Nov 16", "3 prints"), with two cards fanned behind. **Only the top card is swiped**, either way: it follows the finger out to that side and tucks in at the bottom of the stack while the next card comes up. The stack cycles; a new swipe always moves the card that is visibly on top. Deeper cards fade in as they rise; nothing jumps or pops. Tapping the top card opens that day.
 - **Calendar:** M–S, soft rounded cells without numbers; printed days show their photo filling the cell. Tapping a day opens that day's ruler, starting at its first reminder. A "‹ Nov ⌄ ›" pill below.
 - **Switching:** hold the stack and the cards press in a little, then every print flies out to its day in the calendar, one after another, straightening as it goes. Hold a day in the calendar and everything presses in, then the prints gather back into the stack with that day on top.

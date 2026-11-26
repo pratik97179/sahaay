@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/app/app.dart';
+import 'package:sahaay/app/routes.dart';
 import 'package:sahaay/core/database/app_database.dart';
 import 'package:sahaay/core/database/database_provider.dart';
 import 'package:sahaay/core/time/clock.dart';
@@ -20,6 +21,7 @@ Future<void> pumpTestApp(
   FakePhotoCapture? capture,
   FakePhotoStorage? photos,
   DateTime? now,
+  String initialLocation = AppRoutes.medicines,
 }) async {
   // A typical phone screen (360 x 780 logical pixels).
   tester.view
@@ -36,7 +38,7 @@ Future<void> pumpTestApp(
           photos ?? FakePhotoStorage(),
         ),
       ],
-      child: const SahaayApp(),
+      child: SahaayApp(initialLocation: initialLocation),
     ),
   );
   await tester.pumpAndSettle();
