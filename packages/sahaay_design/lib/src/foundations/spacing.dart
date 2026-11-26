@@ -23,4 +23,8 @@ abstract final class Spacing {
 
   /// Between an icon and its text, or related inline elements.
   static const double besideIcon = 12;
+
+  /// Between rows inside one group: a thin strip of page colour instead of
+  /// a dividing line.
+  static const double betweenRows = 2;
 }

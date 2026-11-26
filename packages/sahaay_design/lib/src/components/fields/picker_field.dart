@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/sahaay_tokens.dart';
+import '../scaled_icon.dart';
 import 'field_frame.dart';
 
 /// A labelled field whose value is chosen in a picker sheet
@@ -56,7 +57,7 @@ class PickerField extends StatelessWidget {
               context,
               hasError: errorText != null,
               placeholder: placeholder,
-              prefixIcon: Icon(icon),
+              prefixIcon: ScaledIcon(icon, besideText: f.value),
             ).copyWith(enabled: enabled),
             child: value == null ? null : Text(value, style: f.value),
           ),

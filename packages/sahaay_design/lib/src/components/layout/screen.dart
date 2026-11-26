@@ -1,6 +1,9 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import '../../foundations/spacing.dart';
 
 import '../../tokens/sahaay_tokens.dart';
 
@@ -47,6 +50,10 @@ class _ScreenState extends State<Screen> {
   final _titleKey = GlobalKey();
   bool _titleHidden = false;
 
+  /// The floating action's measured height, so the content can always be
+  /// scrolled clear of it whatever its size.
+  double _floatingHeight = 0;
+
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
     final title = _titleKey.currentContext?.findRenderObject();
@@ -61,11 +68,21 @@ class _ScreenState extends State<Screen> {
     final t = context.sahaay;
     final padding = MediaQuery.paddingOf(context);
     final barHeight = padding.top + kToolbarHeight;
-    final bottomRoom = widget.floatingAction == null ? 0.0 : 96.0;
+    final floating = widget.floatingAction;
+    final bottomRoom = floating == null ? 0.0 : _floatingHeight + t.screen.edge;
     return Scaffold(
       backgroundColor: t.screen.background,
       extendBodyBehindAppBar: true,
-      floatingActionButton: widget.floatingAction,
+      floatingActionButton: floating == null
+          ? null
+          : _ReportSize(
+              onSize: (size) {
+                if (size.height != _floatingHeight) {
+                  setState(() => _floatingHeight = size.height);
+                }
+              },
+              child: floating,
+            ),
       appBar: _TopBar(
         title: widget.title,
         showTitle: _titleHidden,
@@ -160,7 +177,18 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         curve: motion.curve,
         child: ExcludeSemantics(
           excluding: !showTitle,
-          child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            // The bar has a fixed platform height, so its title grows only
+            // as far as the bar has room for.
+            textScaler: MediaQuery.textScalerOf(context).clamp(
+              maxScaleFactor:
+                  (kToolbarHeight - Spacing.underLabel) /
+                  (t.topBar.title.fontSize! * t.topBar.title.height!),
+            ),
+          ),
         ),
       ),
     );
@@ -174,5 +202,36 @@ class _TopBar extends StatelessWidget implements PreferredSizeWidget {
         child: bar,
       ),
     );
+  }
+}
+
+/// Reports its child's size after layout.
+class _ReportSize extends SingleChildRenderObjectWidget {
+  const _ReportSize({required this.onSize, required super.child});
+
+  final ValueChanged<Size> onSize;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderReportSize(onSize);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderReportSize render) =>
+      render.onSize = onSize;
+}
+
+class _RenderReportSize extends RenderProxyBox {
+  _RenderReportSize(this.onSize);
+
+  ValueChanged<Size> onSize;
+  Size? _last;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size == _last) return;
+    _last = size;
+    final reported = size;
+    WidgetsBinding.instance.addPostFrameCallback((_) => onSize(reported));
   }
 }

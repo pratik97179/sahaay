@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../foundations/sizing.dart';
 import '../../tokens/sahaay_tokens.dart';
 
 /// A medicine photo clipped to the photo shape, at a fixed aspect ratio.
@@ -34,11 +35,16 @@ class ShapedPhoto extends StatelessWidget {
           excludeFromSemantics: semanticLabel == null,
           errorBuilder: (context, error, stackTrace) => ColoredBox(
             color: t.card.background,
-            child: Center(
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                color: t.emptyState.icon,
-                size: 32,
+            // The placeholder icon is a share of the photo, so it suits a
+            // small tile and a large panel alike.
+            child: FractionallySizedBox(
+              widthFactor: Sizing.placeholderShare,
+              heightFactor: Sizing.placeholderShare,
+              child: FittedBox(
+                child: Icon(
+                  Icons.image_not_supported_outlined,
+                  color: t.emptyState.icon,
+                ),
               ),
             ),
           ),

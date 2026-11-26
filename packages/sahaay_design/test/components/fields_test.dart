@@ -283,6 +283,10 @@ void main() {
             firstDate: DateTime(2026, 11, 1),
             lastDate: DateTime(2030),
             describe: (d) => 'Chosen ${d.day}/${d.month}/${d.year}',
+            describeMonth: (d) => 'Month ${d.month}/${d.year}',
+            weekdayLabels: const ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+            previousMonthLabel: 'Previous month',
+            nextMonthLabel: 'Next month',
           ),
         ),
       );

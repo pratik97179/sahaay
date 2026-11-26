@@ -459,6 +459,7 @@ final class SheetTokens {
     required this.background,
     required this.shape,
     required this.handle,
+    required this.handleSize,
     required this.scrim,
     required this.shadow,
     required this.spring,
@@ -467,6 +468,9 @@ final class SheetTokens {
   final Color background;
   final OutlinedBorder shape;
   final Color handle;
+
+  /// The drag handle: a short, soft bar people recognise as "drag me".
+  final Size handleSize;
   final Color scrim;
   final List<BoxShadow> shadow;
 
@@ -478,6 +482,7 @@ final class SheetTokens {
     background: background,
     shape: shape,
     handle: handle,
+    handleSize: handleSize,
     scrim: scrim,
     shadow: shadow,
     spring: null,
@@ -488,6 +493,7 @@ final class SheetTokens {
         background: _c(a.background, b.background, t),
         shape: _snap(a.shape, b.shape, t),
         handle: _c(a.handle, b.handle, t),
+        handleSize: _snap(a.handleSize, b.handleSize, t),
         scrim: _c(a.scrim, b.scrim, t),
         shadow: BoxShadow.lerpList(a.shadow, b.shadow, t) ?? const [],
         spring: _snap(a.spring, b.spring, t),

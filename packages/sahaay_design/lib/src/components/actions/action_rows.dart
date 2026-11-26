@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../foundations/spacing.dart';
 import '../../tokens/sahaay_tokens.dart';
 import '../items/pressable.dart';
+import '../scaled_icon.dart';
 
 /// A group of action rows on one soft card (`docs/design-system.md` §11.4,
 /// §11.7). Rows are separated by a thin gap of page colour, not lines, and
@@ -24,7 +25,7 @@ class ActionGroup extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             for (var i = 0; i < children.length; i++) ...[
-              if (i > 0) const SizedBox(height: 2),
+              if (i > 0) const SizedBox(height: Spacing.betweenRows),
               children[i],
             ],
           ],
@@ -63,10 +64,14 @@ class ActionRow extends StatelessWidget {
         excludeSemantics: true,
         child: child,
       ),
-      leading: Icon(icon, color: r.icon),
+      leading: ScaledIcon(icon, besideText: r.label, color: r.icon),
       body: Text(label, style: r.label),
       trailing: showChevron
-          ? Icon(Icons.chevron_right, color: r.chevron)
+          ? ScaledIcon(
+              Icons.chevron_right,
+              besideText: r.label,
+              color: r.chevron,
+            )
           : null,
     );
   }
@@ -108,7 +113,9 @@ class SwitchRow extends StatelessWidget {
         excludeSemantics: true,
         child: child,
       ),
-      leading: icon == null ? null : Icon(icon, color: r.icon),
+      leading: icon == null
+          ? null
+          : ScaledIcon(icon, besideText: r.label, color: r.icon),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -157,7 +164,7 @@ class DangerRow extends StatelessWidget {
         excludeSemantics: true,
         child: child,
       ),
-      leading: Icon(icon, color: d.icon),
+      leading: ScaledIcon(icon, besideText: d.label, color: d.icon),
       body: Text(label, style: d.label),
     );
   }

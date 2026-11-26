@@ -88,8 +88,8 @@ class SheetFrame extends StatelessWidget {
           children: [
             Center(
               child: Container(
-                width: 40,
-                height: 4,
+                width: s.handleSize.width,
+                height: s.handleSize.height,
                 decoration: ShapeDecoration(
                   color: s.handle,
                   shape: const StadiumBorder(),

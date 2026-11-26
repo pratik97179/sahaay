@@ -368,6 +368,7 @@ A spacious rhythm on a 4-point grid. These are internal; components own them (§
 | `betweenFields` | Between adjacent fields | 28 |
 | `underLabel` | Between a field label and its control | 8 |
 | `besideIcon` | Between an icon and its text, or related inline elements | 12 |
+| `betweenRows` | Between rows inside one group: a thin strip of page colour instead of a line | 2 |
 
 Spacing does not grow with text size in v1; revisit if testing at 200% shows crowding.
 
@@ -517,8 +518,8 @@ Behaviour shared by items:
 | `showTimeWheelSheet` | A time wheel; follows the device's 12- or 24-hour setting | `TimeOfDay` |
 | `showChoiceSheet` | Rows with a check on the chosen one; tapping a row chooses and closes | the chosen value |
 | `showMultiChoiceSheet` | Rows that check and uncheck (weekdays); Done is disabled while nothing is chosen | a set of values |
-| `showDayOfMonthSheet` | A 7-column grid of 31 days, with a footnote | a set of days |
-| `showCalendarSheet` | A month calendar with the chosen date written out in full; optional "no date" choice | `DateChoice` (a date, or none) |
+| `showDayOfMonthSheet` | A grid of 31 days with as many columns as fit (up to seven), with a footnote | a set of days |
+| `showCalendarSheet` | Sahaay's own month calendar: month navigation, weekday labels and seven flexible columns; the chosen date written out in full; optional "no date" choice. Month and weekday names are passed in | `DateChoice` (a date, or none) |
 | `showMonthDaySheet` | Month and day wheels; February offers the 29th | month and day |
 | `showSahaaySheet` | Any content in the sheet frame | whatever the sheet pops |
 
@@ -527,13 +528,13 @@ Behaviour shared by fields and sheets:
 - **Errors** appear under the control with an icon and words, grow in over `motion.appear`, are announced to screen readers, and give the control a brick outline.
 - **All words** — titles, labels, button text, footnotes, month names, the formatted date — are passed in by the feature, so the design system holds no product copy and stays ready for other languages.
 - **Sheets** rise along the no-bounce spring (a 350 ms curve sampled from `sheet.spring`), close faster (250 ms, ease-in), and can be dragged down and flung away, tracking the finger. With reduced motion they appear and disappear at once. Content scrolls when it is taller than the screen, so 200% text never clips.
-- **Wheel rows** grow with the user's text size.
-- **Known limit:** the month calendar uses Flutter's `CalendarDatePicker`, whose day cells are about 40 pt — below the 48 pt target. Replace it with a custom grid if testing on devices shows people struggle.
+- **Wheel rows** grow with the user's text size, and a wheel shows as many rows as fit in 40% of the screen height (three to five), so it stays usable in landscape and at large text.
+- **Day cells** are round, sage when chosen, outlined for today, and quiet when they can't be chosen. They are sized to hold their number at the user's text size and are never smaller than 48 pt, except as described in §12.1 for the month calendar on very narrow phones.
 
 ### 11.4 Actions
 
 - `PrimaryButton` — the single filled sage pill for a form's main action; full width, at least 56 pt tall.
-- `ActionGroup` — rows on one soft card. Rows are separated by a 2 pt gap of page colour, not lines; each group is followed by `row.groupGap` (32).
+- `ActionGroup` — rows on one soft card. Rows are separated by `betweenRows` (a 2 pt strip of page colour), not lines; each group is followed by `row.groupGap` (32).
 - `ActionRow` — a full-width row (at least 56 pt) with an icon, a label and, when it opens another screen, a chevron.
 - `SwitchRow` — a row with a switch; tapping anywhere on the row toggles it. While off, it shows its note in words (for example "Paused — won't notify until you turn it back on"), which grows in over `motion.appear` and is also read to screen readers.
 - `DangerRow` — a destructive row in brick, alone in its own `ActionGroup` at the bottom. The caller confirms before acting.
@@ -590,8 +591,8 @@ No "missed", "late" or snooze. An empty quantity or instruction is simply left o
 | Time | A wheel; follows the device's 12- or 24-hour setting. |
 | Repeat type | Choice rows. |
 | Weekdays | Full-name check rows. |
-| Days of the month | A 7-column grid; 31 is explained as "last day of the month". |
-| Dates | A month calendar with the full chosen date shown (cells currently about 40 pt; see §11.3). |
+| Days of the month | A grid with as many columns as fit; 31 is explained as "last day of the month". |
+| Dates | A month calendar with the full chosen date shown. |
 | Yearly | A month-and-day wheel. |
 | End date | Offers "No end date"; nothing before the start date can be chosen. |
 
@@ -614,7 +615,7 @@ Tokens are grouped by the component they belong to, and read as `context.sahaay.
 | `switchRow` | `trackOn`, `trackOff`, `thumb`, `stateNote` |
 | `dangerRow` | `label`, `icon` |
 | `tag` | `background`, `label`, `icon`, `shape` |
-| `sheet` | `background`, `shape`, `handle`, `scrim`, `shadow`, `spring` |
+| `sheet` | `background`, `shape`, `handle`, `handleSize`, `scrim`, `shadow`, `spring` |
 | `dialog` | `background`, `shape`, `title`, `message`, `scrim`, `shadow` |
 | `snackbar` | `background`, `message` |
 | `emptyState` | `icon`, `message` |
@@ -657,11 +658,32 @@ The system must preserve hierarchy across environments.
 Rules:
 
 - Respect system insets.
-- Avoid unnecessary fixed dimensions.
 - Allow text to wrap.
 - Maintain touch targets of at least 48 pt.
 - Support accessibility text scaling.
 - Do not stretch content indefinitely on wide screens.
+
+### 12.1 Nothing overflows, on any device
+
+**The interface must never overflow or clip, on any device, in any orientation, at any text size.** It keeps as few hard-coded sizes, spaces and positions as possible.
+
+- **Sizes come from three places only:** design tokens, the user's text size (`MediaQuery.textScalerOf`), or the space actually available (`LayoutBuilder`, `Expanded`, `Flexible`, `Wrap`, `AspectRatio`, `FractionallySizedBox`). A raw number in a component needs a named foundation value and a reason.
+- **Flex, don't fix.** Rows use `Expanded` and `Flexible`; collections use `Wrap` or a column count computed from the room available; screens and sheets scroll when content is taller than the space.
+- **Text wraps; it is never shrunk to fit.** No `FittedBox` around readable text. Single-line text inside a fixed-height platform bar is limited to the scale the bar can hold, and ends with an ellipsis rather than clipping.
+- **Icons grow with their text.** An icon beside text is 1.25 × that text's size at the user's text size (`ScaledIcon`); a placeholder icon is a share of the photo it stands in for.
+- **Measure, don't guess.** When content must leave room for something else, such as the floating "Add medicine" button, it measures that thing's real size.
+- **Touch targets grow, never shrink.** Controls are at least 48 pt and grow with text. The one exception is the 7-column month calendar on very narrow phones, where weekdays must line up; there, each day fills its column and its number is limited to what the column holds.
+- **Checked where it matters.** Each component's tests include 200% text on a 320 pt-wide phone in light and dark. Before a component slice is finished, it is checked by hand across small, standard, landscape and tablet sizes at text sizes from 100% to 400%.
+
+Relative sizing values live in one place (`foundations/sizing.dart`):
+
+| Value | Meaning | Value |
+|---|---|---|
+| `minTouchTarget` | Smallest comfortable touch target | 48 |
+| `iconToText` | Icon size relative to its text | 1.25 × |
+| `placeholderShare` | Placeholder icon's share of its photo | 30% |
+| `maxWheelRows` / `minWheelRows` | Rows a picker wheel shows | 5 / 3 |
+| `wheelScreenShare` | Most of the screen height a wheel takes | 40% |
 
 ---
 
@@ -759,6 +781,7 @@ Proposed structure (provisional):
 | 5b | Items: `ItemCard`, `PhotoTile`, `PhotoTileGrid`, `TimeCard`, `TakePanel` | done |
 | 5c | Fields: `TextInputField`, `PickerField`, and the picker sheets | done |
 | 5d | Actions: `PrimaryButton`, `ActionGroup`, `ActionRow`, `SwitchRow`, `DangerRow` | done |
+| 5x | No fixed sizes (§12.1): measured floating action, fitted bar title, icons that scale with text, adaptive day grid, Sahaay's own month calendar, wheels sized to the screen | done |
 | 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | next |
 | 6 | Widgetbook catalogue | |
 | 7 | Screens switch to the package; `lib/design_system/` removed | |

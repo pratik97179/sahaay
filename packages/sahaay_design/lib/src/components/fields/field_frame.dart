@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../foundations/radii.dart';
 import '../../foundations/spacing.dart';
 import '../../tokens/sahaay_tokens.dart';
+import '../scaled_icon.dart';
 
 /// The parts every field shares (`docs/design-system.md` §3.4, §11.3): its
 /// label, the control, validation feedback below it, and the gap to the
@@ -48,9 +49,9 @@ class FieldFrame extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
+                          ScaledIcon(
                             Icons.error_outline,
-                            size: 20,
+                            besideText: f.errorText,
                             color: f.errorOutline,
                           ),
                           const SizedBox(width: Spacing.underLabel),

@@ -142,6 +142,7 @@ final class SahaayTokens extends ThemeExtension<SahaayTokens> {
         background: s.floatingSurface,
         shape: s.sheet,
         handle: p.textDisabled,
+        handleSize: const Size(40, 4),
         scrim: p.scrim,
         shadow: s.floatingShadow,
         spring: Motion.sheetSpring,
