@@ -6,5 +6,6 @@
 library;
 
 export 'src/licenses.dart' show registerSahaayDesignLicenses;
+export 'src/theme/sahaay_theme.dart';
 export 'src/tokens/components.dart';
 export 'src/tokens/sahaay_tokens.dart' show SahaayContext, SahaayTokens;
