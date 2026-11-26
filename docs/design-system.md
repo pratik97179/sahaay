@@ -532,10 +532,13 @@ Behaviour shared by fields and sheets:
 
 ### 11.4 Actions
 
-- `PrimaryButton` — the single filled sage pill for a form's main action.
-- `ActionRow` — a full-width row with an icon and a label.
-- `SwitchRow` — a row with a switch and an optional state note.
-- `DangerRow` — a destructive row, alone in its own group.
+- `PrimaryButton` — the single filled sage pill for a form's main action; full width, at least 56 pt tall.
+- `ActionGroup` — rows on one soft card. Rows are separated by a 2 pt gap of page colour, not lines; each group is followed by `row.groupGap` (32).
+- `ActionRow` — a full-width row (at least 56 pt) with an icon, a label and, when it opens another screen, a chevron.
+- `SwitchRow` — a row with a switch; tapping anywhere on the row toggles it. While off, it shows its note in words (for example "Paused — won't notify until you turn it back on"), which grows in over `motion.appear` and is also read to screen readers.
+- `DangerRow` — a destructive row in brick, alone in its own `ActionGroup` at the bottom. The caller confirms before acting.
+
+Rows deepen their tint while pressed, like cards, and read as one button (or one toggle) to screen readers.
 
 ### 11.5 Feedback
 
@@ -755,8 +758,8 @@ Proposed structure (provisional):
 | 5a | Layout: `Screen`, `Section` | done |
 | 5b | Items: `ItemCard`, `PhotoTile`, `PhotoTileGrid`, `TimeCard`, `TakePanel` | done |
 | 5c | Fields: `TextInputField`, `PickerField`, and the picker sheets | done |
-| 5d | Actions: `PrimaryButton`, `ActionRow`, `SwitchRow`, `DangerRow` | next |
-| 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | |
+| 5d | Actions: `PrimaryButton`, `ActionGroup`, `ActionRow`, `SwitchRow`, `DangerRow` | done |
+| 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | next |
 | 6 | Widgetbook catalogue | |
 | 7 | Screens switch to the package; `lib/design_system/` removed | |
 

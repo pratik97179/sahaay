@@ -5,6 +5,8 @@
 /// and, as they are built, the theme and components.
 library;
 
+export 'src/components/actions/action_rows.dart';
+export 'src/components/actions/primary_button.dart';
 export 'src/components/fields/picker_field.dart';
 export 'src/components/fields/text_input_field.dart';
 export 'src/components/items/item_card.dart' show ItemCard;
