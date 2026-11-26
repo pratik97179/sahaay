@@ -73,7 +73,7 @@ Sahaay is calm, quiet and spacious. Many users are older, unwell, tired or anxio
 - **More space than feels necessary.** Sections are separated by space and soft tints, not borders.
 - **No medical judgement.** No adherence, "missed", "late" or health colours anywhere.
 
-The concrete values are recorded in §4–§9, component behaviour in §11.7, token names in §11.8, and the code structure in §13.1.
+The concrete values are recorded in §4–§9, component behaviour in §11.7, token names in §11.8, the code structure in §13.1, progress in §14.2, and the reasons behind the structure in §17.
 
 ---
 
@@ -311,30 +311,31 @@ Do not select a colour because it looks appropriate in isolation.
 ### 5.1 Direction
 
 - **Warm paper.** Light: a soft warm off-white page, with cards one clear warm step deeper. Dark: a warm charcoal (not near-black), with cards one clear lighter warm step. Surfaces are defined on their own, not derived from a seed colour.
-- **One gentle accent: sage.** A low-saturation green, mid-dark in light (about `#4F6F5F`) and soft and pale in dark (about `#A9C4B4`). Used only for actions, selection and focus — never for status, doses or decoration.
-- **One state colour: danger.** A muted brick (about `#9A4A3C` light, `#E3A597` dark), used only for errors and destructive actions. There are no success, warning or information colours in v1: paused, saved and informational states use text colours with an icon and words. Add a state colour only when a real case needs it (§15).
+- **One gentle accent: sage.** A low-saturation green, mid-dark in light (`#4A6A5A`) and soft and pale in dark (`#A9C4B4`). Used only for actions, selection and focus — never for status, doses or decoration.
+- **One state colour: danger.** A muted brick (`#944639` light, `#E3A597` dark), used only for errors and destructive actions. There are no success, warning or information colours in v1: paused, saved and informational states use text colours with an icon and words. Add a state colour only when a real case needs it (§15).
 
 ### 5.2 Shared colours
 
 These are the design system's internal colours. Components use them; feature code reaches them only through component tokens (§11.8).
 
-| Colour | Meaning |
-|---|---|
-| `page` | The screen background |
-| `card` | A card or grouped area on the page |
-| `cardPressed` | A card while it is being pressed |
-| `raised` | The one stronger surface on a screen, such as the take panel |
-| `field` | The background of an editable field |
-| `text` | Main readable text |
-| `textSoft` | Notes, details and labels |
-| `textDisabled` | Text that cannot currently be used |
-| `action` | The background of a primary action, and selection |
-| `actionPressed` | A primary action while it is being pressed |
-| `onAction` | Text and icons on `action` |
-| `danger` | Errors and destructive actions (text, icons, outlines) |
-| `focus` | The visible focus ring |
-| `scrim` | The dimmed layer behind sheets and dialogs |
-| `shadow` | The soft shadow under floating things (light appearance only) |
+| Colour | Meaning | Light | Dark |
+|---|---|---|---|
+| `page` | The screen background | `#F6F2EA` | `#1F1C19` |
+| `card` | A card or grouped area on the page; also the field background | `#ECE6DA` | `#2B2723` |
+| `cardPressed` | A card or row while it is being pressed | `#E5DED1` | `#332E29` |
+| `raised` | The one stronger surface on a screen, such as the take panel; in dark, also the surface of floating things | `#E3DBCC` | `#36312C` |
+| `text` | Main readable text | `#2B2622` | `#F0EAE2` |
+| `textSoft` | Notes, details and labels | `#5F574F` | `#B8AFA5` |
+| `textDisabled` | Text that cannot currently be used | `#9A9087` | `#6F675F` |
+| `action` | Primary actions, selection and the focus ring | `#4A6A5A` | `#A9C4B4` |
+| `actionPressed` | A primary action while it is being pressed | `#3F5C4E` | `#BCD3C6` |
+| `onAction` | Text and icons on `action` | `#FFFFFF` | `#1F2A24` |
+| `danger` | Errors and destructive actions (text, icons, outlines, the confirm button) | `#944639` | `#E3A597` |
+| `onDanger` | Text on a filled `danger` button | added with the confirm dialog, with its own AA check | |
+| `scrim` | The dimmed layer behind sheets and dialogs | black 40% | black 60% |
+| `shadow` | The soft shadow under floating things | `#3A2E22` at 12% | none |
+
+Values are provisional and tuned in the catalogue. A test checks every text pair a component draws, on the surface it draws on, at WCAG AA in both appearances; a change that breaks contrast fails the build.
 
 ### 5.3 Colour rules
 
@@ -412,6 +413,8 @@ Soft and round, with continuous (superellipse) corners everywhere:
 | `sheet` | Bottom sheets | 32 (top corners) |
 | `button`, `chip`, `tag` | Buttons, compact choices, state tags | fully rounded |
 
+Text fields are the one exception to continuous corners: Flutter's input borders can only draw ordinary rounded corners, so fields use the same 16 radius with standard corners. At this size the difference is barely visible.
+
 Avoid shape overrides inside features. Add a shape only when a meaningful visual distinction exists.
 
 ---
@@ -423,7 +426,7 @@ Depth shows which things sit above others. Shadows are never decoration.
 | Depth | Used for | Treatment |
 |---|---|---|
 | `flat` | Cards and panels | A warm surface step only; no shadow |
-| `frost` | The top bar | A translucent, frosted material over scrolling content. Solid page colour when high contrast is on. |
+| `frost` | The top bar | The content behind is blurred and covered by the page colour at 72% opacity. Solid page colour when high contrast is on. |
 | `floating` | Dialogs, sheets, the add action | One soft, wide, low-opacity warm shadow. In dark appearance, a lighter surface instead. |
 
 ---
@@ -451,7 +454,7 @@ Rules:
 - Press feedback is a tint change, not a ripple or a scale.
 - Nothing animates from scale 0, and nothing moves linearly.
 - Exits are faster than entrances.
-- With reduced motion on (`MediaQuery.disableAnimationsOf`), every movement becomes a short cross-fade or an instant change. The tokens resolve this themselves.
+- With reduced motion on (`MediaQuery.disableAnimationsOf`), `context.sahaay` resolves the tokens itself: press, expand and collapse take no time; appear and disappear become 120 ms fades; `sheet.spring` is absent, so sheets cross-fade; and `motion.reduced` is true so components can choose a cross-fade over movement.
 - Functionality never depends on an animation completing.
 
 ---
@@ -512,7 +515,7 @@ Components take plain values — strings, images and callbacks — and never the
 ### 11.5 Feedback
 
 - `Tag` — a neutral state label with an icon and a word.
-- `ConfirmDialog` — confirms a destructive action.
+- `ConfirmDialog` — confirms a destructive action. Its confirm button is a filled brick (`danger`) button with `onDanger` text; Cancel is a quiet text button.
 - `Snackbar` — a quiet confirmation such as "Reminder saved".
 - `EmptyState` and `ErrorState`.
 
@@ -570,7 +573,7 @@ Tokens are grouped by the component they belong to, and read as `context.sahaay.
 
 | Component | Tokens |
 |---|---|
-| `screen` | `background`, `edge`, `title`, `subtitle`, `sectionGap` |
+| `screen` | `background`, `edge`, `title`, `subtitle`, `subtitleGap`, `sectionGap`, `titleMaxScale` |
 | `topBar` | `frost`, `solidBackground`, `title`, `icon` |
 | `section` | `title`, `titleGap` |
 | `card` | `background`, `pressedBackground`, `shape`, `padding`, `gap` |
@@ -588,8 +591,17 @@ Tokens are grouped by the component they belong to, and read as `context.sahaay.
 | `snackbar` | `background`, `message` |
 | `emptyState` | `icon`, `message` |
 | `errorState` | `icon`, `message` |
-| `focus` | `ring` |
-| `motion` | `press`, `appear`, `disappear`, `expand`, `collapse` (§9) |
+| `focus` | `ring`, `width` |
+| `motion` | `press`, `appear`, `disappear`, `expand`, `collapse`, `reduced` (§9) |
+
+Values that are not obvious from §4–§9:
+
+- `topBar.title` uses the item title style (condensed 24); `topBar.frost` is absent with high contrast.
+- `takePanel.name` uses the section title style (condensed 28); `takePanel.instruction` uses strong body text.
+- `row.groupGap` is 32, twice the gap between items.
+- `button.minHeight` and `row.minHeight` are 56; `photoTile.minWidth` is 160 at 100% text size.
+- `screen.titleMaxScale` is 1.6.
+- `emptyState` and `errorState` share one token shape: an icon colour and a message style.
 
 Example (illustration):
 
@@ -651,8 +663,12 @@ packages/sahaay_design/
     src/theme/        ThemeData and Material component themes built from the tokens
     src/components/   layout/, items/, fields/, actions/, feedback/
     sahaay_design.dart  public API: the theme, `context.sahaay`, and the components
-  fonts/              Barlow Condensed and Nunito
+  fonts/              Barlow Condensed and Nunito, each with its OFL licence
+  test/
+  .gitignore          build output stays out of version control
 ```
+
+The package joins the app through a pub workspace: the root `pubspec.yaml` lists it under `workspace:` and the package declares `resolution: workspace`, so one `flutter pub get` and one lockfile cover both. Widgetbook joins the same workspace later.
 
 Rules:
 
@@ -661,7 +677,10 @@ Rules:
 - **Accessibility inside the tokens.** Reduced motion, high contrast (the solid top bar) and text scaling are resolved by the design system, not by features.
 - **No domain types.** The package never imports the app. Feature-specific items (for example, a medicine tile built from a `Medicine`) live in their feature and are composed from design-system components.
 - **Enforcement.** A test fails if code under `lib/features/` imports `sahaay_design/src/`, or uses `Color(`, `Colors.`, `fontSize:` or `TextStyle(`. An exception needs a comment explaining why.
+- **Fonts.** Nunito ships as a variable font, so its text styles set the `wght` variation as well as `fontWeight`; Flutter does not move a variable font's weight axis from `fontWeight` alone. Barlow Condensed ships as static Bold and ExtraBold files. `registerSahaayDesignLicenses()` adds both OFL licences to the app's licence page and is called once at start-up.
+- **Theme.** `SahaayTheme.light()` and `.dark()` build `ThemeData` from the tokens with their own colour scheme (no seed colour, no Material surface tint) and Nunito as the default family. Ripples are off (`NoSplash`); press feedback is a tint change owned by components. Page transitions stay the platform default.
 - **Migration.** Screens move to the new package one reviewed slice at a time. The old `lib/design_system/` is deleted once nothing uses it.
+- **Keeping this document true.** Any change to a value, token or behaviour updates this document in the same commit.
 
 ---
 
@@ -699,6 +718,22 @@ Proposed structure (provisional):
 - Fields
 - Actions
 - Feedback
+
+### 14.2 Build progress
+
+| Slice | Contents | State |
+|---|---|---|
+| 1 | This document: direction, token names, architecture | done |
+| 2 | Package scaffold, fonts, foundations, contrast test | done |
+| 3 | Tokens, `context.sahaay`, accessibility resolution | done |
+| 4 | `SahaayTheme` | done |
+| 5a | Layout: `Screen`, `Section` | done |
+| 5b | Items: `Card`, `PhotoTile`, `TimeCard`, `TakePanel` | next |
+| 5c | Fields and picker sheets | |
+| 5d | Actions: `PrimaryButton`, `ActionRow`, `SwitchRow`, `DangerRow` | |
+| 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | |
+| 6 | Widgetbook catalogue | |
+| 7 | Screens switch to the package; `lib/design_system/` removed | |
 
 ---
 
@@ -741,3 +776,35 @@ They should not repeatedly make independent decisions about:
 - Animation durations
 
 Those decisions belong to the design system.
+
+---
+
+## 17. Decisions and rationale
+
+This section records why the design system is built the way it is. It replaces a separate decision record, so this document stays the single source of truth for the design system.
+
+**Context.** The first design system (`lib/design_system/`) mapped roles onto a Material colour scheme generated from one seed colour, with placeholder values and framework vocabulary in its names (`surfaceContainer`, `primaryValue`, `itemInset`). Nothing stopped feature code from using raw colours or sizes. The v1 visual direction (§2.5) called for a rebuild rather than a migration, with tokens named for what they are for.
+
+| Need | Decision | Why |
+|---|---|---|
+| Where the design system lives | A separate package, `packages/sahaay_design/`, in a pub workspace | The compiler enforces the boundary: the package cannot import the app, and the app cannot reach its private `src/`. It is built fresh without touching existing code. |
+| Layering | Foundations → tokens → theme → components, one public barrel | Raw values stay private; features use components and component tokens. |
+| Token naming | Grouped by component (`card.background`, `timeCard.time`), each pointing to a shared value | Names say what a value is for. The shared layer keeps matching components from drifting apart. |
+| Access | `context.sahaay`, carried in a `ThemeExtension` | Follows the theme, switches with light and dark, rebuilds dependants. `Theme` already is the service, so no separate runtime service is needed. |
+| Domain | Components take strings, images and callbacks, never `Medicine` or `Reminder` | Keeps dependencies one-way; feature-specific items live in their feature. |
+| Typefaces | Barlow Condensed and Nunito (SIL Open Font License), bundled in the package | Sahaay is local-only, so fonts must not download at runtime; `google_fonts` is not used. Adds about 500 KB. |
+| Continuous corners | Flutter's built-in `RoundedSuperellipseBorder` | No package needed. |
+| Catalogue | Widgetbook as a separate app with generated use cases | Never ships with the app; use cases stay in step with components. |
+
+**Options considered and not taken.**
+
+- A folder inside `lib/`: simpler, but the boundary would rest on convention and a test only.
+- A runtime design-system service beside `Theme`: duplicates `Theme`, and Material widgets would not read it.
+- Purpose-named shared tokens as the public API (`colors.page`, `text.body`): readable, but component-grouped names were preferred.
+- Widgetbook inside the app package: it would ship as an app dependency.
+
+**Consequences.**
+
+- The repository has a second package now and a third (`widgetbook/`) later, each analysed and tested on its own.
+- `widgetbook`, `widgetbook_annotation` and `widgetbook_generator` are added only when the catalogue is built, after checking compatibility.
+- A test blocks raw colours, text styles and imports of the package's `src/` from feature code.
