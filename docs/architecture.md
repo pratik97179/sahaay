@@ -59,6 +59,7 @@ Potential feature ownership includes:
 
 - Medicines: medicine details, photo reference, and medicine lifecycle.
 - Reminders: reminder configuration, independent management, and recurrence behavior.
+- Prints: the person's own record that a reminder's dose was taken on a day (PRD §3.3, FR-11), and the Today and History views that read them.
 - Notifications: platform delivery and notification interaction integration.
 
 Treat these as starting boundaries, not mandatory packages. Adjust them to the repository and actual use cases.
@@ -88,7 +89,8 @@ Cross-cutting code may include persistence coordination, notification scheduling
 - All product data remains on-device, as required by the PRD.
 - Keep persistence mapping separate from domain behavior.
 - Preserve medicine/reminder ownership and independent reminder configuration.
-- Deleting a medicine must remove its associated reminders and photo.
+- Deleting a medicine must remove its associated reminders, their prints, and its photo. Deleting a reminder removes its prints.
+- A print is stored only from the person's own action; nothing in the app creates or removes one on its own.
 - Handle photo files and database records consistently; avoid leaving orphaned files or references.
 - Persist enough schedule information to deterministically reconstruct future notifications.
 - Do not add cloud sync, accounts, or backup/restore without a product-scope change.
@@ -101,7 +103,8 @@ Cross-cutting code may include persistence coordination, notification scheduling
 - Ensure edits, pauses, resumes, and deletions affect only the selected reminder, except when deleting a medicine and its associated data.
 - Prevent notifications before a reminder's start date or after its end date.
 - Make notification identifiers and rescheduling behavior stable and testable.
-- Do not infer that a notification was seen or that a medicine was taken.
+- Do not infer that a notification was seen or that a medicine was taken. A dose counts as taken only when the person makes a print.
+- Prints never change a reminder's schedule or its notifications.
 
 When a selected monthly or yearly date doesn't exist in a month, the reminder fires on that month's last day. The clamping doesn't carry over to later months (PRD v0.3, FR-03 and AC-12). This is domain behavior: implement and test it there.
 

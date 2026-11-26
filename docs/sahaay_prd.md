@@ -1,9 +1,11 @@
 # Sahaay — Product Requirements Document (PRD)
 
-**Version:** 0.3 (v1 scope)  
+**Version:** 0.4 (v1 scope)  
 **Status:** Draft  
 **Product:** Sahaay  
 **Category:** Medication Reminders
+
+**Changes in 0.4:** the person can record that they took a dose by making a *print* (§3.3, FR-11). The home screen is *Today*, a time ruler of the day's reminders (FR-12), and *History* shows past prints as a flipbook and a calendar (FR-13). Adherence analytics, scores and "missed" warnings remain out of scope (§7).
 
 ---
 
@@ -13,7 +15,9 @@ Sahaay is a medication reminder application that helps users remember to take me
 
 Users can add medicines, attach a photo for identification, and configure one or more independent reminders for each medicine. When a reminder is due, Sahaay sends a text notification. Tapping the notification opens that reminder's entry screen, where the medicine's photo and details are shown.
 
-Sahaay is a reminder tool. It does not provide medical advice, prescribe medicines, or make decisions about dosage or treatment.
+Users can also record, themselves, that they took a dose, and look back at those records day by day. Sahaay never infers that a dose was taken and never scores or judges it.
+
+Sahaay is a reminder tool. It does not provide medical advice, prescribe medicines, or make decisions about dosage or treatment. It never changes, suggests or validates a dose.
 
 All data is stored locally on the user's device.
 
@@ -25,6 +29,7 @@ All data is stored locally on the user's device.
 4. Allow users to manage each reminder independently.
 5. Make medicine identification easier through photos.
 6. Keep the application focused on recording and reminding, not making medical decisions.
+7. Let users record, in their own hand, that they took a dose, and look back at those records without judgement.
 
 ## 3. Core Concepts
 
@@ -56,6 +61,17 @@ Each reminder:
 Multiple reminders belonging to the same medicine must not interfere with one another.
 
 **Multiple times per day:** a medicine taken more than once a day is modelled as multiple reminders. For example, "twice a day at 9:00 AM and 9:00 PM" is two reminders: one daily at 9:00 AM and one daily at 9:00 PM.
+
+### 3.3 Print
+
+A print is the person's own record that they took the dose for one reminder on one day.
+
+A print has:
+- The reminder it belongs to.
+- The day it is for.
+- The time the person made it.
+
+A print exists only because the person made it. Sahaay never creates, infers or removes a print on its own, and a reminder without a print on a day is simply unprinted: it is never called "missed" or "late".
 
 ## 4. Functional Requirements
 
@@ -164,7 +180,36 @@ Deleting a medicine must also delete all reminders associated with it and its st
 
 ### FR-10: Local Storage
 
-All medicines, reminders, and photos must be stored locally on the device. v1 has no account, server, or cloud sync.
+All medicines, reminders, prints, and photos must be stored locally on the device. v1 has no account, server, or cloud sync.
+
+### FR-11: Print a Reminder
+
+The user must be able to record that they took a reminder's dose by making a print, and to undo it.
+
+- A print is made by deliberately holding the medicine's photo; a quick tap does not make one, so it cannot happen by accident.
+- A reminder can be printed once its time has come (from 30 minutes before it), and on any earlier day. Paused reminders, and reminders whose time is still to come, cannot be printed.
+- Holding again undoes the print.
+- The print records the time it was made, and that time is shown with it.
+- Printing never changes the reminder, its schedule, its notifications, or any dose.
+
+### FR-12: Today
+
+The home screen shows today's reminders on a horizontal time ruler.
+
+- The ruler opens on the next reminder still to come.
+- Swiping steps to the next or previous reminder; the ruler never stops between reminders.
+- The reminder under the ruler's centre shows its medicine photo, time, name, quantity and instruction, and whether it is printed.
+- Tapping the photo opens that reminder's entry screen (FR-05).
+- Today's ruler starts fresh each day. Earlier days are reached through History (FR-13).
+
+### FR-13: History
+
+The user must be able to look back at earlier days and their prints.
+
+- History shows the current month as a flipbook of the days that have prints, each with its photo, date and number of prints, and as a calendar of the whole month, where days with prints show their photo.
+- The user can switch between the two views.
+- Opening a day shows that day's ruler with its reminders and prints, starting at its first reminder. Prints can be added or undone there (FR-11).
+- History shows only what the person printed. It shows no totals, scores, streaks, percentages or "missed" days.
 
 ## 5. Core User Flows
 
@@ -197,7 +242,20 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 
 1. User selects a medicine for removal.
 2. User confirms the removal.
-3. The medicine, its photo, and all its associated reminders are deleted.
+3. The medicine, its photo, all its associated reminders, and their prints are deleted.
+
+### 5.5 Print a Reminder
+
+1. A reminder's time comes, or the user opens it from Today or History.
+2. User holds the medicine's photo.
+3. Sahaay records a print with the time it was made, and shows it.
+4. User may hold again to undo it.
+
+### 5.6 Look Back
+
+1. User opens History from Today.
+2. User browses the month as a flipbook or a calendar.
+3. User opens a day and sees that day's reminders and prints.
 
 ## 6. Business Rules and Constraints
 
@@ -208,11 +266,13 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 5. Every recurring reminder has a start date; the end date is optional.
 6. Reminder-specific quantity and instruction must not be shared implicitly across sibling reminders.
 7. Editing, pausing, or deleting one reminder must not affect sibling reminders.
-8. Deleting a medicine removes all its reminders and its photo.
+8. Deleting a medicine removes all its reminders, their prints, and its photo. Deleting a reminder removes its prints.
 9. The medicine photo belongs to the medicine and is reused by its reminders.
 10. All data is stored locally on the device.
 11. Sahaay must not make medical decisions or infer whether a treatment should continue or stop.
 12. The user is responsible for entering and maintaining the reminder information.
+13. Prints are made and undone only by the user. Sahaay never infers that a dose was taken.
+14. Prints never change a reminder, its schedule, its notifications, or a dose.
 
 ## 7. Out of Scope (v1)
 
@@ -223,7 +283,8 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 - Automatic changes to medication schedules.
 - Deciding when a medicine should be discontinued.
 - Automatic inference of treatment completion.
-- Dose tracking or medication adherence analytics.
+- Inferred dose tracking: deciding on the user's behalf that a dose was or wasn't taken.
+- Adherence analytics, scores, streaks, percentages, or "missed"/"late" warnings.
 - Video media, and media inside notifications.
 - Cloud sync, accounts, backup and restore.
 - Time zone and travel handling (deferred; see §10).
@@ -248,6 +309,12 @@ All medicines, reminders, and photos must be stored locally on the device. v1 ha
 | AC-12 | A monthly or yearly reminder whose selected day is missing from a month fires on that month's last day, and the next month uses the originally selected day again. |
 | AC-13 | All data persists locally across app restarts and device reboots. |
 | AC-14 | The application does not calculate or recommend medical instructions. |
+| AC-15 | Holding a due reminder's photo makes a print with the time it was made; holding again undoes it. A quick tap makes no print. |
+| AC-16 | A reminder still to come, or a paused reminder, cannot be printed; a reminder on an earlier day can. |
+| AC-17 | Sahaay never creates or removes a print without the user's action, and never labels an unprinted reminder "missed" or "late". |
+| AC-18 | Today opens on the next reminder still to come, and swiping steps between reminders only. |
+| AC-19 | History shows the month's printed days as a flipbook and a calendar, opens any day's ruler, and shows no totals or scores. |
+| AC-20 | Deleting a reminder or medicine removes its prints. |
 
 ## 9. Open Product Decisions
 
@@ -259,7 +326,7 @@ None currently.
 
 - Time zone and daylight-saving behaviour when the user travels.
 - Edit medicine (name, photo, form).
-- Home screen and medicine list design details.
+- Medicine list design details (the home screen is Today, FR-12).
 - Notification permission-denied flows. v1 requests notification permission when the first reminder is saved; on Android it also requests exact-alarm permission.
 - A "pause until" date.
 - Multilingual support and caregiver features.

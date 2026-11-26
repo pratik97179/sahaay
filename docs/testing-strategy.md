@@ -338,6 +338,8 @@ Widget tests should verify user-visible behavior rather than internal rendering 
 - Long medicine names and instructions.
 - Accessibility text scaling.
 - Light and dark appearance.
+- Today: opening on the next reminder, stepping between reminders, printing and undoing by holding the photo, a quick tap opening the reminder.
+- History: switching between flipbook and calendar, swiping the top print to the bottom, opening a day.
 
 ### Interaction requirements
 
@@ -461,6 +463,12 @@ Tests should be traceable to the PRD's acceptance criteria.
 | AC-12 | Monthly and yearly month-end clamping without carry-over |
 | AC-13 | Local persistence across restarts and device reboot |
 | AC-14 | Absence of automated medical calculations or recommendations |
+| AC-15 | Making and undoing a print; a tap makes none |
+| AC-16 | Which reminders can be printed on a day (domain) |
+| AC-17 | No print created, removed or labelled "missed" without the person |
+| AC-18 | Today's starting reminder and stepping |
+| AC-19 | History views and opening a day |
+| AC-20 | Prints deleted with their reminder or medicine (persistence) |
 
 The exact test cases and their locations should evolve with implementation.
 

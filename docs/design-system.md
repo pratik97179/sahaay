@@ -1,5 +1,7 @@
 # Sahaay — Design Language
 
+> **Makeover in progress.** The visual design built so far (§2.5 and §4–§12: warm paper, condensed headings, sage accent, card-based components) is being replaced. The agreed new direction, the decisions made so far and the open questions are in **§18**. Until the new design language is settled, §3, §13 (architecture) and §12.1 (nothing overflows) still apply; the visual values in §4–§11 describe the current package and will be rewritten.
+
 ## 1. Purpose
 
 Sahaay has its own design language.
@@ -62,7 +64,7 @@ Accessibility is a property of the design system, not something each feature mus
 
 Account for text scaling, colour contrast, touch targets, focus visibility, and reduced motion.
 
-### 2.5 Visual direction (v1)
+### 2.5 Visual direction (v1, being replaced, see §18)
 
 Sahaay is calm, quiet and spacious. Many users are older, unwell, tired or anxious, and often open the app at the moment a reminder fires. The interface must never hurry or startle them.
 
@@ -71,7 +73,7 @@ Sahaay is calm, quiet and spacious. Many users are older, unwell, tired or anxio
 - **One gentle accent.** A muted sage, used only for actions.
 - **Nothing looks urgent unless it is.** Only errors and destructive actions use a state colour.
 - **More space than feels necessary.** Sections are separated by space and soft tints, not borders.
-- **No medical judgement.** No adherence, "missed", "late" or health colours anywhere.
+- **No medical judgement.** No scores, streaks, "missed", "late" or health colours anywhere. A dose shows as taken only when the person made a print themselves (§18); an unprinted reminder is neutral.
 
 The concrete values are recorded in §4–§9, component behaviour in §11.7, token names in §11.8, the code structure in §13.1, progress in §14.2, and the reasons behind the structure in §17.
 
@@ -787,12 +789,15 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | done |
 | 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
 | 7a | App shell: the app uses the new theme (`AppTheme`, carrying the old theme's values until every screen has moved) and registers the font licences at start-up | done |
-| 7b | Medicines home | next |
-| 7c | Medicine screen and its reminders section | |
-| 7d | Reminder screen | |
-| 7e | Add medicine | |
-| 7f | Reminder editor | |
-| 7g | `lib/design_system/` and its tests removed; feature enforcement test | |
+| M | **Makeover** (§18): prototypes, then design philosophy, then design language, then the existing `sahaay_design` package updated to it | in progress |
+| 7b | Medicines home | paused until the makeover |
+| 7c | Medicine screen and its reminders section | paused |
+| 7d | Reminder screen | paused |
+| 7e | Add medicine | paused |
+| 7f | Reminder editor | paused |
+| 7g | `lib/design_system/` and its tests removed; feature enforcement test | paused |
+
+While the makeover runs, the app's current screens are not updated as the design system changes; they move to the new design system once it is settled.
 
 ---
 
@@ -871,3 +876,62 @@ This section records why the design system is built the way it is. It replaces a
 - Only `widgetbook` (3.25.0) is added, to the catalogue alone; the app's dependencies are unchanged.
 - The catalogue is kept in step by hand, in the same commit as the component change.
 - A test blocks raw colours, text styles and imports of the package's `src/` from feature code.
+
+---
+
+## 18. Makeover (in progress)
+
+### 18.1 Why
+
+A critique of the built design (impeccable's method, 25 of 36) found it generic: beige cards on a beige page, stock Material icons and controls, and screens stacked as lists of cards. It read as a template, not as Sahaay. The makeover replaces the look and the way people move through the app; the package architecture (§13.1), token naming by component, the no-overflow rule (§12.1) and accessibility (§2.4) stay.
+
+### 18.2 How we work
+
+1. Explore with throwaway prototypes (a Flutter web app run locally, outside the repository) and iterate until a decision is made.
+2. Settle a **design philosophy**, then a **design language**.
+3. Update the existing `sahaay_design` package to it. It stays one package; nothing new is created alongside it.
+4. Then move the app's screens to it (§14.2, steps 7b–7g). Until then the app's current screens are left as they are.
+
+Every agreed decision is recorded here and in every other document it affects.
+
+References used: Stoic (journal app: monochrome, its own pictograms, a lowercase voice), Wonderous (chained and staggered motion), the iOS Messages photo stack (swipe and spread-to-grid motion), and the product owner's flipbook and calendar mockup.
+
+### 18.3 Agreed so far
+
+**Today (home)**
+
+- A horizontal **time ruler** with hour labels, quarter-hour ticks, faded ends and a fixed centre needle.
+- **Stepping:** swiping left goes to the next reminder, right to the previous one. The ruler follows the finger, then springs to the reminder; it never stops between reminders and resists at the first and last. Arrow keys also step.
+- While it moves, the time ticks through the hours and the name and instruction fade out; once it settles they slide back in.
+- The **medicine photo** sits above the needle in a **rounded, continuous-corner frame**: never a circle, never a full-screen background. It does not move sideways while the ruler is dragged. Changing reminder: the current photo shrinks into its bottom centre and the next grows out of it.
+- The other reminders show on the ruler as small marks: a tiny print (printed), a ring (due, not printed), a small dot (still to come). Nothing is drawn at the needle.
+- A **"now"** mark on today's ruler. A date line and a greeting at the top, and a **History** button (a small stack of prints, drawn) at the top right.
+- Tapping the photo opens the reminder screen: the photo grows into it, and dragging down returns.
+- Today's ruler starts fresh each day; earlier days are reached through History.
+
+**Prints (taken)**
+
+- **Hold the photo** (about 0.9 s) to print it: a white paper border develops around the photo, it tilts slightly as if set down, and the time is written on the strip ("taken · 7:42 am"). Letting go early rolls back. Holding again undoes it. A quick tap opens the reminder.
+- Only reminders whose time has come (from 30 minutes before) and that aren't paused can be printed, and any reminder on an earlier day.
+- Prints are made only by the person. Nothing is ever "missed" or red; an unprinted reminder is neutral. (PRD 0.4, §3.3, FR-11.)
+
+**History**
+
+- Opens from Today by fading in and growing from the centre. Header: "‹ today", "november.", "your prints, day by day." on a pale blue-grey page.
+- **Flipbook:** the month's printed days as white print cards (photo inset, "Nov 16", "3 prints"), with two cards fanned behind. **Only the top card is swiped**, either way: it follows the finger out to that side and tucks in at the bottom of the stack while the next card comes up. The stack cycles; a new swipe always moves the card that is visibly on top. Deeper cards fade in as they rise; nothing jumps or pops. Tapping the top card opens that day.
+- **Calendar:** M–S, soft rounded cells without numbers; printed days show their photo filling the cell. Tapping a day opens that day's ruler, starting at its first reminder. A "‹ Nov ⌄ ›" pill below.
+- **Switching:** hold the stack and the cards press in a little, then every print flies out to its day in the calendar, one after another, straightening as it goes. Hold a day in the calendar and everything presses in, then the prints gather back into the stack with that day on top.
+- A small **view switch** below the book: two square segments (a drawn stack and a drawn grid) on a soft track. Its thumb follows the transition itself, whether the view was switched there or by holding.
+
+**Motion**
+
+- `flutter_animate`, used only inside `sahaay_design` behind Sahaay's own helpers (enter, stagger, pop), with Sahaay's motion tokens and Reduce Motion handled inside. Agreed, but on hold until the motion work resumes.
+- Wonderous's structure (chains, stagger, swap) is borrowed; its slower showcase timings are not.
+
+### 18.4 Open
+
+- The design philosophy and design language: typefaces (Figtree was used in prototypes only), the colours of each hour, dark mode, the icon set.
+- The other screens in the new style: the medicine list, adding a medicine, the reminder screen in detail, editing a reminder.
+- History's month switching (the arrows on the "Nov" pill), and History across months.
+- Accessibility of the ruler and History: large text, VoiceOver (a plain list behind them), Reduce Motion.
+
