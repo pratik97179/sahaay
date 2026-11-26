@@ -955,13 +955,15 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 
 ### 18.5 Next steps
 
-The safest path agreed in conversation is to build the new UI **beside** the old one and switch over when it is complete (option A; to be confirmed with the branch to use):
+**Decided (2026-11-26): replace the screens in place**, on `feat/design-system-package`. Each old screen is swapped for its new one directly, with no switch between old and new UI; until every screen is done the app is part old, part new. (Building beside the old UI behind a switch was considered and not chosen.)
 
 1. Tidy the small pieces of logic that sit in UI files (add-medicine validation, a reminder-date rule, the add-medicine reminders hook that also builds widgets, wording helpers).
 2. Add the missing logic, one slice each: reminders on a given day across all medicines; prints (table, repository, the "can be printed" rule, a database upgrade with a migration test); the month summary for History.
 3. Update `sahaay_design` to the new language: Figtree, the colours, the drawn icons, and the new components (ruler, print, stack, calendar, switch), each in Widgetbook with tests.
-4. Build the new screens behind a switch in `lib/app/`, one slice each: Today, the reminder screen, History, then the rest once designed.
-5. Flip the switch, then delete the old screens and `lib/design_system/`.
+4. Replace the screens one slice each: Today, the reminder screen, History, then the rest once designed. Each slice removes the old screen it replaces.
+5. When the last old screen is gone, delete `lib/design_system/`.
+
+**Next to prototype:** the reminder screen.
 
 ### 18.6 Open
 
