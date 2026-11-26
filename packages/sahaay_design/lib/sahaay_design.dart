@@ -7,6 +7,10 @@ library;
 
 export 'src/components/actions/action_rows.dart';
 export 'src/components/actions/primary_button.dart';
+export 'src/components/feedback/confirm_dialog.dart';
+export 'src/components/feedback/snackbar.dart';
+export 'src/components/feedback/state_message.dart';
+export 'src/components/feedback/tag.dart';
 export 'src/components/fields/picker_field.dart';
 export 'src/components/fields/text_input_field.dart';
 export 'src/components/items/item_card.dart' show ItemCard;

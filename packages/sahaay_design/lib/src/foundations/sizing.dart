@@ -13,6 +13,10 @@ abstract final class Sizing {
   /// with the user's text size.
   static const double iconToText = 1.25;
 
+  /// The icon of an empty or error state is this many times its message's
+  /// size: large enough to recognise, quiet enough not to alarm.
+  static const double stateIconToText = 2.5;
+
   /// A placeholder icon fills this share of the photo it stands in for.
   static const double placeholderShare = 0.3;
 

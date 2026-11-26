@@ -19,6 +19,8 @@ final class Palette {
     required this.actionPressed,
     required this.onAction,
     required this.danger,
+    required this.dangerPressed,
+    required this.onDanger,
     required this.scrim,
     required this.shadow,
   });
@@ -37,6 +39,8 @@ final class Palette {
     actionPressed: Color(0xFF3F5C4E),
     onAction: Color(0xFFFFFFFF),
     danger: Color(0xFF944639),
+    dangerPressed: Color(0xFF7F3B30),
+    onDanger: Color(0xFFFFFFFF),
     scrim: Color(0x66000000),
     shadow: Color(0x1F3A2E22),
   );
@@ -55,6 +59,8 @@ final class Palette {
     actionPressed: Color(0xFFBCD3C6),
     onAction: Color(0xFF1F2A24),
     danger: Color(0xFFE3A597),
+    dangerPressed: Color(0xFFECB8AC),
+    onDanger: Color(0xFF2A1A16),
     scrim: Color(0x99000000),
     // Shadows don't read on a dark page; floating things use [raised].
     shadow: Color(0x00000000),
@@ -97,6 +103,12 @@ final class Palette {
 
   /// Muted brick: errors and destructive actions only.
   final Color danger;
+
+  /// A filled danger button while it is being pressed.
+  final Color dangerPressed;
+
+  /// Text on a filled [danger] button.
+  final Color onDanger;
 
   /// The dimmed layer behind sheets and dialogs.
   final Color scrim;

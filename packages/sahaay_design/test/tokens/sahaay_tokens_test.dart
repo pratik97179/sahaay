@@ -32,6 +32,12 @@ List<(String, TextStyle, Color)> textOnSurface(SahaayTokens t) => [
   ('tag.label', t.tag.label, t.tag.background),
   ('dialog.title', t.dialog.title, t.dialog.background),
   ('dialog.message', t.dialog.message, t.dialog.background),
+  ('dialog.confirmLabel', t.dialog.confirmLabel, t.dialog.confirmBackground),
+  (
+    'dialog.confirmLabel pressed',
+    t.dialog.confirmLabel,
+    t.dialog.confirmPressedBackground,
+  ),
   ('snackbar.message', t.snackbar.message, t.snackbar.background),
   ('emptyState.message', t.emptyState.message, t.screen.background),
   ('errorState.message', t.errorState.message, t.screen.background),

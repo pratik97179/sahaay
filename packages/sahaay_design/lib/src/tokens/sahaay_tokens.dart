@@ -154,6 +154,9 @@ final class SahaayTokens extends ThemeExtension<SahaayTokens> {
         message: s.body,
         scrim: p.scrim,
         shadow: s.floatingShadow,
+        confirmBackground: p.danger,
+        confirmPressedBackground: p.dangerPressed,
+        confirmLabel: s.button.copyWith(color: p.onDanger),
       ),
       snackbar: SnackbarTokens(
         background: p.text,

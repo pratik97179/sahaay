@@ -509,6 +509,9 @@ final class DialogTokens {
     required this.message,
     required this.scrim,
     required this.shadow,
+    required this.confirmBackground,
+    required this.confirmPressedBackground,
+    required this.confirmLabel,
   });
 
   final Color background;
@@ -518,6 +521,11 @@ final class DialogTokens {
   final Color scrim;
   final List<BoxShadow> shadow;
 
+  /// The filled brick button that confirms a destructive action.
+  final Color confirmBackground;
+  final Color confirmPressedBackground;
+  final TextStyle confirmLabel;
+
   static DialogTokens lerp(DialogTokens a, DialogTokens b, double t) =>
       DialogTokens(
         background: _c(a.background, b.background, t),
@@ -526,6 +534,13 @@ final class DialogTokens {
         message: _s(a.message, b.message, t),
         scrim: _c(a.scrim, b.scrim, t),
         shadow: BoxShadow.lerpList(a.shadow, b.shadow, t) ?? const [],
+        confirmBackground: _c(a.confirmBackground, b.confirmBackground, t),
+        confirmPressedBackground: _c(
+          a.confirmPressedBackground,
+          b.confirmPressedBackground,
+          t,
+        ),
+        confirmLabel: _s(a.confirmLabel, b.confirmLabel, t),
       );
 }
 

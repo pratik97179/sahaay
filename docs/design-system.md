@@ -331,7 +331,8 @@ These are the design system's internal colours. Components use them; feature cod
 | `actionPressed` | A primary action while it is being pressed | `#3F5C4E` | `#BCD3C6` |
 | `onAction` | Text and icons on `action` | `#FFFFFF` | `#1F2A24` |
 | `danger` | Errors and destructive actions (text, icons, outlines, the confirm button) | `#944639` | `#E3A597` |
-| `onDanger` | Text on a filled `danger` button | added with the confirm dialog, with its own AA check | |
+| `dangerPressed` | A filled danger button while it is being pressed | `#7F3B30` | `#ECB8AC` |
+| `onDanger` | Text on a filled `danger` button | `#FFFFFF` (6.6:1) | `#2A1A16` (8.0:1) |
 | `scrim` | The dimmed layer behind sheets and dialogs | black 40% | black 60% |
 | `shadow` | The soft shadow under floating things | `#3A2E22` at 12% | none |
 
@@ -543,10 +544,13 @@ Rows deepen their tint while pressed, like cards, and read as one button (or one
 
 ### 11.5 Feedback
 
-- `Tag` — a neutral state label with an icon and a word.
-- `ConfirmDialog` — confirms a destructive action. Its confirm button is a filled brick (`danger`) button with `onDanger` text; Cancel is a quiet text button.
-- `Snackbar` — a quiet confirmation such as "Reminder saved".
-- `EmptyState` and `ErrorState`.
+- `Tag` — a neutral pill with an icon and a word, such as "Paused". Never coloured by state; it wraps if the word is long.
+- `showConfirmDialog` / `ConfirmDialog` — confirms a destructive action and resolves to `true` only when confirmed. The title, the message, then a full-width filled brick button (`dialog.confirmBackground`, `onDanger` text, deeper brick while pressed) with a quiet Cancel text button below it. Buttons are stacked, so long labels and large text always fit; the dialog scrolls if it must. With reduced motion it appears at once.
+- `showSahaaySnackbar` — a quiet floating message, such as "Reminder saved". Long messages wrap; it leaves on its own.
+- `EmptyState` — an icon, a calm message and an optional next step, such as "No medicines yet." with "Add medicine".
+- `ErrorState` — the same shape with a brick icon, announced to screen readers; the words carry the meaning, and an optional action offers a way on.
+
+The icon of an empty or error state is 2.5 × its message's size (`stateIconToText`), so it grows with the user's text size.
 
 ### 11.6 Component rules
 
@@ -616,7 +620,7 @@ Tokens are grouped by the component they belong to, and read as `context.sahaay.
 | `dangerRow` | `label`, `icon` |
 | `tag` | `background`, `label`, `icon`, `shape` |
 | `sheet` | `background`, `shape`, `handle`, `handleSize`, `scrim`, `shadow`, `spring` |
-| `dialog` | `background`, `shape`, `title`, `message`, `scrim`, `shadow` |
+| `dialog` | `background`, `shape`, `title`, `message`, `scrim`, `shadow`, `confirmBackground`, `confirmPressedBackground`, `confirmLabel` |
 | `snackbar` | `background`, `message` |
 | `emptyState` | `icon`, `message` |
 | `errorState` | `icon`, `message` |
@@ -681,6 +685,7 @@ Relative sizing values live in one place (`foundations/sizing.dart`):
 |---|---|---|
 | `minTouchTarget` | Smallest comfortable touch target | 48 |
 | `iconToText` | Icon size relative to its text | 1.25 × |
+| `stateIconToText` | Empty and error state icon size relative to the message | 2.5 × |
 | `placeholderShare` | Placeholder icon's share of its photo | 30% |
 | `maxWheelRows` / `minWheelRows` | Rows a picker wheel shows | 5 / 3 |
 | `wheelScreenShare` | Most of the screen height a wheel takes | 40% |
@@ -782,8 +787,8 @@ Proposed structure (provisional):
 | 5c | Fields: `TextInputField`, `PickerField`, and the picker sheets | done |
 | 5d | Actions: `PrimaryButton`, `ActionGroup`, `ActionRow`, `SwitchRow`, `DangerRow` | done |
 | 5x | No fixed sizes (§12.1): measured floating action, fitted bar title, icons that scale with text, adaptive day grid, Sahaay's own month calendar, wheels sized to the screen | done |
-| 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | next |
-| 6 | Widgetbook catalogue | |
+| 5e | Feedback: `Tag`, `ConfirmDialog`, `Snackbar`, `EmptyState`, `ErrorState` | done |
+| 6 | Widgetbook catalogue | next |
 | 7 | Screens switch to the package; `lib/design_system/` removed | |
 
 ---
