@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../../../core/launch/launch_handoff.dart';
+
 /// The medicine photo. A quick tap opens it; holding it prints it (or, if
 /// it already was, undoes the print). Letting go early rolls back.
 class HoldPhoto extends StatefulWidget {
@@ -228,6 +230,33 @@ class RulerPainter extends CustomPainter {
   final double? now;
   final TextScaler scaler;
   final bool use24;
+
+  /// Where the launch needle lands on a ruler laid out in [box] (global
+  /// coordinates) at [hour]: its needle and the five nearest ticks on each
+  /// side, drawn exactly as [paint] draws them.
+  static LaunchLanding landing(Rect box, double hour, double px) {
+    final cx = box.center.dx;
+    final base = box.top + box.height * 0.55;
+    LaunchLine tick(int q) {
+      final major = q % 4 == 0;
+      final len = major ? 26.0 : (q.isEven ? 15.0 : 9.0);
+      return LaunchLine(
+        x: cx + (q / 4 - hour) * px,
+        top: base - len,
+        bottom: base,
+        width: major ? 2.2 : 1.4,
+        alpha: major ? 0.75 : 0.3,
+      );
+    }
+
+    final right = (hour * 4).floor() + 1;
+    final left = (hour * 4).ceil() - 1;
+    return LaunchLanding.ruler(
+      needle: LaunchLine(x: cx, top: box.top, bottom: base + 2, width: 3.5),
+      right: [for (var q = right; q < right + 5 && q <= 96; q++) tick(q)],
+      left: [for (var q = left; q > left - 5 && q >= 0; q--) tick(q)],
+    );
+  }
 
   @override
   void paint(Canvas canvas, Size size) {

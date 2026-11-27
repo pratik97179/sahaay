@@ -42,7 +42,7 @@ Future<void> pumpTestApp(
           photos ?? FakePhotoStorage(),
         ),
       ],
-      child: SahaayApp(initialLocation: initialLocation),
+      child: SahaayApp(initialLocation: initialLocation, launchCurtain: false),
     ),
   );
   await tester.pumpAndSettle();
