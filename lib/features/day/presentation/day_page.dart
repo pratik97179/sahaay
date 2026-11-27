@@ -1,5 +1,6 @@
 // Today's ruler (docs/design-system.md §18.3), on real reminders and
 // prints.
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -8,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/launch/launch_handoff.dart';
 import '../../prints/prints_providers.dart';
 import '../../reminders/domain/calendar.dart';
 import 'day_data.dart';
@@ -35,6 +37,13 @@ class DayPage extends ConsumerWidget {
         meds: list,
         marks: ref.watch(dayMarksProvider(day)),
         onToggle: (e) => ref.read(togglePrintProvider)(e.reminder, day),
+        // Only Today, the first screen, catches the launch needle.
+        onLanding: this.day == null
+            ? ref.read(launchHandoffProvider).land
+            : null,
+        reveal: this.day == null
+            ? ref.read(launchHandoffProvider).reveal
+            : null,
       ),
       _ => ColoredBox(color: DayLight.screen.page),
     };
@@ -48,12 +57,20 @@ class _DayRuler extends StatefulWidget {
     required this.meds,
     required this.marks,
     required this.onToggle,
+    this.onLanding,
+    this.reveal,
   });
   final LocalDate day;
   final LocalDateTime now;
   final List<DayEntry> meds;
   final Map<String, LocalTime> marks;
   final ValueChanged<DayEntry> onToggle;
+
+  /// Told, after the first layout, where the launch needle should land.
+  final ValueChanged<LaunchLanding>? onLanding;
+
+  /// How much of the ruler shows while the launch marks land on it.
+  final ValueListenable<double>? reveal;
   @override
   State<_DayRuler> createState() => _DayRulerState();
 }
@@ -73,6 +90,30 @@ class _DayRulerState extends State<_DayRuler>
   )..addListener(() => setState(() {}));
   bool _dragging = false;
   double _dragDx = 0;
+  final _rulerBox = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.onLanding != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _land());
+    }
+  }
+
+  void _land() {
+    final box = _rulerBox.currentContext?.findRenderObject() as RenderBox?;
+    if (meds.isEmpty || box == null || !box.hasSize) {
+      widget.onLanding!(const LaunchLanding.none());
+      return;
+    }
+    widget.onLanding!(
+      RulerPainter.landing(
+        box.localToGlobal(Offset.zero) & box.size,
+        _hour.value,
+        pxPerHour,
+      ),
+    );
+  }
 
   int _start() {
     if (meds.isEmpty || !_isToday) return 0;
@@ -432,35 +473,39 @@ class _DayRulerState extends State<_DayRuler>
         onHorizontalDragStart: _onDragStart,
         onHorizontalDragUpdate: _onDragUpdate,
         onHorizontalDragEnd: _onDragEnd,
-        child: SizedBox(
-          height: 96,
-          child: ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (r) => const LinearGradient(
-              colors: [
-                Colors.transparent,
-                Colors.black,
-                Colors.black,
-                Colors.transparent,
-              ],
-              stops: [0, 0.28, 0.72, 1],
-            ).createShader(r),
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: RulerPainter(
-                _hour.value,
-                pxPerHour,
-                light.ink,
-                light.soft,
-                _index,
-                [for (final e in meds) e.hour],
-                {
-                  for (final (i, e) in meds.indexed)
-                    if (widget.marks.containsKey(e.reminder.id)) i,
-                },
-                _isToday ? nowHour : null,
-                MediaQuery.textScalerOf(context),
-                MediaQuery.alwaysUse24HourFormatOf(context),
+        child: _Revealed(
+          reveal: widget.reveal,
+          child: SizedBox(
+            key: _rulerBox,
+            height: 96,
+            child: ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (r) => const LinearGradient(
+                colors: [
+                  Colors.transparent,
+                  Colors.black,
+                  Colors.black,
+                  Colors.transparent,
+                ],
+                stops: [0, 0.28, 0.72, 1],
+              ).createShader(r),
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: RulerPainter(
+                  _hour.value,
+                  pxPerHour,
+                  light.ink,
+                  light.soft,
+                  _index,
+                  [for (final e in meds) e.hour],
+                  {
+                    for (final (i, e) in meds.indexed)
+                      if (widget.marks.containsKey(e.reminder.id)) i,
+                  },
+                  _isToday ? nowHour : null,
+                  MediaQuery.textScalerOf(context),
+                  MediaQuery.alwaysUse24HourFormatOf(context),
+                ),
               ),
             ),
           ),
@@ -554,3 +599,21 @@ const _months = [
 ];
 
 String monthName(int month) => _months[month - 1];
+
+/// Shows [child] as much as [reveal] says; fully when there is none.
+class _Revealed extends StatelessWidget {
+  const _Revealed({required this.reveal, required this.child});
+  final ValueListenable<double>? reveal;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final reveal = this.reveal;
+    if (reveal == null) return child;
+    return ValueListenableBuilder(
+      valueListenable: reveal,
+      child: child,
+      builder: (context, v, child) => Opacity(opacity: v, child: child),
+    );
+  }
+}

@@ -5,15 +5,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../core/launch/launch_handoff.dart';
 import '../features/notifications/notifications_providers.dart';
+import 'launch_curtain.dart';
 import 'router.dart';
 import 'routes.dart';
 
 class SahaayApp extends ConsumerStatefulWidget {
-  const SahaayApp({this.initialLocation = AppRoutes.today, super.key});
+  const SahaayApp({
+    this.initialLocation = AppRoutes.today,
+    this.launchCurtain = true,
+    super.key,
+  });
 
   /// Where the app opens; tests start some flows elsewhere.
   final String initialLocation;
+
+  /// Carries the launch screen into the first screen; tests leave it out.
+  final bool launchCurtain;
 
   @override
   ConsumerState<SahaayApp> createState() => _SahaayAppState();
@@ -35,7 +44,10 @@ class _SahaayAppState extends ConsumerState<SahaayApp> {
     _taps = notifications.taps.listen(_openReminder);
     unawaited(
       notifications.launchReminderId().then((id) {
-        if (id != null) _openReminder(id);
+        if (id == null) return;
+        // Opened on a reminder, not Today: the launch screen just fades.
+        ref.read(launchHandoffProvider).land(const LaunchLanding.none());
+        _openReminder(id);
       }),
     );
     // Back in the foreground: time has moved on, so plan again.
@@ -61,6 +73,9 @@ class _SahaayAppState extends ConsumerState<SahaayApp> {
       title: 'sahaay',
       theme: SahaayTheme.light(),
       routerConfig: _router,
+      builder: widget.launchCurtain
+          ? (context, child) => Stack(children: [?child, const LaunchCurtain()])
+          : null,
     );
   }
 }
