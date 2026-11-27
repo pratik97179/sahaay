@@ -38,10 +38,19 @@ final class WhenDraft {
 /// §18.3). The time on a ruler like Today's; how often in a few words; the
 /// amount and a pinned note side by side.
 class WhenStep extends StatefulWidget {
-  const WhenStep({required this.current, required this.enabled, super.key});
+  const WhenStep({
+    required this.current,
+    required this.enabled,
+    this.singleTime = false,
+    super.key,
+  });
 
   final ValueNotifier<WhenDraft> current;
   final bool enabled;
+
+  /// Editing one saved reminder: one time of day, so no adding or removing
+  /// times.
+  final bool singleTime;
 
   @override
   State<WhenStep> createState() => _WhenStepState();
@@ -97,8 +106,12 @@ class _WhenStepState extends State<WhenStep> {
               selected: sel,
               light: light,
               onSelect: (i) => setState(() => _selected = i),
-              onRemove: widget.enabled && times.length > 1 ? _removeTime : null,
-              onAdd: widget.enabled && times.isNotEmpty ? _addTime : null,
+              onRemove: widget.enabled && !widget.singleTime && times.length > 1
+                  ? _removeTime
+                  : null,
+              onAdd: widget.enabled && !widget.singleTime && times.isNotEmpty
+                  ? _addTime
+                  : null,
             ),
             const SizedBox(height: 12),
             _TimeRuler(

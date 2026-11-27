@@ -1,21 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
-import '../../../design_system/design_system.dart';
+import '../../../core/time/clock.dart';
 import '../../medicines/domain/medicine.dart';
 import '../../medicines/medicines_providers.dart';
 import '../../medicines/presentation/medicine_labels.dart';
-import '../../medicines/presentation/medicine_photo.dart';
-import '../domain/recurrence.dart';
+import '../application/reminder_draft.dart';
+import '../domain/calendar.dart';
 import '../domain/reminder.dart';
 import '../reminders_providers.dart';
-import 'schedule_text.dart';
+import 'when_step.dart';
 
-/// One reminder's entry screen: the medicine's photo and form, and the
-/// reminder's details, with edit, pause or resume, and delete (PRD §5.2,
-/// §5.3, FR-05 to FR-08). Notifications will open this screen.
+/// One reminder (PRD §5.2, §5.3, FR-05 to FR-08; docs/design-system.md
+/// §18.3): the medicine it is for, then the reminder itself, set the same
+/// way as on Add medicine's "when?" step. Every change is saved as it is
+/// made. Pause or resume and delete sit at the top right. Notifications open
+/// this screen.
 class ReminderPage extends ConsumerWidget {
   const ReminderPage({required this.reminderId, super.key});
 
@@ -23,22 +28,31 @@ class ReminderPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return switch (ref.watch(reminderProvider(reminderId))) {
-      AsyncData(value: final Reminder reminder) => switch (ref.watch(
-        medicineProvider(reminder.medicineId),
-      )) {
-        AsyncData(value: final Medicine medicine) => _ReminderView(
-          reminder: reminder,
-          medicine: medicine,
-        ),
-        AsyncError() => const _Message.error(),
-        AsyncData() => const _Message.missing(),
-        _ => const _Message.loading(),
-      },
-      AsyncData() => const _Message.missing(),
-      AsyncError() => const _Message.error(),
-      _ => const _Message.loading(),
+    final reminder = ref.watch(reminderProvider(reminderId));
+    final medicine = switch (reminder) {
+      AsyncData(value: final Reminder r) => ref.watch(
+        medicineProvider(r.medicineId),
+      ),
+      _ => null,
     };
+    return Scaffold(
+      backgroundColor: DayLight.screen.page,
+      body: SafeArea(
+        child: switch ((reminder, medicine)) {
+          (
+            AsyncData(value: final Reminder r),
+            AsyncData(value: final Medicine m),
+          ) =>
+            _ReminderView(reminder: r, medicine: m),
+          (AsyncError(), _) || (_, AsyncError()) => const _Message(
+            "this reminder couldn't be loaded.",
+          ),
+          (AsyncData(value: null), _) || (_, AsyncData(value: null)) =>
+            const _Message('this reminder no longer exists.'),
+          _ => const SizedBox.shrink(),
+        },
+      ),
+    );
   }
 }
 
@@ -53,200 +67,452 @@ class _ReminderView extends ConsumerStatefulWidget {
 }
 
 class _ReminderViewState extends ConsumerState<_ReminderView> {
-  bool _busy = false;
+  late final _draft = ValueNotifier(
+    WhenDraft(draft: ReminderDraft.fromReminder(widget.reminder)),
+  );
 
-  Future<void> _run(Future<void> Function() action, String failure) async {
-    setState(() => _busy = true);
-    try {
-      await action();
-    } on Exception {
-      if (mounted) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(failure)));
+  @override
+  void initState() {
+    super.initState();
+    // Touch the up-front reads while `ref` is usable.
+    _manage;
+    _clock;
+    _draft.addListener(_changed);
+  }
+
+  Timer? _save;
+
+  /// A saved reminder is locked until the edit mark unlocks it.
+  bool _editing = false;
+
+  // Read up front: the last change may be saved while the screen closes,
+  // when `ref` can no longer be used.
+  late final _manage = ref.read(manageReminderProvider);
+  late final _clock = ref.read(clockProvider);
+
+  LocalDateTime _now() => LocalDateTime.fromDateTime(_clock());
+
+  /// Saves a moment after the last change, so dragging the ruler doesn't
+  /// write on every frame. A change that isn't complete yet (a weekly
+  /// reminder with no days chosen) waits until it is.
+  void _changed() {
+    _save?.cancel();
+    _save = Timer(const Duration(milliseconds: 450), () async {
+      final details = _draft.value.toDetails(_now());
+      if (details.isEmpty) return;
+      try {
+        await _manage.update(widget.reminder.id, details.first);
+      } on Exception {
+        _say("the change couldn't be saved.");
       }
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    });
+  }
+
+  void _say(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  Future<void> _togglePause() async {
+    final paused = !widget.reminder.isPaused;
+    try {
+      await _manage.setPaused(widget.reminder.id, paused: paused);
+    } on Exception {
+      _say(
+        paused
+            ? "the reminder couldn't be paused."
+            : "the reminder couldn't be resumed.",
+      );
     }
   }
 
-  Future<void> _togglePause() {
-    final paused = !widget.reminder.isPaused;
-    return _run(
-      () => ref
-          .read(manageReminderProvider)
-          .setPaused(widget.reminder.id, paused: paused),
-      paused
-          ? "The reminder couldn't be paused."
-          : "The reminder couldn't be resumed.",
-    );
-  }
-
   Future<void> _delete() async {
-    final confirmed = await confirmDestructiveAction(
-      context,
-      title: 'Delete this reminder?',
-      message:
-          'Only this reminder is deleted. The medicine and its other '
-          "reminders stay. This can't be undone.",
-      confirmLabel: 'Delete',
-    );
-    if (!confirmed || !mounted) return;
+    _save?.cancel();
     final router = GoRouter.of(context);
     final medicineId = widget.reminder.medicineId;
-    await _run(() async {
-      await ref.read(manageReminderProvider).delete(widget.reminder.id);
+    try {
+      await _manage.delete(widget.reminder.id);
       if (router.canPop()) {
         router.pop();
       } else {
         router.go(AppRoutes.medicine(medicineId));
       }
-    }, "The reminder couldn't be deleted.");
+    } on Exception {
+      _say("the reminder couldn't be deleted.");
+    }
+  }
+
+  @override
+  void dispose() {
+    // A change still waiting is saved before leaving.
+    if (_save?.isActive ?? false) {
+      _save!.cancel();
+      final details = _draft.value.toDetails(_now());
+      if (details.isNotEmpty) {
+        unawaited(_manage.update(widget.reminder.id, details.first));
+      }
+    }
+    _draft.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final reminder = widget.reminder;
+    final light = DayLight.screen;
     final medicine = widget.medicine;
-    final schedule = reminder.schedule;
-    final once = schedule.recurrence is OneTimeRecurrence;
-    final spacing = context.spacing;
-    final typography = context.typography;
-    final quantity = reminder.quantity;
-    final instruction = reminder.instruction;
-    final endDate = schedule.endDate;
-
-    return PageLayout(
-      heading: medicine.displayName,
-      supportingText: 'Reminder',
-      children: [
-        ContentSection(
-          heading: 'Medicine',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final paused = widget.reminder.isPaused;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(28, 20, 28, 48),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              MedicinePhoto.large(
-                photoKey: medicine.photoPath,
-                semanticLabel: 'Photo of ${medicine.displayName}',
-              ),
-              SizedBox(height: spacing.fieldSeparation),
-              ReadOnlyField(label: 'Form', value: medicine.form.label),
-            ],
-          ),
-        ),
-        ContentSection(
-          heading: 'Reminder',
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Padding(
-                padding: EdgeInsets.only(bottom: spacing.fieldSeparation),
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).maybePop(),
+                      child: Text(
+                        '‹  ${medicine.displayName}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: figtree(17, FontWeight.w700, light.soft),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'reminder',
+                      style: figtree(
+                        44,
+                        FontWeight.w800,
+                        light.ink,
+                        letterSpacing: -1,
+                      ),
+                    ),
+                    // Both lines keep their space, so nothing moves when it
+                    // is paused or resumed.
+                    Stack(
                       children: [
-                        Expanded(
+                        Opacity(
+                          opacity: paused ? 0 : 1,
                           child: Text(
-                            formatTime(context, schedule.time),
-                            style: typography.primaryValue,
+                            _editing
+                                ? 'changes save as you make them.'
+                                : 'tap edit to change it.',
+                            style: figtree(17, FontWeight.w500, light.soft),
                           ),
                         ),
-                        if (reminder.isPaused)
-                          Text('Paused', style: typography.statusLabel),
+                        Opacity(
+                          opacity: paused ? 1 : 0,
+                          child: Text(
+                            "paused. it won't notify until resumed.",
+                            style: figtree(17, FontWeight.w700, light.ink),
+                          ),
+                        ),
                       ],
                     ),
-                    if (reminder.isPaused)
-                      Text(
-                        "It won't notify until you resume it.",
-                        style: typography.supporting,
-                      ),
                   ],
                 ),
               ),
-              if (once)
-                ReadOnlyField(
-                  label: 'Date',
-                  value: formatDate(context, schedule.startDate),
-                )
-              else ...[
-                ReadOnlyField(
-                  label: 'Repeats',
-                  value: describeSchedule(
-                    schedule,
-                    formatDate: (date) => formatDate(context, date),
-                  ),
-                  supporting: monthEndNote(schedule.recurrence),
-                ),
-                ReadOnlyField(
-                  label: 'Starts',
-                  value: formatDate(context, schedule.startDate),
-                ),
-                ReadOnlyField(
-                  label: 'Ends',
-                  value: endDate == null
-                      ? 'No end date'
-                      : formatDate(context, endDate),
-                ),
-              ],
-              if (quantity != null)
-                ReadOnlyField(label: 'Quantity', value: quantity),
-              if (instruction != null)
-                ReadOnlyField(label: 'Instruction', value: instruction),
+              _PauseButton(paused: paused, light: light, onTap: _togglePause),
+              HoldToDelete(
+                light: light,
+                label: 'Delete this reminder',
+                hint:
+                    'Only this reminder is deleted; the medicine and its other '
+                    'reminders stay',
+                onDelete: _delete,
+              ),
             ],
           ),
-        ),
-        OutlinedButton.icon(
-          onPressed: _busy
-              ? null
-              : () => context.push(AppRoutes.editReminder(reminder.id)),
-          icon: const Icon(Icons.edit_outlined),
-          label: const Text('Edit reminder'),
-        ),
-        SizedBox(height: spacing.itemSeparation),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : _togglePause,
-          icon: Icon(
-            reminder.isPaused
-                ? Icons.play_arrow_outlined
-                : Icons.pause_outlined,
+          const SizedBox(height: 22),
+          Row(
+            children: [
+              SizedBox.square(
+                dimension: 64,
+                child: Semantics(
+                  image: true,
+                  label: 'Photo of ${medicine.displayName}',
+                  child: MedPhoto(
+                    radius: 18,
+                    image: FileImage(
+                      ref
+                          .watch(medicinePhotoStorageProvider)
+                          .resolve(medicine.photoPath),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  medicine.displayName,
+                  style: figtree(20, FontWeight.w800, light.ink),
+                ),
+              ),
+              // Unlocks the reminder below for changing.
+              _EditButton(
+                editing: _editing,
+                light: light,
+                onTap: () => setState(() => _editing = !_editing),
+              ),
+            ],
           ),
-          label: Text(reminder.isPaused ? 'Resume reminder' : 'Pause reminder'),
-        ),
-        SizedBox(height: spacing.sectionSeparation),
-        DestructiveButton(
-          label: 'Delete reminder',
-          icon: Icons.delete_outline,
-          onPressed: _busy ? null : _delete,
-        ),
-      ],
+          const SizedBox(height: 28),
+          Opacity(
+            opacity: paused ? 0.55 : 1,
+            // Locked until edit is tapped: nothing below responds.
+            child: IgnorePointer(
+              ignoring: !_editing,
+              child: WhenStep(
+                current: _draft,
+                enabled: _editing,
+                singleTime: true,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-enum _Status { missing, error, loading }
-
-/// The reminder screen when there is no reminder to show.
-class _Message extends StatelessWidget {
-  const _Message.missing() : _status = _Status.missing;
-  const _Message.error() : _status = _Status.error;
-  const _Message.loading() : _status = _Status.loading;
-
-  final _Status _status;
+/// A drawn pencil with "edit" under it; while editing it turns to a tick
+/// with "done", which locks the reminder again.
+class _EditButton extends StatelessWidget {
+  const _EditButton({
+    required this.editing,
+    required this.light,
+    required this.onTap,
+  });
+  final bool editing;
+  final DayLight light;
+  final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => PageLayout(
-    heading: 'Reminder',
-    children: [
-      switch (_status) {
-        _Status.missing => const EmptyState(
-          message: 'This reminder no longer exists.',
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: editing ? 'Done editing' : 'Edit this reminder',
+    excludeSemantics: true,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        child: Column(
+          children: [
+            SizedBox.square(
+              dimension: 40,
+              child: CustomPaint(painter: _EditMark(light.ink, editing)),
+            ),
+            const SizedBox(height: 4),
+            // Both words keep their space, so the header never shifts.
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(
+                  opacity: editing ? 0 : 1,
+                  child: Text(
+                    'edit',
+                    style: figtree(13, FontWeight.w700, light.ink),
+                  ),
+                ),
+                Opacity(
+                  opacity: editing ? 1 : 0,
+                  child: Text(
+                    'done',
+                    style: figtree(13, FontWeight.w700, light.ink),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        _Status.error => const ErrorState(
-          message: "This reminder couldn't be loaded.",
-        ),
-        _Status.loading => const Center(child: CircularProgressIndicator()),
-      },
-    ],
+      ),
+    ),
   );
+}
+
+class _EditMark extends CustomPainter {
+  _EditMark(this.ink, this.editing);
+  final Color ink;
+  final bool editing;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final c = s.center(Offset.zero);
+    final r = s.width * 0.42;
+    canvas.drawCircle(c, r, Paint()..color = ink);
+    final u = r / 10;
+    final paper = Paint()..color = Paper.sheet;
+    if (editing) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(c.dx - 4.5 * u, c.dy + 0.2 * u)
+          ..lineTo(c.dx - 1.2 * u, c.dy + 3.6 * u)
+          ..lineTo(c.dx + 5 * u, c.dy - 3.2 * u),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.6
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..color = Paper.sheet,
+      );
+      return;
+    }
+    // A pencil, set at an angle.
+    canvas.save();
+    canvas.translate(c.dx, c.dy);
+    canvas.rotate(-0.785);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTRB(-6 * u, -1.8 * u, 3 * u, 1.8 * u),
+        Radius.circular(0.8 * u),
+      ),
+      paper,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(3 * u, -1.8 * u)
+        ..lineTo(6.5 * u, 0)
+        ..lineTo(3 * u, 1.8 * u)
+        ..close(),
+      paper,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(_EditMark old) => old.ink != ink || old.editing != editing;
+}
+
+/// A drawn pause (two bars) or resume (a triangle) mark with its word under
+/// it, the same size as the other header buttons.
+class _PauseButton extends StatelessWidget {
+  const _PauseButton({
+    required this.paused,
+    required this.light,
+    required this.onTap,
+  });
+  final bool paused;
+  final DayLight light;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: paused ? 'Resume this reminder' : 'Pause this reminder',
+    excludeSemantics: true,
+    child: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        child: Column(
+          children: [
+            SizedBox.square(
+              dimension: 40,
+              child: CustomPaint(painter: _PauseMark(light.ink, paused)),
+            ),
+            const SizedBox(height: 4),
+            // Both words keep their space, so the header never shifts.
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Opacity(
+                  opacity: paused ? 0 : 1,
+                  child: Text(
+                    'pause',
+                    style: figtree(13, FontWeight.w700, light.ink),
+                  ),
+                ),
+                Opacity(
+                  opacity: paused ? 1 : 0,
+                  child: Text(
+                    'resume',
+                    style: figtree(13, FontWeight.w700, light.ink),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _PauseMark extends CustomPainter {
+  _PauseMark(this.ink, this.paused);
+  final Color ink;
+  final bool paused;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final c = s.center(Offset.zero);
+    final r = s.width * 0.42;
+    canvas.drawCircle(c, r, Paint()..color = ink);
+    final paper = Paint()..color = Paper.sheet;
+    if (paused) {
+      // Resume: a soft triangle.
+      final u = r / 10;
+      canvas.drawPath(
+        Path()
+          ..moveTo(c.dx - 3 * u, c.dy - 5 * u)
+          ..lineTo(c.dx + 5.5 * u, c.dy)
+          ..lineTo(c.dx - 3 * u, c.dy + 5 * u)
+          ..close(),
+        paper,
+      );
+    } else {
+      for (final x in [-2.6, 2.6]) {
+        canvas.drawRRect(
+          RRect.fromRectAndRadius(
+            Rect.fromCenter(
+              center: c.translate(x * r / 10, 0),
+              width: r * 0.22,
+              height: r * 0.95,
+            ),
+            Radius.circular(r * 0.08),
+          ),
+          paper,
+        );
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(_PauseMark old) => old.ink != ink || old.paused != paused;
+}
+
+class _Message extends StatelessWidget {
+  const _Message(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final light = DayLight.screen;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(28, 20, 28, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.of(context).maybePop(),
+            child: Text(
+              '‹  back',
+              style: figtree(17, FontWeight.w700, light.soft),
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text(text, style: figtree(20, FontWeight.w700, light.ink)),
+        ],
+      ),
+    );
+  }
 }

@@ -795,6 +795,7 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | M3 | Add medicine (§18.3): one step at a time (photo, name, how it's taken, when, saved) with the drawn icon indicator; saving on arriving at the last step; the "when?" step holding the whole reminder on one screen (time pills, ruler, how often, amount dials, the sticky note). Replaces `add_medicine_page.dart` and the separate draft-reminder screen (`draft_reminder_page.dart` and its route removed). Handwriting font QE David Reid added to `sahaay_design` (its licence for release still to be confirmed). Not yet: the start date and an end date on this step, which stay with the reminder screen | in progress |
 | M4 | Shared makeover pieces moved into `sahaay_design` (`src/day/day_marks.dart`): `Paper` colours, `MedPhoto`, `DayStrip`, `FormMark`, `clockText`, and `DayLight.screen` (the 1 pm colour) with `DayLight.withInk`. Features no longer import each other's drawing code; day-only pieces stay in `day_widgets.dart`, and the add button lives in the medicines feature | done |
 | M5 | The medicine page (§18.3): header with form mark, hold-to-delete bin, the photo, the day strip and a paper print per reminder with its note. Medicine photos glow in their own colours (`MedPhoto`). Replaces the old Material page | in progress |
+| M6 | The reminder screen (§18.3): locked until edit, the "when?" controls, drawn pause and hold-to-delete (`HoldToDelete` moved into `sahaay_design`). The old reminder page and edit page are replaced; Today's "Edit" opens it. Not yet: start and end dates, updated tests | in progress |
 | 7b | Medicines home | paused until the makeover |
 | 7c | Medicine screen and its reminders section | paused |
 | 7d | Reminder screen | paused |
@@ -970,6 +971,14 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - **reminders**, with the drawn clock with a plus to add one, the day strip of their times, then each reminder as a small paper print: the time, how often, the amount, and the person's note pinned on as a little tilted sticky note in handwriting. A paused reminder is faded and says "· paused". Tapping a print opens that reminder. With none: "no reminders yet."
 - Editing the medicine's name, photo or form stays out of v1 (PRD §10).
 
+**The reminder screen** (agreed 2026-11-27)
+
+- Opened from a reminder print on the medicine page, from Today's reminder page and from notifications.
+- Header: "‹ " and the medicine's name, "reminder" large, and one line under it. At the top right, drawn **pause** (two bars; it turns to a triangle with "resume" when paused) and the hold-to-delete bin, which deletes only this reminder.
+- The medicine's photo and name, then the reminder set with the same controls as Add medicine's "when?" step (one time of day only).
+- **Locked until edit:** a saved reminder opens read-only; nothing below the header responds. A drawn pencil with "edit", at the right end of the photo-and-name row, unlocks it; it then shows a tick with "done", which locks it again. While unlocked, every change saves on its own a moment after it is made, and a change still waiting is saved when the screen closes. Paused, the screen is faded and the line reads "paused. it won't notify until resumed."
+- Not yet: the start and end dates.
+
 **Medicine photos** (agreed 2026-11-27)
 
 - A photo that is not a print glows in its own colours: a blurred, brighter copy of the photo sits behind and a little below it as a soft halo, with a thin light rim and a faint sheen across the top, so it reads like glass rather than a flat picture. It applies wherever the photo appears on its own (Today, the reminder page, the medicine page, the Add medicine photo). The halo fades out as a photo develops into a paper print, so prints keep their plain paper look. (Rejected: the plain grey drop shadow, as dull.)
@@ -1005,7 +1014,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 4. Replace the screens one slice each: Today, the reminder screen, History, then the rest once designed. Each slice removes the old screen it replaces.
 5. When the last old screen is gone, delete `lib/design_system/`.
 
-**Next to prototype:** the reminder screen.
+**Next to prototype:** the start and end dates on the reminder screen, then Add reminder from the medicine page (still the old editor).
 
 ### 18.6 Open
 
