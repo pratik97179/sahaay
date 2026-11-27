@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Today's ruler and needle (docs/design-system.md §3). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M48.00,57.17 L48.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.88" />
+    <path
+        android:pathData="M60.00,57.17 L60.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.88" />
+    <path
+        android:pathData="M42.00,52.33 L42.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.72" />
+    <path
+        android:pathData="M66.00,52.33 L66.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.72" />
+    <path
+        android:pathData="M36.00,57.17 L36.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.55" />
+    <path
+        android:pathData="M72.00,57.17 L72.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.55" />
+    <path
+        android:pathData="M30.00,52.33 L30.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.39" />
+    <path
+        android:pathData="M78.00,52.33 L78.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.39" />
+    <path
+        android:pathData="M24.00,57.17 L24.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.23" />
+    <path
+        android:pathData="M84.00,57.17 L84.00,64.83"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="1.83"
+        android:strokeLineCap="round"
+        android:strokeAlpha="0.23" />
+    <path
+        android:pathData="M54.00,39.00 L54.00,69.00"
+        android:strokeColor="#1F1C18"
+        android:strokeWidth="3.83"
+        android:strokeLineCap="round" />
+</vector>
