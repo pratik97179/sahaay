@@ -6,7 +6,6 @@ import '../features/medicines/presentation/medicine_details_page.dart';
 import '../features/medicines/presentation/new_medicine_page.dart';
 import '../features/medicines/presentation/your_medicines_page.dart';
 import '../features/reminders/domain/calendar.dart';
-import '../features/reminders/presentation/edit_reminder_page.dart';
 import '../features/reminders/presentation/medicine_reminders_section.dart';
 import '../features/reminders/presentation/new_medicine_reminders.dart';
 import '../features/reminders/presentation/new_reminder_page.dart';
@@ -61,13 +60,6 @@ GoRouter createRouter({String initialLocation = AppRoutes.today}) => GoRouter(
           path: 'reminders/:id',
           builder: (context, state) =>
               ReminderPage(reminderId: state.pathParameters['id']!),
-          routes: [
-            GoRoute(
-              path: 'edit',
-              builder: (context, state) =>
-                  EditReminderPage(reminderId: state.pathParameters['id']!),
-            ),
-          ],
         ),
       ],
     ),

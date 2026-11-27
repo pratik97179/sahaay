@@ -189,7 +189,7 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                               GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () => context.push(
-                                  AppRoutes.editReminder(m.reminder.id),
+                                  AppRoutes.reminder(m.reminder.id),
                                 ),
                                 child: Text(
                                   'Edit',

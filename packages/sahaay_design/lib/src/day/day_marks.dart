@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -15,6 +16,12 @@ abstract final class Paper {
 
   /// Quieter text and marks on paper.
   static const soft = Color(0xFF6B6660);
+
+  /// A sticky note's pale yellow.
+  static const note = Color(0xFFF6E7A6);
+
+  /// What is written on a sticky note.
+  static const noteInk = Color(0xFF4A4230);
 }
 
 /// A time as the app writes it: "7:30 am", or "19:30" when the phone uses
@@ -28,37 +35,115 @@ String clockText(BuildContext context, int hour, int minute) =>
         .toLowerCase();
 
 /// The medicine photo: a soft-cornered frame, never a circle.
+///
+/// It glows in its own colours: a blurred, brighter copy of the photo sits
+/// behind it as a soft halo, and a thin light rim and a faint sheen across
+/// the top make it read like glass rather than a flat picture. [glow]
+/// (0–1) fades the halo, for a photo turning into a paper print.
 class MedPhoto extends StatelessWidget {
-  const MedPhoto({required this.image, this.radius = 36, super.key});
+  const MedPhoto({
+    required this.image,
+    this.radius = 36,
+    this.glow = 1,
+    super.key,
+  });
   final ImageProvider image;
   final double radius;
+  final double glow;
+
   @override
   Widget build(BuildContext context) {
     final shape = RoundedSuperellipseBorder(
       borderRadius: BorderRadius.circular(radius),
     );
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: shape,
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.16),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
+    Widget picture() => Image(
+      image: image,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stack) =>
+          const ColoredBox(color: Color(0x22000000)),
+    );
+    return Stack(
+      clipBehavior: Clip.none,
+      fit: StackFit.expand,
+      children: [
+        if (glow > 0)
+          // The halo: the photo itself, blurred and lifted in colour,
+          // settling a little below and behind.
+          Transform.translate(
+            offset: const Offset(0, 22),
+            child: Transform.scale(
+              scale: 0.98,
+              child: Opacity(
+                opacity: (0.95 * glow).clamp(0.0, 1.0),
+                child: ImageFiltered(
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: 24,
+                    sigmaY: 24,
+                    tileMode: TileMode.decal,
+                  ),
+                  child: ColorFiltered(
+                    colorFilter: const ColorFilter.matrix(_lift),
+                    child: ClipPath(
+                      clipper: ShapeBorderClipper(shape: shape),
+                      child: picture(),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-        ],
-      ),
-      child: ClipPath(
-        clipper: ShapeBorderClipper(shape: shape),
-        child: Image(
-          image: image,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stack) =>
-              const ColoredBox(color: Color(0x22000000)),
+        DecoratedBox(
+          // A small, close shadow so it sits on the page.
+          decoration: ShapeDecoration(
+            shape: shape,
+            shadows: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.10),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: ClipPath(
+            clipper: ShapeBorderClipper(shape: shape),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                picture(),
+                // A faint sheen across the top, like light on glass.
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.center,
+                      colors: [Color(0x26FFFFFF), Color(0x00FFFFFF)],
+                    ),
+                  ),
+                ),
+                // A thin light rim.
+                DecoratedBox(
+                  decoration: ShapeDecoration(
+                    shape: RoundedSuperellipseBorder(
+                      borderRadius: BorderRadius.circular(radius),
+                      side: const BorderSide(color: Color(0x47FFFFFF)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
+
+  /// More saturation and a little brightness, so the halo's colour shows.
+  static const _lift = <double>[
+    1.7, -0.45, -0.25, 0, 10, //
+    -0.25, 1.65, -0.4, 0, 10, //
+    -0.25, -0.45, 1.7, 0, 10, //
+    0, 0, 0, 1, 0, //
+  ];
 }
 
 /// A whole day on one line, midnight to midnight: quiet marks at 6 am, noon
@@ -243,4 +328,56 @@ class FormMark extends CustomPainter {
       old.injectable != injectable ||
       old.color != color ||
       old.filled != filled;
+}
+
+/// A medicine photo that flies between screens (`docs/design-system.md`
+/// §18.3): it leaves its small print, grows into place on the next screen,
+/// rounding off its corners and gathering its glow on the way. Both ends
+/// give the same [tag].
+class MedPhotoHero extends StatelessWidget {
+  const MedPhotoHero({
+    required this.tag,
+    required this.image,
+    required this.radius,
+    this.glow = 1,
+    super.key,
+  });
+
+  final Object tag;
+  final ImageProvider image;
+  final double radius;
+  final double glow;
+
+  @override
+  Widget build(BuildContext context) => Hero(
+    tag: tag,
+    flightShuttleBuilder: (context, animation, direction, from, to) {
+      final a = (from.widget as Hero).child as MedPhoto;
+      final b = (to.widget as Hero).child as MedPhoto;
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: const Cubic(0.2, 0.9, 0.25, 1),
+      );
+      return AnimatedBuilder(
+        animation: curved,
+        builder: (context, _) {
+          final t = direction == HeroFlightDirection.push
+              ? curved.value
+              : 1 - curved.value;
+          final (start, end) = direction == HeroFlightDirection.push
+              ? (a, b)
+              : (b, a);
+          return MedPhoto(
+            image: image,
+            radius: start.radius + (end.radius - start.radius) * t,
+            // The glow swells past where it settles, then eases back.
+            glow:
+                (start.glow + (end.glow - start.glow) * t) +
+                0.35 * math.sin(math.pi * t),
+          );
+        },
+      );
+    },
+    child: MedPhoto(image: image, radius: radius, glow: glow),
+  );
 }

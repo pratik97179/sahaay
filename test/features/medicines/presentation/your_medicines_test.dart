@@ -81,7 +81,7 @@ void main() {
     await tester.tap(find.text('Metformin'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Medicine information'), findsOneWidget);
+    expect(find.text('reminders'), findsOneWidget);
 
     await disposeTestApp(tester);
   });

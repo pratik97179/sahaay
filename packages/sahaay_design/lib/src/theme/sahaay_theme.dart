@@ -4,6 +4,7 @@ import '../foundations/palette.dart';
 import '../foundations/radii.dart';
 import '../foundations/typefaces.dart';
 import '../tokens/sahaay_tokens.dart';
+import 'lift_transition.dart';
 
 /// The app theme (`docs/design-system.md` §13): `ThemeData` built from the
 /// design tokens, with [SahaayTokens] attached for `context.sahaay`.
@@ -48,6 +49,14 @@ abstract final class SahaayTheme {
     bool selected(Set<WidgetState> s) => s.contains(WidgetState.selected);
 
     return ThemeData(
+      // Every screen change lifts in as a card (§18.3).
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: LiftPageTransitionsBuilder(),
+          TargetPlatform.iOS: LiftPageTransitionsBuilder(),
+          TargetPlatform.macOS: LiftPageTransitionsBuilder(),
+        },
+      ),
       useMaterial3: true,
       colorScheme: scheme,
       fontFamily: Typefaces.reading,

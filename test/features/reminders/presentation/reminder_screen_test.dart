@@ -188,9 +188,9 @@ void main() {
     await tester.pumpAndSettle();
 
     // Back on the medicine page, with the sibling still there.
-    expect(find.text('Medicine information'), findsOneWidget);
-    expect(find.text('9:00 AM'), findsNothing);
-    expect(find.text('9:00 PM'), findsOneWidget);
+    expect(find.text('reminders'), findsOneWidget);
+    expect(find.text('9:00 am'), findsNothing);
+    expect(find.text('9:00 pm'), findsOneWidget);
     expect(await runDb(tester, () => reminders.find('morning')), isNull);
     expect((await stored(tester, 'evening')).quantity, '2 tablets');
 

@@ -261,18 +261,29 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
         Padding(
           padding: const EdgeInsets.only(top: 8, bottom: 16),
           child: Center(
-            child: _StepIndicator(
-              controller: _steps,
-              step: _step,
-              light: light,
-              labels: const [
-                'photo',
-                'name',
-                'how it’s taken',
-                'when',
-                'saved',
-              ],
-              onSelect: saved ? (_) {} : _goTo,
+            // Rebuilt on its own as the name or the reminders change.
+            child: ListenableBuilder(
+              listenable: Listenable.merge([_name, ?_extras?.filled]),
+              builder: (context, _) => _StepIndicator(
+                controller: _steps,
+                step: _step,
+                light: light,
+                done: [
+                  _photoPath != null,
+                  _name.text.trim().isNotEmpty,
+                  _form != null,
+                  _extras?.filled.value ?? false,
+                  false,
+                ],
+                labels: const [
+                  'photo',
+                  'name',
+                  'how it’s taken',
+                  'when',
+                  'saved',
+                ],
+                onSelect: saved ? (_) {} : _goTo,
+              ),
             ),
           ),
         ),
@@ -509,12 +520,16 @@ class _StepIndicator extends StatelessWidget {
     required this.step,
     required this.light,
     required this.labels,
+    required this.done,
     required this.onSelect,
   });
   final PageController controller;
   final int step;
   final DayLight light;
   final List<String> labels;
+
+  /// Per step, whether its entry is filled in: its dot is then a tick.
+  final List<bool> done;
   final ValueChanged<int> onSelect;
 
   /// The active icon's size: a little larger than the header's drawn stamps.
@@ -534,7 +549,9 @@ class _StepIndicator extends StatelessWidget {
             Semantics(
               button: true,
               selected: i == step,
-              label: 'Step ${i + 1} of ${labels.length}: ${labels[i]}',
+              label:
+                  'Step ${i + 1} of ${labels.length}: ${labels[i]}'
+                  '${done[i] ? ', done' : ''}',
               excludeSemantics: true,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
@@ -551,6 +568,7 @@ class _StepIndicator extends StatelessWidget {
                         painter: _StepMark(
                           step: i,
                           t: t,
+                          done: done[i],
                           ink: light.ink,
                           size: _icon,
                         ),
@@ -566,17 +584,20 @@ class _StepIndicator extends StatelessWidget {
   );
 }
 
-/// One step's mark: a small dot at [t] = 0, its drawn icon at [t] = 1. In
-/// between it turns half a revolution while it grows or shrinks.
+/// One step's mark: a small dot at [t] = 0 (a small tick once [done]), its
+/// drawn icon at [t] = 1. In between it turns half a revolution while it
+/// grows or shrinks.
 class _StepMark extends CustomPainter {
   _StepMark({
     required this.step,
     required this.t,
+    required this.done,
     required this.ink,
     required this.size,
   });
   final int step;
   final double t;
+  final bool done;
   final Color ink;
   final double size;
 
@@ -587,9 +608,25 @@ class _StepMark extends CustomPainter {
     final e = Curves.easeInOut.transform(t);
     canvas.save();
     canvas.translate(box.width / 2, box.height / 2);
+    // A small upright tick, drawn before the turn so it never shows upside
+    // down; it fades as the icon grows out of it.
+    if (done && e < 1) {
+      canvas.drawPath(
+        Path()
+          ..moveTo(-4, 0.2)
+          ..lineTo(-1.2, 3)
+          ..lineTo(4.2, -2.8),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..color = ink.withValues(alpha: 0.7 * (1 - e)),
+      );
+    }
     canvas.rotate((1 - e) * math.pi);
     // A crisp ink dot that fades as the icon grows out of it.
-    if (e < 1) {
+    if (!done && e < 1) {
       canvas.drawCircle(
         Offset.zero,
         3.5,
@@ -697,7 +734,7 @@ class _StepMark extends CustomPainter {
 
   @override
   bool shouldRepaint(_StepMark old) =>
-      old.t != t || old.ink != ink || old.step != step;
+      old.t != t || old.done != done || old.ink != ink || old.step != step;
 }
 
 /// The last page: the medicine, saved, set down as a print on the shelf.

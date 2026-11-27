@@ -235,11 +235,8 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // The same 1 pm colour as the ruler screens, with History's own ink.
-    final light = DayLight.screen.withInk(
-      ink: const Color(0xFF15171A),
-      soft: const Color(0xFF6B7079),
-    );
+    // Warm paper, or warm dark grey when the phone is in dark mode (§18.3).
+    final light = DayLight.paper(dark: _isDark(context));
     final g = _grid.value;
     return Scaffold(
       backgroundColor: light.page,
@@ -439,7 +436,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                           : null),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFDADEE6)
+                    color: _hues(context).cell
                         .withValues(alpha: d > today ? 0.55 : 1),
                     borderRadius: BorderRadius.circular(9),
                   ),
@@ -547,7 +544,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
   Widget _controls(DayLight light, double g) {
     final shadow = [
       BoxShadow(
-        color: const Color(0xFF3A4150).withValues(alpha: 0.10),
+        color: _hues(context).shadow.withValues(alpha: 0.10),
         blurRadius: 20,
         offset: const Offset(0, 8),
       ),
@@ -574,7 +571,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                 height: 54,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: Colors.white,
+                  color: _hues(context).raised,
                   boxShadow: shadow,
                 ),
                 child: Row(
@@ -669,11 +666,11 @@ class _DayPrint extends StatelessWidget {
         76 * (1 - g),
       ),
       decoration: BoxDecoration(
-        color: Color.lerp(Colors.white, Colors.transparent, g),
+        color: Color.lerp(Paper.sheet, Colors.transparent, g),
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF3A4150).withValues(alpha: 0.16 * (1 - g)),
+            color: _hues(context).shadow.withValues(alpha: 0.16 * (1 - g)),
             blurRadius: 26 - 20 * g,
             offset: Offset(0, 12 - 10 * g),
           ),
@@ -698,19 +695,11 @@ class _DayPrint extends StatelessWidget {
                   children: [
                     Text(
                       '${monthName(month).substring(0, 3)} ${printed.day}',
-                      style: figtree(
-                        21,
-                        FontWeight.w800,
-                        const Color(0xFF15171A),
-                      ),
+                      style: figtree(21, FontWeight.w800, Paper.ink),
                     ),
                     Text(
                       '$prints ${prints == 1 ? 'print' : 'prints'}',
-                      style: figtree(
-                        15,
-                        FontWeight.w400,
-                        const Color(0xFF6B7079),
-                      ),
+                      style: figtree(15, FontWeight.w400, Paper.soft),
                     ),
                   ],
                 ),
@@ -790,7 +779,7 @@ class _ViewSwitch extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: const Color(0xFFDDE1E8),
+        color: _hues(context).track,
         borderRadius: BorderRadius.circular(12),
       ),
       child: SizedBox(
@@ -805,11 +794,11 @@ class _ViewSwitch extends StatelessWidget {
               height: _seg,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: _hues(context).raised,
                   borderRadius: BorderRadius.circular(9),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF3A4150).withValues(alpha: 0.12),
+                      color: _hues(context).shadow.withValues(alpha: 0.12),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -921,3 +910,24 @@ class _ViewIcon extends CustomPainter {
   bool shouldRepaint(_ViewIcon old) =>
       old.color != color || old.calendar != calendar;
 }
+
+bool _isDark(BuildContext context) =>
+    MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+
+/// History's quieter surfaces, light or dark with the phone: empty calendar
+/// days, the switch's track, raised controls and shadows.
+({Color cell, Color track, Color raised, Color shadow}) _hues(
+  BuildContext context,
+) => _isDark(context)
+    ? (
+        cell: const Color(0xFF34302C),
+        track: const Color(0xFF2E2B28),
+        raised: const Color(0xFF3A3632),
+        shadow: Colors.black,
+      )
+    : (
+        cell: const Color(0xFFE7E2D8),
+        track: const Color(0xFFE3DED4),
+        raised: Paper.sheet,
+        shadow: const Color(0xFF3A3530),
+      );
