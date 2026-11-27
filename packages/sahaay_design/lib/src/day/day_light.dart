@@ -75,3 +75,28 @@ TextStyle figtree(
   height: height,
   letterSpacing: letterSpacing,
 );
+
+/// Handwriting, for what the person writes themselves, such as a note.
+TextStyle handwritten(double size, Color color, {double height = 1.25}) =>
+    TextStyle(
+      fontFamily: Typefaces.handwriting,
+      package: Typefaces.package,
+      fontSize: size,
+      color: color,
+      height: height,
+      // Set, not inherited: a text field would otherwise take the theme's
+      // letter spacing and the writing would widen.
+      letterSpacing: 0,
+    );
+
+/// The rounded reading face (Nunito), for small labels that sit on paper,
+/// such as the line at the top of a note.
+TextStyle rounded(double size, FontWeight weight, Color color) => TextStyle(
+  fontFamily: Typefaces.reading,
+  package: Typefaces.package,
+  fontSize: size,
+  fontWeight: weight,
+  fontVariations: [FontVariation('wght', weight.value.toDouble())],
+  color: color,
+  letterSpacing: 0,
+);

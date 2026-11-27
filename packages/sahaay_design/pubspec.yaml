@@ -42,3 +42,8 @@ flutter:
     - family: Figtree
       fonts:
         - asset: fonts/figtree/Figtree-Variable.ttf
+    # Handwriting, for what the person writes themselves, such as the
+    # sticky note (§18.3). Latin only; copyright David Reid.
+    - family: QEDavidReid
+      fonts:
+        - asset: fonts/qe_david_reid/QEDavidReid.ttf

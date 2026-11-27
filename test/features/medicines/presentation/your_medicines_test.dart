@@ -69,7 +69,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Add a medicine'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Take photo'), findsOneWidget);
+    expect(find.text('take its photo.'), findsOneWidget);
 
     await disposeTestApp(tester);
   });
