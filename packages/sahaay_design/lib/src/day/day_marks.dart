@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'day_light.dart';
 
 /// The cream paper of prints and cards, with the ink drawn on it
-/// (`docs/design-system.md` §18.3).
+/// (`docs/design-system.md` §3).
 abstract final class Paper {
   /// The paper itself.
   static const sheet = Color(0xFFFBFAF6);
@@ -328,56 +328,4 @@ class FormMark extends CustomPainter {
       old.injectable != injectable ||
       old.color != color ||
       old.filled != filled;
-}
-
-/// A medicine photo that flies between screens (`docs/design-system.md`
-/// §18.3): it leaves its small print, grows into place on the next screen,
-/// rounding off its corners and gathering its glow on the way. Both ends
-/// give the same [tag].
-class MedPhotoHero extends StatelessWidget {
-  const MedPhotoHero({
-    required this.tag,
-    required this.image,
-    required this.radius,
-    this.glow = 1,
-    super.key,
-  });
-
-  final Object tag;
-  final ImageProvider image;
-  final double radius;
-  final double glow;
-
-  @override
-  Widget build(BuildContext context) => Hero(
-    tag: tag,
-    flightShuttleBuilder: (context, animation, direction, from, to) {
-      final a = (from.widget as Hero).child as MedPhoto;
-      final b = (to.widget as Hero).child as MedPhoto;
-      final curved = CurvedAnimation(
-        parent: animation,
-        curve: const Cubic(0.2, 0.9, 0.25, 1),
-      );
-      return AnimatedBuilder(
-        animation: curved,
-        builder: (context, _) {
-          final t = direction == HeroFlightDirection.push
-              ? curved.value
-              : 1 - curved.value;
-          final (start, end) = direction == HeroFlightDirection.push
-              ? (a, b)
-              : (b, a);
-          return MedPhoto(
-            image: image,
-            radius: start.radius + (end.radius - start.radius) * t,
-            // The glow swells past where it settles, then eases back.
-            glow:
-                (start.glow + (end.glow - start.glow) * t) +
-                0.35 * math.sin(math.pi * t),
-          );
-        },
-      );
-    },
-    child: MedPhoto(image: image, radius: radius, glow: glow),
-  );
 }

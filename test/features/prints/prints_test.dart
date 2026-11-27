@@ -17,7 +17,7 @@ void main() {
       LocalDateTime(d ?? today, LocalTime(h, m));
   final past = LocalDate(2026, 1, 1);
 
-  group('canPrint (FR-11, AC-16)', () {
+  group('canPrint', () {
     final nine = aReminder(start: past, time: LocalTime(9, 0));
 
     test('opens 30 minutes before the reminder\'s time', () {
@@ -87,33 +87,27 @@ void main() {
       ]);
     });
 
-    test(
-      'deleting a reminder or its medicine removes its prints (AC-20)',
-      () async {
-        await prints.add(Print(reminderId: 'r1', day: today, madeAt: at(9, 0)));
-        await prints.add(Print(reminderId: 'r2', day: today, madeAt: at(9, 0)));
+    test('deleting a reminder or its medicine removes its prints', () async {
+      await prints.add(Print(reminderId: 'r1', day: today, madeAt: at(9, 0)));
+      await prints.add(Print(reminderId: 'r2', day: today, madeAt: at(9, 0)));
 
-        await reminders.delete('r1');
-        expect(await prints.find('r1', today), isNull);
-        expect(await prints.find('r2', today), isNotNull);
+      await reminders.delete('r1');
+      expect(await prints.find('r1', today), isNull);
+      expect(await prints.find('r2', today), isNotNull);
 
-        await medicines.delete('m1');
-        expect(await prints.find('r2', today), isNull);
-      },
-    );
+      await medicines.delete('m1');
+      expect(await prints.find('r2', today), isNull);
+    });
 
-    test(
-      'toggling makes a print, and toggling again undoes it (AC-15)',
-      () async {
-        final toggle = TogglePrint(prints: prints, now: () => at(9, 5));
-        final reminder = aReminder(id: 'r1', start: past);
+    test('toggling makes a print, and toggling again undoes it', () async {
+      final toggle = TogglePrint(prints: prints, now: () => at(9, 5));
+      final reminder = aReminder(id: 'r1', start: past);
 
-        expect(await toggle(reminder, today), isTrue);
-        expect((await prints.find('r1', today))!.madeAt, at(9, 5));
-        expect(await toggle(reminder, today), isFalse);
-        expect(await prints.find('r1', today), isNull);
-      },
-    );
+      expect(await toggle(reminder, today), isTrue);
+      expect((await prints.find('r1', today))!.madeAt, at(9, 5));
+      expect(await toggle(reminder, today), isFalse);
+      expect(await prints.find('r1', today), isNull);
+    });
 
     test('toggling a reminder still to come makes no print', () async {
       final toggle = TogglePrint(prints: prints, now: () => at(6, 0));

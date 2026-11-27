@@ -1,4 +1,4 @@
-/// Captures a medicine photo with the device camera (PRD §3.1, FR-01).
+/// Captures a medicine photo with the device camera.
 ///
 /// Kept behind a contract so screens can be tested without the camera plugin.
 abstract interface class PhotoCapture {

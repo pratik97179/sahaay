@@ -1,7 +1,7 @@
 import '../domain/reminder_repository.dart';
 import 'reminder_draft.dart';
 
-/// Edits, pauses, resumes and deletes single reminders (FR-06 to FR-08).
+/// Edits, pauses, resumes and deletes single reminders.
 ///
 /// Every operation reads and writes only the reminder it is given, so the
 /// medicine's other reminders are never touched.

@@ -9,6 +9,6 @@ extension MedicineFormLabel on MedicineForm {
 }
 
 extension MedicineDisplayName on Medicine {
-  /// The medicine's name, or a generic label when none was given (PRD §3.1).
+  /// The medicine's name, or a generic label when none was given.
   String get displayName => name ?? 'Unnamed medicine';
 }

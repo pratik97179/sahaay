@@ -1,10 +1,10 @@
 import 'calendar.dart';
 import 'reminder_schedule.dart';
 
-/// A reminder for one medicine at one time of day (PRD §3.2).
+/// A reminder for one medicine at one time of day.
 ///
 /// [quantity] and [instruction] are free text recorded exactly as the user
-/// entered them; Sahaay never interprets or validates them (FR-04).
+/// entered them; Sahaay never interprets or validates them.
 final class Reminder {
   Reminder({
     required this.id,

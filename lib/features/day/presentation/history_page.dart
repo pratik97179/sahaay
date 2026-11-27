@@ -1,4 +1,4 @@
-// History (docs/design-system.md §18.3), on real prints.
+// History (docs/design-system.md §3), on real prints.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -15,7 +15,7 @@ import 'day_widgets.dart';
 
 /// History: the month's prints as a flipbook. Swipe through the days like a
 /// stack of photos; hold the stack and every day flies out to its place in
-/// the month's calendar. Hold the calendar to gather them back (FR-13).
+/// the month's calendar. Hold the calendar to gather them back.
 class HistoryPage extends ConsumerWidget {
   const HistoryPage({super.key});
 
@@ -235,8 +235,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Warm paper, or warm dark grey when the phone is in dark mode (§18.3).
-    final light = DayLight.paper(dark: _isDark(context));
+    const light = DayLight.screen;
     final g = _grid.value;
     return Scaffold(
       backgroundColor: light.page,
@@ -436,8 +435,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                           : null),
                 child: Container(
                   decoration: BoxDecoration(
-                    color: _hues(context).cell
-                        .withValues(alpha: d > today ? 0.55 : 1),
+                    color: _hues.cell.withValues(alpha: d > today ? 0.55 : 1),
                     borderRadius: BorderRadius.circular(9),
                   ),
                 ),
@@ -544,7 +542,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
   Widget _controls(DayLight light, double g) {
     final shadow = [
       BoxShadow(
-        color: _hues(context).shadow.withValues(alpha: 0.10),
+        color: _hues.shadow.withValues(alpha: 0.10),
         blurRadius: 20,
         offset: const Offset(0, 8),
       ),
@@ -571,7 +569,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                 height: 54,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
-                  color: _hues(context).raised,
+                  color: _hues.raised,
                   boxShadow: shadow,
                 ),
                 child: Row(
@@ -670,7 +668,7 @@ class _DayPrint extends StatelessWidget {
         borderRadius: BorderRadius.circular(radius),
         boxShadow: [
           BoxShadow(
-            color: _hues(context).shadow.withValues(alpha: 0.16 * (1 - g)),
+            color: _hues.shadow.withValues(alpha: 0.16 * (1 - g)),
             blurRadius: 26 - 20 * g,
             offset: Offset(0, 12 - 10 * g),
           ),
@@ -779,7 +777,7 @@ class _ViewSwitch extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: _hues(context).track,
+        color: _hues.track,
         borderRadius: BorderRadius.circular(12),
       ),
       child: SizedBox(
@@ -794,11 +792,11 @@ class _ViewSwitch extends StatelessWidget {
               height: _seg,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: _hues(context).raised,
+                  color: _hues.raised,
                   borderRadius: BorderRadius.circular(9),
                   boxShadow: [
                     BoxShadow(
-                      color: _hues(context).shadow.withValues(alpha: 0.12),
+                      color: _hues.shadow.withValues(alpha: 0.12),
                       blurRadius: 6,
                       offset: const Offset(0, 2),
                     ),
@@ -911,23 +909,11 @@ class _ViewIcon extends CustomPainter {
       old.color != color || old.calendar != calendar;
 }
 
-bool _isDark(BuildContext context) =>
-    MediaQuery.platformBrightnessOf(context) == Brightness.dark;
-
-/// History's quieter surfaces, light or dark with the phone: empty calendar
-/// days, the switch's track, raised controls and shadows.
-({Color cell, Color track, Color raised, Color shadow}) _hues(
-  BuildContext context,
-) => _isDark(context)
-    ? (
-        cell: const Color(0xFF34302C),
-        track: const Color(0xFF2E2B28),
-        raised: const Color(0xFF3A3632),
-        shadow: Colors.black,
-      )
-    : (
-        cell: const Color(0xFFE7E2D8),
-        track: const Color(0xFFE3DED4),
-        raised: Paper.sheet,
-        shadow: const Color(0xFF3A3530),
-      );
+/// History's quieter surfaces: empty calendar days, the switch's track,
+/// raised controls and shadows.
+const _hues = (
+  cell: Color(0xFFE7E2D8),
+  track: Color(0xFFE3DED4),
+  raised: Paper.sheet,
+  shadow: Color(0xFF3A3530),
+);

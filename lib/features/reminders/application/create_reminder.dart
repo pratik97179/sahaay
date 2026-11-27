@@ -2,7 +2,7 @@ import '../domain/reminder.dart';
 import '../domain/reminder_repository.dart';
 import 'reminder_draft.dart';
 
-/// Adds a reminder to an existing medicine (FR-02).
+/// Adds a reminder to an existing medicine.
 final class CreateReminder {
   CreateReminder({required this._reminders, required this._newId});
 

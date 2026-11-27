@@ -2,7 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Sahaay's screen change (`docs/design-system.md` §18.3): the new screen
+/// Sahaay's screen change (`docs/design-system.md` §3): the new screen
 /// rises as a rounded card, a little small, low and clear, and settles flat
 /// while its corners square off; the screen behind sinks back and dims. One
 /// continuous springy motion, mirrored on the way back.

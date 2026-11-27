@@ -8,6 +8,7 @@ import 'package:sahaay/core/database/app_database.dart';
 import 'package:sahaay/core/database/database_provider.dart';
 import 'package:sahaay/core/time/clock.dart';
 import 'package:sahaay/features/medicines/medicines_providers.dart';
+import 'package:sahaay/features/notifications/notifications_providers.dart';
 
 import 'fakes.dart';
 
@@ -33,6 +34,9 @@ Future<void> pumpTestApp(
       overrides: [
         appDatabaseProvider.overrideWithValue(db),
         clockProvider.overrideWithValue(() => now ?? testNow),
+        notificationSchedulerProvider.overrideWithValue(
+          FakeNotificationScheduler(),
+        ),
         photoCaptureProvider.overrideWithValue(capture ?? FakePhotoCapture()),
         medicinePhotoStorageProvider.overrideWithValue(
           photos ?? FakePhotoStorage(),

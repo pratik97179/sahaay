@@ -2,7 +2,7 @@ import 'calendar.dart';
 import 'recurrence.dart';
 
 /// When a reminder fires: one time of day, a recurrence, a required start
-/// date and an optional end date (PRD §3.2, FR-03).
+/// date and an optional end date.
 final class ReminderSchedule {
   ReminderSchedule({
     required this.time,

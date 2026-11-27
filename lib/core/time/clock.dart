@@ -4,5 +4,5 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 typedef Clock = DateTime Function();
 
 /// The single source of "now", overridden in tests so dates and validation
-/// stay deterministic (`docs/testing-strategy.md` §4.1).
+/// stay deterministic.
 final clockProvider = Provider<Clock>((ref) => DateTime.now);

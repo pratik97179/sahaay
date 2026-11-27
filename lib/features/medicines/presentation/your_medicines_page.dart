@@ -15,7 +15,7 @@ import '../medicines_providers.dart';
 import 'add_medicine_button.dart';
 import 'medicine_labels.dart';
 
-/// The person's medicines as a shelf of prints (docs/design-system.md §18):
+/// The person's medicines as a shelf of prints (docs/design-system.md §3):
 /// adding a medicine first, then each medicine as a rounded print showing
 /// its photo, name and form, when in the day its reminders are, and what's
 /// next.
@@ -72,7 +72,7 @@ class YourMedicinesPage extends ConsumerWidget {
                             Text(
                               'your medicines.',
                               style: figtree(
-                                44,
+                                40,
                                 FontWeight.w800,
                                 light.ink,
                                 letterSpacing: -1,

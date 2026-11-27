@@ -6,13 +6,9 @@ Sahaay is a reminder tool only: it does not give medical advice or calculate dos
 
 ## Documentation
 
-- [Product requirements](docs/sahaay_prd.md) (the source of truth for scope)
 - [Architecture](docs/architecture.md)
 - [Design system](docs/design-system.md)
-- [Implementation plan](docs/implementation-plan.md)
-- [Testing strategy](docs/testing-strategy.md)
 - [Technology decisions](docs/adr/0001-technology-choices.md)
-- [v1 technical notes](docs/sahaay_v1_technical_notes.md)
 
 ## Getting Started
 

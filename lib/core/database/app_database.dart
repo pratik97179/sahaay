@@ -47,8 +47,8 @@ class Reminders extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
-/// The person's own record that they took one reminder's dose on one day
-/// (PRD §3.3, FR-11). Made and removed only by the person.
+/// The person's own record that they took one reminder's dose on one day.
+/// Made and removed only by the person.
 @DataClassName('PrintRow')
 class Prints extends Table {
   TextColumn get reminderId =>
@@ -77,7 +77,7 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
-      // 2: prints (PRD 0.4). Existing medicines and reminders are kept.
+      // 2: prints. Existing medicines and reminders are kept.
       if (from < 2) await m.createTable(prints);
     },
     beforeOpen: (details) async {

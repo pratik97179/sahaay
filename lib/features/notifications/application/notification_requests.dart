@@ -18,7 +18,7 @@ final class NotificationRequest {
   final int id;
 
   /// The reminder this notification is for; carried as the notification's
-  /// payload so a tap opens that reminder (FR-05).
+  /// payload so a tap opens that reminder.
   final String reminderId;
   final LocalDateTime at;
   final NotificationRepeat? repeat;
@@ -30,8 +30,7 @@ final class NotificationRequest {
       'NotificationRequest($id, $reminderId, $at, $repeat, "$title", "$body")';
 }
 
-/// The notifications that should be pending for [reminders], with their text
-/// (PRD FR-05):
+/// The notifications that should be pending for [reminders], with their text:
 /// - The title names the medicine, or says "Unnamed medicine".
 /// - The body gives the reminder's quantity and instruction exactly as the
 ///   user entered them. When there are none, it gives the time.

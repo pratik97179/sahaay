@@ -1,5 +1,5 @@
 name: sahaay_design
-description: Sahaay's design system — tokens, theme and components.
+description: Sahaay's design system - colours, type and drawn pieces.
 publish_to: 'none'
 version: 0.1.0
 
@@ -18,32 +18,18 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
-  # Licences ship with the fonts, as the SIL Open Font License requires.
-  assets:
-    - fonts/barlow_condensed/OFL.txt
-    - fonts/nunito/OFL.txt
-    - fonts/figtree/OFL.txt
-
   fonts:
-    # The identifying voice: screen, section and item titles, and times.
-    - family: BarlowCondensed
-      fonts:
-        - asset: fonts/barlow_condensed/BarlowCondensed-Bold.ttf
-          weight: 700
-        - asset: fonts/barlow_condensed/BarlowCondensed-ExtraBold.ttf
-          weight: 800
-    # The reading voice. A variable font: weights are set with the `wght`
-    # axis in the text styles, not with `FontWeight` alone.
-    - family: Nunito
-      fonts:
-        - asset: fonts/nunito/Nunito-Variable.ttf
-    # The makeover's typeface (docs/design-system.md §18.3). A variable font:
-    # weights are set with the `wght` axis as well as `FontWeight`.
+    # The single typeface. A variable font: weights are set with the `wght`
+    # axis as well as `FontWeight`.
     - family: Figtree
       fonts:
         - asset: fonts/figtree/Figtree-Variable.ttf
+    # The rounded reading face. A variable font.
+    - family: Nunito
+      fonts:
+        - asset: fonts/nunito/Nunito-Variable.ttf
     # Handwriting, for what the person writes themselves, such as the
-    # sticky note (§18.3). Latin only; copyright David Reid.
+    # sticky note. Latin only.
     - family: QEDavidReid
       fonts:
         - asset: fonts/qe_david_reid/QEDavidReid.ttf

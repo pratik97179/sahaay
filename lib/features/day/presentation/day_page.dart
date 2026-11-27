@@ -15,8 +15,8 @@ import 'day_reminder_page.dart';
 import 'day_widgets.dart';
 import 'history_page.dart';
 
-/// A day's ruler: Today (the home screen, PRD FR-12) or an earlier day
-/// opened from History (FR-13).
+/// A day's ruler: Today (the home screen) or an earlier day
+/// opened from History.
 class DayPage extends ConsumerWidget {
   const DayPage({this.day, super.key});
 

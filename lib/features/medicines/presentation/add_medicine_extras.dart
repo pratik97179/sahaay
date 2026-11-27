@@ -2,14 +2,21 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../domain/medicine.dart';
+
 /// A section another feature adds to the Add medicine form, whose records are
-/// saved together with the new medicine in one transaction (PRD §5.1).
+/// saved together with the new medicine in one transaction.
 ///
 /// This is how reminders are created while adding a medicine without the
 /// medicines feature depending on the reminders feature.
 abstract interface class AddMedicineExtras {
   /// The form section; [enabled] is false while the medicine is being saved.
-  Widget buildSection(BuildContext context, {required bool enabled});
+  /// [form] is the medicine's form as chosen so far, or null.
+  Widget buildSection(
+    BuildContext context, {
+    required bool enabled,
+    required MedicineForm? form,
+  });
 
   /// True while the section holds something that [saveFor] would save, so
   /// its step can show as done.

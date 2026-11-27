@@ -3,7 +3,7 @@ import '../domain/recurrence.dart';
 import '../domain/reminder.dart';
 import '../domain/reminder_schedule.dart';
 
-/// The recurrence patterns the user can choose from (PRD FR-03).
+/// The recurrence patterns the user can choose from.
 enum RepeatType { once, daily, weekly, monthly, yearly }
 
 /// Why a draft cannot be saved yet.

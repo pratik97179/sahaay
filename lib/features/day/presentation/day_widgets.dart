@@ -1,4 +1,4 @@
-// Pieces of the day screens (docs/design-system.md §18.3): Today, the
+// Pieces of the day screens (docs/design-system.md §3): Today, the
 // reminder page and History.
 import 'dart:async';
 

@@ -1,7 +1,7 @@
-/// The form of a medicine (PRD §3.1).
+/// The form of a medicine.
 enum MedicineForm { oral, injectable }
 
-/// A medicine the user creates reminders for (PRD §3.1).
+/// A medicine the user creates reminders for.
 ///
 /// Reminders reference a medicine by id; they are owned by the reminders
 /// feature and are not embedded here.
