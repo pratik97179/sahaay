@@ -227,12 +227,12 @@ void main() {
       expect(saved.isPaused, isFalse);
 
       // Back on the medicine's page.
-      expect(find.text('Medicine information'), findsOneWidget);
-      expect(find.text('8:00 AM'), findsOneWidget);
-      expect(find.text('Every 2 days'), findsOneWidget);
+      expect(find.text('reminders'), findsOneWidget);
+      expect(find.text('8:00 am'), findsOneWidget);
+      expect(find.text('every 2 days'), findsOneWidget);
       expect(find.text('1 tablet'), findsOneWidget);
       expect(find.text('After food'), findsOneWidget);
-      expect(find.text('No reminders.'), findsNothing);
+      expect(find.text('no reminders yet.'), findsNothing);
 
       await disposeTestApp(tester);
     });

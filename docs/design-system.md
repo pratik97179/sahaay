@@ -794,6 +794,7 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | M2 | Your medicines (§18.3): the shelf of rounded prints with the day strip and what's next, the drawn **add** button, and Today's **medicines** button. Replaces the old medicines list (`medicines_page.dart`, `medicine_card.dart` removed). Not yet: the medicine page in the new style | in progress |
 | M3 | Add medicine (§18.3): one step at a time (photo, name, how it's taken, when, saved) with the drawn icon indicator; saving on arriving at the last step; the "when?" step holding the whole reminder on one screen (time pills, ruler, how often, amount dials, the sticky note). Replaces `add_medicine_page.dart` and the separate draft-reminder screen (`draft_reminder_page.dart` and its route removed). Handwriting font QE David Reid added to `sahaay_design` (its licence for release still to be confirmed). Not yet: the start date and an end date on this step, which stay with the reminder screen | in progress |
 | M4 | Shared makeover pieces moved into `sahaay_design` (`src/day/day_marks.dart`): `Paper` colours, `MedPhoto`, `DayStrip`, `FormMark`, `clockText`, and `DayLight.screen` (the 1 pm colour) with `DayLight.withInk`. Features no longer import each other's drawing code; day-only pieces stay in `day_widgets.dart`, and the add button lives in the medicines feature | done |
+| M5 | The medicine page (§18.3): header with form mark, hold-to-delete bin, the photo, the day strip and a paper print per reminder with its note. Medicine photos glow in their own colours (`MedPhoto`). Replaces the old Material page | in progress |
 | 7b | Medicines home | paused until the makeover |
 | 7c | Medicine screen and its reminders section | paused |
 | 7d | Reminder screen | paused |
@@ -961,6 +962,18 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
   - No end date on this step; it can be set later on the reminder.
 - **Controls are drawn, not worded.** An action is shown by a drawn mark that looks tappable (a stamp, a pill, a stepper), with its meaning given to screen readers; a plain line of text is never the only sign that something can be tapped. Rejected along the way: "+ another time" as plain text (unclear, and didn't look tappable), the A/B/C layouts' "until" row, and the separate "add a reminder" screen.
 
+**The medicine page** (agreed 2026-11-27)
+
+- Header like the shelf: "‹ your medicines", the name large, and its form mark with "oral" or "injectable" under it.
+- **delete** is a drawn bin at the top right, level with the first header line. Holding it for about a second deletes the medicine, its photo, its reminders and their prints: a ring fills around the bin and its lid lifts while held, and letting go early rolls it back. A quick tap only changes the word under it to "hold". The hold is the confirmation (PRD §5.4), so there is no dialog.
+- The photo, large.
+- **reminders**, with the drawn clock with a plus to add one, the day strip of their times, then each reminder as a small paper print: the time, how often, the amount, and the person's note pinned on as a little tilted sticky note in handwriting. A paused reminder is faded and says "· paused". Tapping a print opens that reminder. With none: "no reminders yet."
+- Editing the medicine's name, photo or form stays out of v1 (PRD §10).
+
+**Medicine photos** (agreed 2026-11-27)
+
+- A photo that is not a print glows in its own colours: a blurred, brighter copy of the photo sits behind and a little below it as a soft halo, with a thin light rim and a faint sheen across the top, so it reads like glass rather than a flat picture. It applies wherever the photo appears on its own (Today, the reminder page, the medicine page, the Add medicine photo). The halo fades out as a photo develops into a paper print, so prints keep their plain paper look. (Rejected: the plain grey drop shadow, as dull.)
+
 **Motion**
 
 - `flutter_animate`, used only inside `sahaay_design` behind Sahaay's own helpers (enter, stagger, pop), with Sahaay's motion tokens and Reduce Motion handled inside. Agreed, but on hold until the motion work resumes.
@@ -992,7 +1005,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 4. Replace the screens one slice each: Today, the reminder screen, History, then the rest once designed. Each slice removes the old screen it replaces.
 5. When the last old screen is gone, delete `lib/design_system/`.
 
-**Next to prototype:** the medicine page, then the reminder screen.
+**Next to prototype:** the reminder screen.
 
 ### 18.6 Open
 

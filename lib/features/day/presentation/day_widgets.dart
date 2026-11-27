@@ -138,6 +138,8 @@ class _HoldPhotoState extends State<HoldPhoto> with TickerProviderStateMixin {
               MedPhoto(
                 image: widget.image,
                 radius: widget.radius * (1 - t * 0.85),
+                // The halo fades as the paper print develops.
+                glow: 1 - t,
               ),
               Positioned(
                 left: 4,

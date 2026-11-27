@@ -36,14 +36,19 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> tapDeleteMedicine(WidgetTester tester) async {
-    await tester.scrollUntilVisible(
-      find.text('Delete medicine'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Delete medicine'));
+  /// Holds the drawn bin for [held], then lets go.
+  Future<void> holdDelete(
+    WidgetTester tester,
+    String name,
+    Duration held,
+  ) async {
+    final bin = find.bySemanticsLabel('Delete $name');
+    await tester.ensureVisible(bin);
+    final gesture = await tester.startGesture(tester.getCenter(bin));
+    for (var t = 0; t < held.inMilliseconds; t += 100) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await gesture.up();
     await tester.pumpAndSettle();
   }
 
@@ -89,8 +94,8 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Medicine information'), findsOneWidget);
-      expect(find.text('No reminders.'), findsOneWidget);
+      expect(find.text('reminders'), findsOneWidget);
+      expect(find.text('no reminders yet.'), findsOneWidget);
 
       await disposeTestApp(tester);
     });
@@ -156,7 +161,7 @@ void main() {
       await tester.tap(find.text('see its reminders  ›'));
       await tester.pumpAndSettle();
       expect(find.text('Insulin'), findsOneWidget);
-      expect(find.text('No reminders.'), findsOneWidget);
+      expect(find.text('no reminders yet.'), findsOneWidget);
 
       // Back goes to the list, not to the finished steps.
       await tester.pageBack();
@@ -219,15 +224,15 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      expect(find.text('9:00 AM'), findsOneWidget);
-      expect(find.text('9:00 PM'), findsOneWidget);
-      expect(find.text('Paused'), findsOneWidget);
-      expect(find.text('No reminders.'), findsNothing);
+      expect(find.text('9:00 am'), findsOneWidget);
+      expect(find.text('9:00 pm'), findsOneWidget);
+      expect(find.text('every day · paused'), findsOneWidget);
+      expect(find.text('no reminders yet.'), findsNothing);
 
       await disposeTestApp(tester);
     });
 
-    testWidgets('deletes the medicine, its reminders and photo on confirm', (
+    testWidgets('holding the bin deletes the medicine, reminders and photo', (
       tester,
     ) async {
       await runDb(
@@ -239,10 +244,11 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      await tapDeleteMedicine(tester);
-      expect(find.text('Delete Paracetamol?'), findsOneWidget);
-      await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
-      await tester.pumpAndSettle();
+      await holdDelete(
+        tester,
+        'Paracetamol',
+        const Duration(milliseconds: 1500),
+      );
 
       expect(find.text('add the first one with its photo.'), findsOneWidget);
       expect(await runDb(tester, () => medicines.find('m1')), isNull);
@@ -255,24 +261,7 @@ void main() {
       await disposeTestApp(tester);
     });
 
-    testWidgets('asks about "this medicine" when it has no name', (
-      tester,
-    ) async {
-      await runDb(tester, () => medicines.insert(aMedicine(name: null)));
-      await pumpTestApp(tester, db: db, photos: photos);
-      await tester.tap(find.text('Unnamed medicine'));
-      await tester.pumpAndSettle();
-
-      await tapDeleteMedicine(tester);
-
-      expect(find.text('Delete this medicine?'), findsOneWidget);
-
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
-      await disposeTestApp(tester);
-    });
-
-    testWidgets('keeps the medicine when deletion is cancelled', (
+    testWidgets('letting go early or tapping keeps the medicine', (
       tester,
     ) async {
       await runDb(
@@ -283,11 +272,17 @@ void main() {
       await tester.tap(find.text('Paracetamol'));
       await tester.pumpAndSettle();
 
-      await tapDeleteMedicine(tester);
-      await tester.tap(find.text('Cancel'));
-      await tester.pumpAndSettle();
+      await holdDelete(
+        tester,
+        'Paracetamol',
+        const Duration(milliseconds: 600),
+      );
+      await tester.tap(find.bySemanticsLabel('Delete Paracetamol'));
+      await tester.pump();
+      expect(find.text('hold'), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(seconds: 2));
 
-      expect(find.text('Medicine information'), findsOneWidget);
+      expect(find.text('reminders'), findsOneWidget);
       expect(await runDb(tester, () => medicines.find('m1')), isNotNull);
       expect(photos.deleted, isEmpty);
 
