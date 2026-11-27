@@ -14,7 +14,7 @@ The repository started as the Flutter counter template (Flutter 3.47.9, Dart 3.1
 | Navigation | `go_router` 18.x | First-party package; path routes (`/reminders/:id`) give notification taps a stable deep-link target. |
 | Local database | `drift` 2.x (SQLite) via `drift_flutter` | Typed queries, migrations, foreign-key cascades, transactions, and in-memory databases for tests. Photos are stored by key, not absolute path, because iOS container paths change. |
 | Photo capture and storage | `image_picker` (camera only), `path_provider` | First-party packages. *(Added with the medicine screens.)* |
-| Local notifications | `flutter_local_notifications` + `timezone` | The established local-notification plugin for Android and iOS scheduling. *(Added with the notification increment.)* |
+| Local notifications | `flutter_local_notifications` 23.x + `timezone` + `flutter_timezone` | The established local-notification plugin for Android and iOS scheduling; `flutter_timezone` gives the device's zone so repeats keep their local time. Needs Android core-library desugaring and compileSdk 37+. |
 | Design system | The `sahaay_design` package (`packages/sahaay_design/`) | Superseded: the design system's choices and their reasons are recorded in `docs/design-system.md` as its single source of truth. |
 
 ## Platforms

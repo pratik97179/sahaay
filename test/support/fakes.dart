@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:sahaay/features/medicines/application/photo_capture.dart';
 import 'package:sahaay/features/medicines/domain/medicine_photo_storage.dart';
+import 'package:sahaay/features/notifications/application/notification_requests.dart';
+import 'package:sahaay/features/notifications/application/notification_scheduler.dart';
 
 /// Returns a fixed path, `null` to simulate the user cancelling, or throws
 /// [error] to simulate a camera that cannot be opened.
@@ -39,4 +41,24 @@ final class FakePhotoStorage implements MedicinePhotoStorage {
     stored.remove(key);
     deleted.add(key);
   }
+}
+
+/// Records what would be scheduled; no device notifications.
+class FakeNotificationScheduler implements NotificationScheduler {
+  List<NotificationRequest> scheduled = const [];
+  int permissionRequests = 0;
+
+  @override
+  Future<void> replaceAll(List<NotificationRequest> requests) async =>
+      scheduled = requests;
+
+  @override
+  Future<void> requestPermission({required bool exactTiming}) async =>
+      permissionRequests++;
+
+  @override
+  Future<String?> launchReminderId() async => null;
+
+  @override
+  Stream<String> get taps => const Stream.empty();
 }
