@@ -188,8 +188,9 @@ class _MedicinePrint extends StatelessWidget {
                 child: SizedBox.square(
                   dimension: MediaQuery.textScalerOf(context).scale(18),
                   child: CustomPaint(
-                    painter: _FormMark(
+                    painter: FormMark(
                       injectable: med.medicine.form == MedicineForm.injectable,
+                      color: _paperSoft,
                     ),
                   ),
                 ),
@@ -199,7 +200,10 @@ class _MedicinePrint extends StatelessWidget {
           const SizedBox(height: 8),
           if (rs.isNotEmpty) ...[
             ExcludeSemantics(
-              child: _DayStrip(
+              child: DayStrip(
+                ink: _paperInk,
+                soft: _paperSoft,
+                background: _paper,
                 marks: [
                   for (final r in rs)
                     (r.schedule.time.minutesSinceMidnight / 60, r.isPaused),
@@ -234,151 +238,6 @@ class _MedicinePrint extends StatelessWidget {
         : '${n.date.day} ${_months[n.date.month - 1]}';
     return 'next · $when $time';
   }
-}
-
-/// A whole day on one line, midnight to midnight: quiet marks at 6 am, noon
-/// and 6 pm, a faint tick at now, and a dot at each reminder's time (a ring
-/// when paused).
-class _DayStrip extends StatelessWidget {
-  const _DayStrip({required this.marks, required this.now});
-  final List<(double, bool)> marks;
-  final double now;
-
-  @override
-  Widget build(BuildContext context) {
-    final scaler = MediaQuery.textScalerOf(context);
-    return SizedBox(
-      height: 22 + scaler.scale(10) * 1.3,
-      width: double.infinity,
-      child: CustomPaint(painter: _DayStripPainter(marks, now, scaler)),
-    );
-  }
-}
-
-class _DayStripPainter extends CustomPainter {
-  _DayStripPainter(this.marks, this.now, this.scaler);
-  final List<(double, bool)> marks;
-  final double now;
-  final TextScaler scaler;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    const dotY = 9.0, lineY = 9.0;
-    const inset = 5.0;
-    final w = size.width - inset * 2;
-    double x(double h) => inset + w * h / 24;
-    canvas.drawLine(
-      Offset(x(0), lineY),
-      Offset(x(24), lineY),
-      Paint()
-        ..strokeWidth = 1.4
-        ..strokeCap = StrokeCap.round
-        ..color = _paperSoft.withValues(alpha: 0.35),
-    );
-    for (final (h, label) in const [
-      (6.0, '6am'),
-      (12.0, 'noon'),
-      (18.0, '6pm'),
-    ]) {
-      canvas.drawLine(
-        Offset(x(h), lineY - 4),
-        Offset(x(h), lineY + 4),
-        Paint()
-          ..strokeWidth = 1.2
-          ..color = _paperSoft.withValues(alpha: 0.5),
-      );
-      final tp = TextPainter(
-        text: TextSpan(text: label, style: f(10, FontWeight.w700, _paperSoft)),
-        textDirection: TextDirection.ltr,
-        textScaler: scaler,
-      )..layout();
-      tp.paint(canvas, Offset(x(h) - tp.width / 2, lineY + 8));
-    }
-    canvas.drawLine(
-      Offset(x(now), lineY - 7),
-      Offset(x(now), lineY + 7),
-      Paint()
-        ..strokeWidth = 1.6
-        ..strokeCap = StrokeCap.round
-        ..color = _paperInk.withValues(alpha: 0.3),
-    );
-    for (final (h, paused) in marks) {
-      final c = Offset(x(h), dotY);
-      if (paused) {
-        canvas.drawCircle(c, 4.2, Paint()..color = _paper);
-        canvas.drawCircle(
-          c,
-          4.2,
-          Paint()
-            ..style = PaintingStyle.stroke
-            ..strokeWidth = 1.6
-            ..color = _paperSoft,
-        );
-      } else {
-        canvas.drawCircle(c, 4.6, Paint()..color = _paperInk);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DayStripPainter old) =>
-      old.marks != marks || old.now != now || old.scaler != scaler;
-}
-
-/// A small drawn mark for the medicine's form: a capsule for oral, a
-/// syringe for injectable.
-class _FormMark extends CustomPainter {
-  _FormMark({required this.injectable});
-  final bool injectable;
-
-  @override
-  void paint(Canvas canvas, Size s) {
-    final stroke = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.6
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..color = _paperSoft;
-    canvas.save();
-    canvas.translate(s.width / 2, s.height / 2);
-    canvas.rotate(-math.pi / 4);
-    final u = s.width / 18;
-    if (!injectable) {
-      // A capsule, half filled.
-      final r = RRect.fromRectAndRadius(
-        Rect.fromCenter(center: Offset.zero, width: 15 * u, height: 7 * u),
-        Radius.circular(3.5 * u),
-      );
-      canvas.save();
-      canvas.clipRRect(r);
-      canvas.drawRect(
-        Rect.fromLTRB(-7.5 * u, -3.5 * u, 0, 3.5 * u),
-        Paint()..color = _paperSoft,
-      );
-      canvas.restore();
-      canvas.drawRRect(r, stroke);
-    } else {
-      // A syringe: barrel, plunger and needle.
-      canvas.drawRRect(
-        RRect.fromRectAndRadius(
-          Rect.fromLTWH(-5 * u, -2.6 * u, 9 * u, 5.2 * u),
-          Radius.circular(1.2 * u),
-        ),
-        stroke,
-      );
-      canvas.drawLine(Offset(-5 * u, 0), Offset(-8.5 * u, 0), stroke);
-      canvas.drawLine(
-        Offset(-8.5 * u, -2.4 * u),
-        Offset(-8.5 * u, 2.4 * u),
-        stroke,
-      );
-      canvas.drawLine(Offset(4 * u, 0), Offset(8.5 * u, 0), stroke);
-    }
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_FormMark old) => old.injectable != injectable;
 }
 
 const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
