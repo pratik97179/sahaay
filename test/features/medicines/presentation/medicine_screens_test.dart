@@ -32,7 +32,7 @@ void main() {
     FakePhotoCapture? camera,
   }) async {
     await pumpTestApp(tester, db: db, photos: photos, capture: camera);
-    await tester.tap(find.text('Add medicine'));
+    await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
   }
 
@@ -47,14 +47,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> tapSave(WidgetTester tester) async {
-    await tester.scrollUntilVisible(
-      find.text('Save medicine'),
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Save medicine'));
+  /// Moves to a step of Add medicine with the indicator at the bottom.
+  Future<void> goToStep(WidgetTester tester, int step, String name) async {
+    await tester.tap(find.bySemanticsLabel('Step $step of 5: $name'));
     await tester.pumpAndSettle();
   }
 
@@ -76,10 +71,10 @@ void main() {
       await pumpTestApp(tester, db: db, photos: photos);
 
       expect(find.text('Paracetamol'), findsOneWidget);
-      expect(find.text('Oral / edible'), findsOneWidget);
       expect(find.text('Unnamed medicine'), findsOneWidget);
-      expect(find.text('Injectable'), findsOneWidget);
-      expect(find.text('No medicines yet.'), findsNothing);
+      expect(find.bySemanticsLabel('Oral'), findsOneWidget);
+      expect(find.bySemanticsLabel('Injectable'), findsOneWidget);
+      expect(find.text('add the first one with its photo.'), findsNothing);
 
       await disposeTestApp(tester);
     });
@@ -102,35 +97,54 @@ void main() {
   });
 
   group('Add medicine', () {
-    testWidgets('requires a photo and a form before saving', (tester) async {
+    testWidgets('goes back to the photo when saving without one', (
+      tester,
+    ) async {
       await openAddMedicine(tester);
+      expect(find.text('take its photo.'), findsOneWidget);
 
-      expect(find.text('Name'), findsOneWidget);
-      expect(find.text('Optional'), findsOneWidget);
+      await goToStep(tester, 5, 'saved');
 
-      await tapSave(tester);
-
-      expect(find.text('Take a photo of the medicine.'), findsOneWidget);
-      expect(find.text('Choose the medicine form.'), findsOneWidget);
+      expect(find.text('take its photo.'), findsOneWidget);
+      expect(find.text('a photo is needed.'), findsOneWidget);
       expect(await runDb(tester, () => medicines.watchAll().first), isEmpty);
 
       await disposeTestApp(tester);
     });
 
-    testWidgets('saves name, photo and form, then shows the medicine', (
+    testWidgets('goes back to the form when saving without one', (
+      tester,
+    ) async {
+      await openAddMedicine(tester);
+      await tester.tap(find.bySemanticsLabel('Take its photo'));
+      await tester.pumpAndSettle();
+
+      await goToStep(tester, 5, 'saved');
+
+      expect(find.text('how is it taken?'), findsOneWidget);
+      expect(find.text('choose how it’s taken.'), findsOneWidget);
+      expect(await runDb(tester, () => medicines.watchAll().first), isEmpty);
+
+      await disposeTestApp(tester);
+    });
+
+    testWidgets('saves name, photo and form on reaching the last step', (
       tester,
     ) async {
       final camera = FakePhotoCapture(result: '/captured/one.jpg');
       await openAddMedicine(tester, camera: camera);
 
+      await tester.tap(find.bySemanticsLabel('Take its photo'));
+      await tester.pumpAndSettle();
+      expect(find.text('tap the photo to take it again'), findsOneWidget);
+      await goToStep(tester, 2, 'name');
       await tester.enterText(find.byType(TextField), 'Insulin');
-      await tester.tap(find.text('Take photo'));
+      await goToStep(tester, 3, 'how it’s taken');
+      await tester.tap(find.text('injectable'));
       await tester.pumpAndSettle();
-      expect(find.text('Retake photo'), findsOneWidget);
-      await tester.tap(find.text('Injectable'));
-      await tester.pumpAndSettle();
-      await tapSave(tester);
+      await goToStep(tester, 5, 'saved');
 
+      expect(find.text('it’s saved.'), findsOneWidget);
       final saved = (await runDb(
         tester,
         () => medicines.watchAll().first,
@@ -139,15 +153,15 @@ void main() {
       expect(saved.form, MedicineForm.injectable);
       expect(photos.stored[saved.photoPath], '/captured/one.jpg');
 
+      await tester.tap(find.text('see its reminders  ›'));
+      await tester.pumpAndSettle();
       expect(find.text('Insulin'), findsOneWidget);
-      expect(find.text('Medicine information'), findsOneWidget);
       expect(find.text('No reminders.'), findsOneWidget);
 
-      // Back goes to the list, not to the add form.
+      // Back goes to the list, not to the finished steps.
       await tester.pageBack();
       await tester.pumpAndSettle();
-      expect(find.text('Medicines'), findsOneWidget);
-      expect(find.text('Insulin'), findsOneWidget);
+      expect(find.text('your medicines.'), findsOneWidget);
 
       await disposeTestApp(tester);
     });
@@ -155,14 +169,11 @@ void main() {
     testWidgets('keeps no photo when the camera is cancelled', (tester) async {
       await openAddMedicine(tester, camera: FakePhotoCapture(result: null));
 
-      await tester.tap(find.text('Take photo'));
+      await tester.tap(find.bySemanticsLabel('Take its photo'));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Oral / edible'));
-      await tapSave(tester);
 
-      expect(find.text('Take photo'), findsOneWidget);
-      expect(find.text('Take a photo of the medicine.'), findsOneWidget);
-      expect(await runDb(tester, () => medicines.watchAll().first), isEmpty);
+      expect(find.bySemanticsLabel('Take its photo'), findsOneWidget);
+      expect(find.text('with the camera'), findsOneWidget);
 
       await disposeTestApp(tester);
     });
@@ -175,11 +186,11 @@ void main() {
         ),
       );
 
-      await tester.tap(find.text('Take photo'));
+      await tester.tap(find.bySemanticsLabel('Take its photo'));
       await tester.pumpAndSettle();
 
-      expect(find.text("The camera couldn't be opened."), findsOneWidget);
-      expect(find.text('Take photo'), findsOneWidget);
+      expect(find.text("the camera couldn't be opened."), findsOneWidget);
+      expect(find.bySemanticsLabel('Take its photo'), findsOneWidget);
 
       await disposeTestApp(tester);
     });
@@ -233,7 +244,7 @@ void main() {
       await tester.tap(find.widgetWithText(FilledButton, 'Delete'));
       await tester.pumpAndSettle();
 
-      expect(find.text('No medicines yet.'), findsOneWidget);
+      expect(find.text('add the first one with its photo.'), findsOneWidget);
       expect(await runDb(tester, () => medicines.find('m1')), isNull);
       expect(
         await runDb(tester, () => reminders.findForMedicine('m1')),

@@ -1,5 +1,4 @@
-// Ported exactly from the reference prototype's HistoryPage
-// (prototypes/day_and_history, docs/design-system.md §18.3), on real prints.
+// History (docs/design-system.md §18.3), on real prints.
 import 'dart:async';
 import 'dart:math' as math;
 
@@ -7,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../reminders/domain/calendar.dart';
 import 'day_data.dart';
@@ -236,8 +236,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     // The same 1 pm colour as the ruler screens, with History's own ink.
-    final light = (
-      page: screenLight.page,
+    final light = DayLight.screen.withInk(
       ink: const Color(0xFF15171A),
       soft: const Color(0xFF6B7079),
     );
@@ -254,17 +253,22 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                 onTap: () => Navigator.of(context).pop(),
                 child: Text(
                   '‹  today',
-                  style: f(17, FontWeight.w700, light.soft),
+                  style: figtree(17, FontWeight.w700, light.soft),
                 ),
               ),
               const SizedBox(height: 10),
               Text(
                 '${monthName(_month.month).toLowerCase()}.',
-                style: f(44, FontWeight.w800, light.ink, ls: -1),
+                style: figtree(
+                  44,
+                  FontWeight.w800,
+                  light.ink,
+                  letterSpacing: -1,
+                ),
               ),
               Text(
                 'your prints, day by day.',
-                style: f(17, FontWeight.w500, light.soft),
+                style: figtree(17, FontWeight.w500, light.soft),
               ),
               Expanded(
                 child: Stack(
@@ -305,7 +309,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
 
   /// Every print, positioned somewhere between its place in the stack and
   /// its day in the calendar.
-  Widget _book(Size area, Light light, double g) {
+  Widget _book(Size area, DayLight light, double g) {
     // The calendar's geometry.
     const gap = gridGap;
     final cell = (area.width - gridLeft - gap * 6) / 7;
@@ -412,7 +416,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
               child: Text(
                 'MTWTFSS'[c],
                 textAlign: TextAlign.center,
-                style: f(15, FontWeight.w600, light.soft),
+                style: figtree(15, FontWeight.w600, light.soft),
               ),
             ),
           ),
@@ -458,7 +462,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
               child: Text(
                 'no prints yet this month.',
                 textAlign: TextAlign.center,
-                style: f(17, FontWeight.w600, light.soft),
+                style: figtree(17, FontWeight.w600, light.soft),
               ),
             ),
           ),
@@ -540,7 +544,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
   }
 
   /// Below the book: a hint for the flipbook; the month pill for the calendar.
-  Widget _controls(Light light, double g) {
+  Widget _controls(DayLight light, double g) {
     final shadow = [
       BoxShadow(
         color: const Color(0xFF3A4150).withValues(alpha: 0.10),
@@ -558,7 +562,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
             opacity: (1 - g * 2).clamp(0, 1),
             child: Text(
               'hold to see the whole month',
-              style: f(14, FontWeight.w600, light.soft),
+              style: figtree(14, FontWeight.w600, light.soft),
             ),
           ),
           Opacity(
@@ -591,7 +595,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                           children: [
                             Text(
                               monthName(_month.month).substring(0, 3),
-                              style: f(17, FontWeight.w700, light.ink),
+                              style: figtree(17, FontWeight.w700, light.ink),
                             ),
                             const SizedBox(width: 6),
                             SizedBox(
@@ -651,7 +655,7 @@ class _DayPrint extends StatelessWidget {
   final PrintedDay printed;
   final int month;
   final double g;
-  final Light light;
+  final DayLight light;
   @override
   Widget build(BuildContext context) {
     final prints = printed.prints;
@@ -694,11 +698,19 @@ class _DayPrint extends StatelessWidget {
                   children: [
                     Text(
                       '${monthName(month).substring(0, 3)} ${printed.day}',
-                      style: f(21, FontWeight.w800, const Color(0xFF15171A)),
+                      style: figtree(
+                        21,
+                        FontWeight.w800,
+                        const Color(0xFF15171A),
+                      ),
                     ),
                     Text(
                       '$prints ${prints == 1 ? 'print' : 'prints'}',
-                      style: f(15, FontWeight.w400, const Color(0xFF6B7079)),
+                      style: figtree(
+                        15,
+                        FontWeight.w400,
+                        const Color(0xFF6B7079),
+                      ),
                     ),
                   ],
                 ),
@@ -767,7 +779,7 @@ class _ViewSwitch extends StatelessWidget {
     required this.onSelect,
   });
   final double value; // 0 = flipbook, 1 = calendar
-  final Light light;
+  final DayLight light;
   final ValueChanged<bool> onSelect;
 
   static const _seg = 34.0;

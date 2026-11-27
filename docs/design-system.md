@@ -790,7 +790,10 @@ A smoke test (`widgetbook/test/catalogue_test.dart`) builds every use case in li
 | 6 | Widgetbook catalogue (`widgetbook/`, web, written by hand) | done |
 | 7a | App shell: the app uses the new theme (`AppTheme`, carrying the old theme's values until every screen has moved) and registers the font licences at start-up | done |
 | M | **Makeover** (§18): prototypes, then design philosophy, then design language, then the existing `sahaay_design` package updated to it | in progress |
-| M1 | The prototype's Today, reminder page and History, ported exactly into `lib/features/day/` on real data, with Today as the home screen. Prints are saved (`prints` table, database version 2 with an upgrade test; deleting a reminder or medicine removes them). Additions the prototype didn't need: an empty day ("nothing for today.", "add a medicine"), "no prints yet this month." in History, a scroll fallback so nothing overflows on small screens or large text, and a status bar that follows the page. Every day screen uses the 1 pm colour while the time-of-day colour is on hold. `sahaay_design` gains Figtree and `DayLight`. Not yet: History in warm off-white and dark mode, drawn icons, a way to the medicines list once one exists, Widgetbook entries | in progress |
+| M1 | The prototype's Today, reminder page and History, ported exactly into `lib/features/day/` on real data, with Today as the home screen. Prints are saved (`prints` table, database version 2 with an upgrade test; deleting a reminder or medicine removes them). Additions the prototype didn't need: an empty day ("nothing for today.", "add a medicine"), "no prints yet this month." in History, a scroll fallback so nothing overflows on small screens or large text, and a status bar that follows the page. Every day screen uses the 1 pm colour while the time-of-day colour is on hold. `sahaay_design` gains Figtree and `DayLight`. Not yet: History in warm off-white and dark mode, drawn icons, Widgetbook entries | in progress |
+| M2 | Your medicines (§18.3): the shelf of rounded prints with the day strip and what's next, the drawn **add** button, and Today's **medicines** button. Replaces the old medicines list (`medicines_page.dart`, `medicine_card.dart` removed). Not yet: the medicine page in the new style | in progress |
+| M3 | Add medicine (§18.3): one step at a time (photo, name, how it's taken, when, saved) with the drawn icon indicator; saving on arriving at the last step; the "when?" step holding the whole reminder on one screen (time pills, ruler, how often, amount dials, the sticky note). Replaces `add_medicine_page.dart` and the separate draft-reminder screen (`draft_reminder_page.dart` and its route removed). Handwriting font QE David Reid added to `sahaay_design` (its licence for release still to be confirmed). Not yet: the start date and an end date on this step, which stay with the reminder screen | in progress |
+| M4 | Shared makeover pieces moved into `sahaay_design` (`src/day/day_marks.dart`): `Paper` colours, `MedPhoto`, `DayStrip`, `FormMark`, `clockText`, and `DayLight.screen` (the 1 pm colour) with `DayLight.withInk`. Features no longer import each other's drawing code; day-only pieces stay in `day_widgets.dart`, and the add button lives in the medicines feature | done |
 | 7b | Medicines home | paused until the makeover |
 | 7c | Medicine screen and its reminders section | paused |
 | 7d | Reminder screen | paused |
@@ -888,7 +891,7 @@ A critique of the built design (impeccable's method, 25 of 36) found it generic:
 
 ### 18.2 How we work
 
-1. Explore with prototypes (small Flutter web apps run locally) and iterate until a decision is made. The Today and History prototype is kept in `prototypes/day_and_history/` as the reference for the details below; it is not part of the app or the pub workspace.
+1. Explore with prototypes and iterate until a decision is made. Since 2026-11-26 this happens in the real app on the iOS simulator. The first Today and History prototype (a standalone Flutter web app) was ported into the app and then deleted (2026-11-27); this section records what it decided.
 2. Settle a **design philosophy**, then a **design language**.
 3. Update the existing `sahaay_design` package to it. It stays one package; nothing new is created alongside it.
 4. Then move the app's screens to it (§14.2, steps 7b–7g). Until then the app's current screens are left as they are.
@@ -907,8 +910,9 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
   - **On hold (2026-11-26).** Seen on a phone, the shifting colour didn't explain itself: it follows the reminder under the needle rather than the real time (stepping to a morning reminder at night turns the screen peach), and people read it as a status (the near-grey afternoon looked "disabled" on a paused reminder). Until a clearer approach is chosen, every day screen (Today, earlier days, the reminder screen and History) uses the 1 pm colour. Options raised: follow the real time, carry the colour on the ruler only, or a recognisable sky.
 - **Every other screen** (History, the medicine list, adding a medicine, and so on) is a steady **warm off-white**, like paper. History moves from the prototype's blue-grey to this.
 - **Dark mode follows the phone.** The other screens turn a soft warm dark grey with light text; the ruler screen keeps its time-of-day colours.
-- **Typeface: Figtree** (SIL Open Font License), bold for titles such as "november.", with a gentle lowercase voice where it suits ("your prints, day by day.").
+- **Typeface: Figtree** (SIL Open Font License), bold for titles such as "november.", with a gentle lowercase voice where it suits ("your prints, day by day."). **QE David Reid** (copyright David Reid; usage rights to be confirmed before release) only for what the person writes by hand, such as the sticky note.
 - **Icons: Sahaay's own, drawn.** About ten are needed (back, add, edit, pause, delete, camera, history, calendar and a few more). No Material or other stock icon set.
+- **Steady layout (agreed 2026-11-27).** A screen's main content stays still during transitions. A control that appears or disappears (such as **done** on the last step of adding a medicine) keeps its space reserved and fades in place; nothing is pushed up, down or sideways by it.
 - **No default buttons.** Each action gets the small control that suits it: information shown on the object itself (the time written on a print), the smallest control that does the job (the icon switch instead of two text pills), physical actions where natural (hold to print, swipe the card, hold to switch views). A full-size button only when nothing else would be clear. Controls are designed per screen, in prototypes.
 
 **Today (home)**
@@ -918,7 +922,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - While it moves, the time ticks through the hours and the name and instruction fade out; once it settles they slide back in.
 - The **medicine photo** sits above the needle in a **rounded, continuous-corner frame**: never a circle, never a full-screen background. It does not move sideways while the ruler is dragged. Changing reminder: the current photo shrinks into its bottom centre and the next grows out of it.
 - The other reminders show on the ruler as small marks: a tiny print (printed), a ring (due, not printed), a small dot (still to come). Nothing is drawn at the needle.
-- A **"now"** mark on today's ruler. A date line and a greeting at the top, and a **History** button (a small stack of prints, drawn) at the top right.
+- A **"now"** mark on today's ruler. A date line and a greeting at the top, and at the top right two drawn buttons with a word under each: **medicines** (a small bottle) and **history** (a small stack of prints). They sit level with the first line of the header, the same place on every screen that has header buttons, and wrap onto two rows with large text.
 - Tapping the photo opens the reminder screen: the photo grows into it, and dragging down returns.
 - Today's ruler starts fresh each day; earlier days are reached through History.
 
@@ -936,12 +940,35 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 - **Switching:** hold the stack and the cards press in a little, then every print flies out to its day in the calendar, one after another, straightening as it goes. Hold a day in the calendar and everything presses in, then the prints gather back into the stack with that day on top.
 - A small **view switch** below the book: two square segments (a drawn stack and a drawn grid) on a soft track. Its thumb follows the transition itself, whether the view was switched there or by holding.
 
+**Your medicines** (agreed 2026-11-26)
+
+- Reached from Today's **medicines** button. Header: "‹ today", "your medicines.", "tap one to see its reminders." ("add the first one with its photo." when there are none).
+- **add** is a drawn button at the top right, level with the first header line like Today's buttons: a capsule with a round tablet carrying a plus, the word "add" under it. Not a plain plus in a box, and not a list card.
+- Each medicine is a **print on a shelf**: cream paper with rounded corners (18; the photo inside 12), set at a slight alternating tilt, two to a row on a phone and more on wider screens.
+- On each print: the **photo**; the **name** with a small drawn **form mark** (a capsule for oral, a syringe for injectable); a **day strip**, a thin midnight-to-midnight line marked at 6 am, noon and 6 pm, with a dot at each reminder's time (a hollow ring when paused) and a faint tick at now; and one plain line saying **what's next** ("next · today 9:00 am", "next · Thu 7:30 am", "paused", "no reminders yet").
+- Tapping a print opens the medicine.
+
+**Adding a medicine** (agreed 2026-11-27)
+
+- **One step at a time**, swiped or stepped through: take its photo → what is it called? → how is it taken? → when? (its reminders) → it's saved.
+- An **icon indicator** at the bottom centre: each step is a small dot, and the current one is its drawn icon (camera, pencil, capsule, clock, tick), bold and solid in ink. Changing step, the old icon turns and shrinks into its dot while the new dot turns and grows into its icon.
+- **No save button.** Arriving at the last step saves the medicine. If the photo or the form is missing, it goes back to that step and says what's needed. Once saved, the steps close; the last step shows the medicine as a print, "it's saved.", and "see its reminders ›".
+- **The "when?" step** (agreed 2026-11-27) holds the whole reminder on one screen, within the height given, without scrolling:
+  - **Times of day** as pills; the one being set is inked and has a small cross to remove it. A drawn **clock with a plus** (no word) adds another time of day. Each time is saved as its own reminder, sharing the schedule, amount and note.
+  - A **ruler like Today's** sets the time: drag it under the fixed needle, in 5-minute steps; the other times show as dots on it. Nothing is added until the ruler is first moved.
+  - **How often** as a row of words (once, daily, weekly, monthly, yearly), then what that needs. Days of the week and dates of the month sit as cells on one **soft rounded track**: a chosen day fills in ink, and days chosen side by side join into a single run (Mon–Fri reads as one bar). The week fills the width; the month's 31 dates slide sideways with a faded edge. **Daily** reads "every ⊖ 2 ⊕ days", centred, with drawn round steppers. **Yearly** is two sideways dials side by side, the date and the month, each turning over a small ink notch at the bottom, with faded ends, like a camera dial. Every option takes the same height as the day track and sits centred, and each word in the row keeps its bold width, so switching between once, daily, weekly, monthly and yearly moves nothing else on the screen. (Rejected: a plain "every 27 november" line and a two-week tile preview; stacked tracks; "every 2nd / 3rd" cells; upright dials, which made the screen jump.) (Rejected: hollow and filled circles, as dated; tall ticks like the time ruler's, as they read as another time dial.)
+  - **Amount and note side by side**, the same height. The amount is a small print with two dials, a number and what it counts: tablet, capsule, units, drops or spoon ("1 tablet"); it starts empty and never suggests an amount. The note is a pale yellow **sticky note** with evenly rounded corners (12), taped and tilted as if pinned, with a soft shadow; what is written on it is in **QE David Reid**, a handwriting face (bundled in `sahaay_design` as `Typefaces.handwriting` with the `handwritten()` style; Latin only); empty, it shows a few drawn scribble lines. Tapping it **lifts it off the page**: the note flies from its place to the middle, growing and straightening, while the page behind blurs and dims. The lifted note carries its own small heading at the top, "note to self", in the rounded Nunito face, soft ink, with no rule or underline; nothing is written on the dimmed page. The note in flight is drawn exactly as it lands (same size, writing or hint, and tick), so nothing changes once it arrives. The keyboard comes only once the note has landed, and the note keeps one size throughout: a little taller than wide (up to 360 wide), using the room above the keyboard without filling it. An ink tick in the note's corner, or a tap outside, flies it back with what was written. (Rejected: a note that popped open over a flat dim and shrank when the keyboard came; one strongly rounded corner; the question floating over the dimmed page (in white, on a paper card, in yellow with an oversized handwritten word, in apricot italic); a hint and tick that appeared only after landing; writing that widened on landing; Kalam for the writing; "anything to remember?" over a ruled line.)
+  - No end date on this step; it can be set later on the reminder.
+- **Controls are drawn, not worded.** An action is shown by a drawn mark that looks tappable (a stamp, a pill, a stepper), with its meaning given to screen readers; a plain line of text is never the only sign that something can be tapped. Rejected along the way: "+ another time" as plain text (unclear, and didn't look tappable), the A/B/C layouts' "until" row, and the separate "add a reminder" screen.
+
 **Motion**
 
 - `flutter_animate`, used only inside `sahaay_design` behind Sahaay's own helpers (enter, stagger, pop), with Sahaay's motion tokens and Reduce Motion handled inside. Agreed, but on hold until the motion work resumes.
 - Wonderous's structure (chains, stagger, swap) is borrowed; its slower showcase timings are not.
 
 ### 18.4 Rejected along the way, and why
+
+- **Medicine list as one medicine at a time, or as a tight contact sheet:** the shelf of prints was chosen. **An "add a medicine" card as the first print, then a dashed one:** moved to a header button for consistency with Today. **A plain plus, or a plus in a box, for add; a tablet with a score line:** a box reads as a stock button, and a line through a tablet reads as a minus or a "no" sign.
 
 - **Recolouring the built design** (Daylight with rounded cards and pills): still read as a Google template. The structure had to change, not the paint.
 - **A full-bleed photo as the screen background:** the previous, framed version was better.
@@ -965,7 +992,7 @@ References used: Stoic (journal app: monochrome, its own pictograms, a lowercase
 4. Replace the screens one slice each: Today, the reminder screen, History, then the rest once designed. Each slice removes the old screen it replaces.
 5. When the last old screen is gone, delete `lib/design_system/`.
 
-**Next to prototype:** the reminder screen.
+**Next to prototype:** the medicine page, then the reminder screen.
 
 ### 18.6 Open
 

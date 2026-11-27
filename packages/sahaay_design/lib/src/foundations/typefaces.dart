@@ -14,4 +14,8 @@ abstract final class Typefaces {
   /// The makeover's single typeface (§18.3): bold for titles, a gentle
   /// lowercase voice elsewhere. A variable font, set with the `wght` axis.
   static const figtree = 'Figtree';
+
+  /// Handwriting, for what the person writes themselves (§18.3). One
+  /// regular weight, Latin only.
+  static const handwriting = 'QEDavidReid';
 }

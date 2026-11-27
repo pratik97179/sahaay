@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/core/database/app_database.dart';
 import 'package:sahaay/features/medicines/data/drift_medicine_repository.dart';
 import 'package:sahaay/features/reminders/data/drift_reminder_repository.dart';
+import 'package:sahaay/features/reminders/domain/calendar.dart';
 import 'package:sahaay/features/reminders/domain/recurrence.dart';
 import 'package:sahaay/features/reminders/domain/reminder.dart';
 
@@ -10,6 +11,8 @@ import '../../../support/fakes.dart';
 import '../../../support/test_app.dart';
 import '../../../support/test_database.dart';
 
+/// The "when?" step of adding a medicine (docs/design-system.md §18.3):
+/// reminders are set on the step itself and saved with the medicine.
 void main() {
   late AppDatabase db;
   late DriftReminderRepository reminders;
@@ -21,78 +24,66 @@ void main() {
 
   tearDown(() => db.close());
 
-  /// Scrolls the current page until [finder] is built and visible, then taps.
-  Future<void> tapVisible(WidgetTester tester, Finder finder) async {
-    await tester.scrollUntilVisible(
-      finder,
-      200,
-      scrollable: find.byType(Scrollable).first,
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(finder);
+  Future<void> goToStep(WidgetTester tester, int step, String name) async {
+    await tester.tap(find.bySemanticsLabel('Step $step of 5: $name'));
     await tester.pumpAndSettle();
   }
 
-  /// Opens Add medicine and fills in the required photo and form.
-  Future<void> startAddingMedicine(WidgetTester tester) async {
+  /// Opens Add medicine, takes the photo, picks the form and moves to
+  /// the "when?" step.
+  Future<void> startAtWhen(WidgetTester tester) async {
     await pumpTestApp(tester, db: db, capture: FakePhotoCapture());
-    await tester.tap(find.text('Add medicine'));
+    await tester.tap(find.text('add'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField), 'Paracetamol');
-    await tapVisible(tester, find.text('Take photo'));
-    await tapVisible(tester, find.text('Oral / edible'));
+    await tester.tap(find.bySemanticsLabel('Take its photo'));
+    await tester.pumpAndSettle();
+    await goToStep(tester, 3, 'how it’s taken');
+    await tester.tap(find.text('oral'));
+    await tester.pumpAndSettle();
+    await goToStep(tester, 4, 'when');
   }
 
-  /// From the Add medicine form, enters a reminder at the test clock's
-  /// 8:00 AM, letting [configure] change other options first.
-  Future<void> addDraftReminder(
-    WidgetTester tester, {
-    Future<void> Function()? configure,
-  }) async {
-    await tapVisible(
-      tester,
-      find.widgetWithText(OutlinedButton, 'Add reminder'),
-    );
-    expect(find.text('For the new medicine'), findsOneWidget);
-    await configure?.call();
-    await tapVisible(tester, find.text('Choose a time'));
-    await tester.tap(find.text('OK'));
+  /// Sets the first time: tapping the untouched ruler sets 9:00 am.
+  Future<void> setFirstTime(WidgetTester tester) async {
+    await tester.tap(find.bySemanticsLabel('Time'));
     await tester.pumpAndSettle();
-    FocusManager.instance.primaryFocus?.unfocus();
-    await tester.pumpAndSettle();
-    await tapVisible(tester, find.widgetWithText(FilledButton, 'Add reminder'));
+  }
+
+  Future<void> save(WidgetTester tester) async {
+    await goToStep(tester, 5, 'saved');
+    expect(find.text('it’s saved.'), findsOneWidget);
   }
 
   Future<List<Reminder>> saved(WidgetTester tester) =>
       runDb(tester, () => reminders.findAll());
 
-  testWidgets('saves the medicine with the reminders entered for it', (
-    tester,
-  ) async {
-    await startAddingMedicine(tester);
+  testWidgets('adds no reminder when no time was set', (tester) async {
+    await startAtWhen(tester);
+    expect(find.text('slide the ruler to set a time'), findsOneWidget);
+
+    await save(tester);
+
     expect(
-      find.text(
-        "You can add reminders now, or later from the medicine's page.",
-      ),
-      findsOneWidget,
+      await runDb(tester, () => DriftMedicineRepository(db).watchAll().first),
+      hasLength(1),
     );
-
-    await addDraftReminder(tester);
-    await addDraftReminder(
-      tester,
-      configure: () async {
-        await tapVisible(tester, find.widgetWithText(ChoiceChip, 'Weekly'));
-        await tapVisible(tester, find.text('Mon'));
-        await tapVisible(tester, find.text('Thu'));
-      },
-    );
-
-    // Back on the form: both drafts are listed, nothing is saved yet.
-    expect(find.text('Every day'), findsOneWidget);
-    expect(find.text('Every week on Monday and Thursday'), findsOneWidget);
     expect(await saved(tester), isEmpty);
 
-    await tapVisible(tester, find.text('Save medicine'));
+    await disposeTestApp(tester);
+  });
+
+  testWidgets('saves one reminder for each time of day', (tester) async {
+    await startAtWhen(tester);
+    await setFirstTime(tester);
+    expect(find.text('9:00 am'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Add another time of day'));
+    await tester.pumpAndSettle();
+    expect(find.text('1:00 pm'), findsOneWidget);
+    // Nothing is saved before the last step.
+    expect(await saved(tester), isEmpty);
+
+    await save(tester);
 
     final medicine = (await runDb(
       tester,
@@ -102,101 +93,90 @@ void main() {
     expect(all, hasLength(2));
     expect(all.every((r) => r.medicineId == medicine.id), isTrue);
     expect(
-      all.map((r) => r.schedule.recurrence),
-      containsAll([
-        DailyRecurrence(),
-        WeeklyRecurrence(weekdays: {1, 4}),
-      ]),
+      all.map((r) => r.schedule.time),
+      containsAll([LocalTime(9, 0), LocalTime(13, 0)]),
     );
-    expect(all.every((r) => !r.isPaused), isTrue);
-
-    // The new medicine's page lists them.
-    expect(find.text('Medicine information'), findsOneWidget);
-    expect(find.text('Every day'), findsOneWidget);
-    expect(find.text('Every week on Monday and Thursday'), findsOneWidget);
+    expect(
+      all.every((r) => r.schedule.recurrence == DailyRecurrence()),
+      isTrue,
+    );
 
     await disposeTestApp(tester);
   });
 
-  testWidgets('edits a draft reminder before the medicine is saved', (
-    tester,
-  ) async {
-    await startAddingMedicine(tester);
-    await addDraftReminder(tester);
-
-    await tapVisible(tester, find.text('Every day'));
-    expect(find.text('Edit reminder'), findsOneWidget);
-    expect(find.text('8:00 AM'), findsOneWidget);
-    await tester.enterText(find.widgetWithText(TextField, '1').first, '3');
-    FocusManager.instance.primaryFocus?.unfocus();
+  testWidgets('a removed time is not saved', (tester) async {
+    await startAtWhen(tester);
+    await setFirstTime(tester);
+    await tester.tap(find.bySemanticsLabel('Add another time of day'));
     await tester.pumpAndSettle();
-    await tapVisible(tester, find.text('Save changes'));
 
-    expect(find.text('Every 3 days'), findsOneWidget);
-    expect(find.text('Every day'), findsNothing);
+    // The new time is the one being set; its cross removes it.
+    await tester.tap(find.bySemanticsLabel('Remove 1:00 pm'));
+    await tester.pumpAndSettle();
+    expect(find.text('1:00 pm'), findsNothing);
 
-    await tapVisible(tester, find.text('Save medicine'));
+    await save(tester);
+
+    expect((await saved(tester)).map((r) => r.schedule.time), [
+      LocalTime(9, 0),
+    ]);
+
+    await disposeTestApp(tester);
+  });
+
+  testWidgets('saves a weekly reminder on the chosen days', (tester) async {
+    await startAtWhen(tester);
+    await setFirstTime(tester);
+    // The last match: an invisible bold copy holds each word's width.
+    await tester.tap(find.text('weekly').last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Monday'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Thursday'));
+    await tester.pumpAndSettle();
+
+    await save(tester);
 
     expect(
       (await saved(tester)).single.schedule.recurrence,
-      DailyRecurrence(interval: 3),
+      WeeklyRecurrence(weekdays: {1, 4}),
     );
 
     await disposeTestApp(tester);
   });
 
-  testWidgets('removes a draft reminder so it is not saved', (tester) async {
-    await startAddingMedicine(tester);
-    await addDraftReminder(tester);
-
-    await tapVisible(tester, find.byTooltip('Remove reminder'));
-
-    expect(find.text('Every day'), findsNothing);
-    await tapVisible(tester, find.text('Save medicine'));
-
-    expect(find.text('Medicine information'), findsOneWidget);
-    expect(find.text('No reminders.'), findsOneWidget);
-    expect(await saved(tester), isEmpty);
-
-    await disposeTestApp(tester);
-  });
-
-  testWidgets('discards a draft when its editor is closed without adding', (
-    tester,
-  ) async {
-    await startAddingMedicine(tester);
-
-    await tapVisible(
-      tester,
-      find.widgetWithText(OutlinedButton, 'Add reminder'),
-    );
-    await tester.pageBack();
+  testWidgets('saves every other day', (tester) async {
+    await startAtWhen(tester);
+    await setFirstTime(tester);
+    await tester.tap(find.bySemanticsLabel('More days apart'));
     await tester.pumpAndSettle();
+    expect(find.text('days'), findsOneWidget);
+
+    await save(tester);
 
     expect(
-      find.text(
-        "You can add reminders now, or later from the medicine's page.",
-      ),
-      findsOneWidget,
+      (await saved(tester)).single.schedule.recurrence,
+      DailyRecurrence(interval: 2),
     );
-    expect(find.byType(Card), findsNothing);
 
     await disposeTestApp(tester);
   });
 
-  testWidgets('keeps draft reminders when the medicine form is incomplete', (
-    tester,
-  ) async {
-    await pumpTestApp(tester, db: db, capture: FakePhotoCapture());
-    await tester.tap(find.text('Add medicine'));
+  testWidgets('saves what is written on the note', (tester) async {
+    await startAtWhen(tester);
+    await setFirstTime(tester);
+
+    await tester.tap(find.bySemanticsLabel('Add a note'));
     await tester.pumpAndSettle();
-    await addDraftReminder(tester);
+    expect(find.text('note to self'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'After food');
+    await tester.tap(find.bySemanticsLabel('Done'));
+    await tester.pumpAndSettle();
+    expect(find.text('After food'), findsOneWidget);
 
-    await tapVisible(tester, find.text('Save medicine'));
+    await save(tester);
 
-    expect(find.text('Take a photo of the medicine.'), findsOneWidget);
-    expect(find.text('Every day'), findsOneWidget);
-    expect(await saved(tester), isEmpty);
+    expect((await saved(tester)).single.instruction, 'After food');
 
     await disposeTestApp(tester);
   });

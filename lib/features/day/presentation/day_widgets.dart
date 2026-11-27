@@ -1,74 +1,10 @@
-// Ported exactly from the reference prototype (prototypes/day_and_history,
-// docs/design-system.md §18), with its sample data replaced by real
-// reminders and prints.
+// Pieces of the day screens (docs/design-system.md §18.3): Today, the
+// reminder page and History.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sahaay_design/sahaay_design.dart';
-
-typedef Light = ({Color page, Color ink, Color soft});
-
-/// The one screen colour for now: the 1 pm light. The colour that followed
-/// the hour is on hold (docs/design-system.md §18.3).
-final Light screenLight = lightAt(13);
-
-/// The light of an hour: page tint and ink.
-Light lightAt(double h) {
-  final l = DayLight.at(h);
-  return (page: l.page, ink: l.ink, soft: l.soft);
-}
-
-TextStyle f(
-  double size,
-  FontWeight w,
-  Color c, {
-  double h = 1.2,
-  double ls = 0,
-}) => figtree(size, w, c, height: h, letterSpacing: ls);
-
-/// A time as the prototype writes it: "7:30 am".
-String clockText(BuildContext context, int hour, int minute) =>
-    MaterialLocalizations.of(context)
-        .formatTimeOfDay(
-          TimeOfDay(hour: hour, minute: minute),
-          alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-        )
-        .toLowerCase();
-
-/// The medicine photo: a soft-cornered frame, never a circle.
-class MedPhoto extends StatelessWidget {
-  const MedPhoto({required this.image, this.radius = 36, super.key});
-  final ImageProvider image;
-  final double radius;
-  @override
-  Widget build(BuildContext context) {
-    final shape = RoundedSuperellipseBorder(
-      borderRadius: BorderRadius.circular(radius),
-    );
-    return DecoratedBox(
-      decoration: ShapeDecoration(
-        shape: shape,
-        shadows: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.16),
-            blurRadius: 28,
-            offset: const Offset(0, 12),
-          ),
-        ],
-      ),
-      child: ClipPath(
-        clipper: ShapeBorderClipper(shape: shape),
-        child: Image(
-          image: image,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stack) =>
-              const ColoredBox(color: Color(0x22000000)),
-        ),
-      ),
-    );
-  }
-}
 
 /// The medicine photo. A quick tap opens it; holding it prints it (or, if
 /// it already was, undoes the print). Letting go early rolls back.
@@ -89,7 +25,7 @@ class HoldPhoto extends StatefulWidget {
   final String? takenAt;
   final bool canMark;
   final VoidCallback onToggle;
-  final Light light;
+  final DayLight light;
   final VoidCallback? onTap;
   final double radius;
   @override
@@ -178,7 +114,7 @@ class _HoldPhotoState extends State<HoldPhoto> with TickerProviderStateMixin {
   /// develops around it, it tilts slightly as if set down, and the time is
   /// written on the strip.
   Widget _print(double t, String at) {
-    const paper = Color(0xFFFBFAF6);
+    const paper = Paper.sheet;
     return Transform.rotate(
       angle: -0.045 * t,
       child: DecoratedBox(
@@ -212,7 +148,7 @@ class _HoldPhotoState extends State<HoldPhoto> with TickerProviderStateMixin {
                   child: Text(
                     'taken  ·  $at',
                     textAlign: TextAlign.center,
-                    style: f(18, FontWeight.w700, const Color(0xFF2A2622)),
+                    style: figtree(18, FontWeight.w700, Paper.ink),
                   ),
                 ),
               ),
@@ -242,7 +178,7 @@ class TakenNote extends StatelessWidget {
   });
   final String? takenAt;
   final bool canMark;
-  final Light light;
+  final DayLight light;
   @override
   Widget build(BuildContext context) {
     final at = takenAt;
@@ -254,7 +190,11 @@ class TakenNote extends StatelessWidget {
             ? 'hold the photo to mark it taken'
             : 'taken at $at  ·  hold to undo',
         key: ValueKey(at),
-        style: f(16, FontWeight.w600, at == null ? light.soft : light.ink),
+        style: figtree(
+          16,
+          FontWeight.w600,
+          at == null ? light.soft : light.ink,
+        ),
       ),
     );
   }
@@ -318,7 +258,10 @@ class RulerPainter extends CustomPainter {
             ? 'noon'
             : '${hh % 12 == 0 ? 12 : hh % 12}${hh < 12 ? 'am' : 'pm'}';
         final tp = TextPainter(
-          text: TextSpan(text: label, style: f(13, FontWeight.w700, soft)),
+          text: TextSpan(
+            text: label,
+            style: figtree(13, FontWeight.w700, soft),
+          ),
           textDirection: TextDirection.ltr,
           textScaler: scaler,
         )..layout();
@@ -335,7 +278,7 @@ class RulerPainter extends CustomPainter {
         final r = Rect.fromCenter(center: c, width: 14, height: 17);
         canvas.drawRRect(
           RRect.fromRectAndRadius(r, const Radius.circular(2)),
-          Paint()..color = const Color(0xFFFBFAF6),
+          Paint()..color = Paper.sheet,
         );
         canvas.drawRRect(
           RRect.fromRectAndRadius(r, const Radius.circular(2)),
@@ -372,7 +315,7 @@ class RulerPainter extends CustomPainter {
           ..color = ink.withValues(alpha: 0.5),
       );
       final tp = TextPainter(
-        text: TextSpan(text: 'now', style: f(12, FontWeight.w800, ink)),
+        text: TextSpan(text: 'now', style: figtree(12, FontWeight.w800, ink)),
         textDirection: TextDirection.ltr,
         textScaler: scaler,
       )..layout();
@@ -403,7 +346,7 @@ class RulerPainter extends CustomPainter {
 /// A small stack of prints: the way into History.
 class HistoryButton extends StatelessWidget {
   const HistoryButton({required this.light, required this.onTap, super.key});
-  final Light light;
+  final DayLight light;
   final VoidCallback onTap;
   @override
   Widget build(BuildContext context) => Semantics(
@@ -423,12 +366,76 @@ class HistoryButton extends StatelessWidget {
               child: CustomPaint(painter: PrintStack(light.ink)),
             ),
             const SizedBox(height: 4),
-            Text('history', style: f(13, FontWeight.w700, light.ink)),
+            Text('history', style: figtree(13, FontWeight.w700, light.ink)),
           ],
         ),
       ),
     ),
   );
+}
+
+/// A small drawn medicine bottle: the way to the person's medicines.
+class MedicinesButton extends StatelessWidget {
+  const MedicinesButton({required this.light, required this.onTap, super.key});
+  final DayLight light;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Semantics(
+    button: true,
+    label: 'Your medicines',
+    excludeSemantics: true,
+    child: GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        child: Column(
+          children: [
+            SizedBox(
+              width: 40,
+              height: 40,
+              child: CustomPaint(painter: _Bottle(light.ink)),
+            ),
+            const SizedBox(height: 4),
+            Text('medicines', style: figtree(13, FontWeight.w700, light.ink)),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _Bottle extends CustomPainter {
+  _Bottle(this.ink);
+  final Color ink;
+  @override
+  void paint(Canvas canvas, Size s) {
+    final w = s.width, h = s.height;
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..strokeJoin = StrokeJoin.round
+      ..color = ink;
+    // The cap, then the body with a label band.
+    final cap = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.32, h * 0.1, w * 0.36, h * 0.16),
+      const Radius.circular(2.5),
+    );
+    canvas.drawRRect(cap, Paint()..color = ink);
+    final body = RRect.fromRectAndRadius(
+      Rect.fromLTWH(w * 0.24, h * 0.3, w * 0.52, h * 0.6),
+      const Radius.circular(6),
+    );
+    canvas.drawRRect(body, Paint()..color = Paper.sheet);
+    canvas.drawRRect(body, stroke);
+    canvas.drawRect(
+      Rect.fromLTWH(w * 0.24, h * 0.48, w * 0.52, h * 0.22),
+      Paint()..color = ink,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Bottle old) => old.ink != ink;
 }
 
 class PrintStack extends CustomPainter {
@@ -447,7 +454,7 @@ class PrintStack extends CustomPainter {
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(r, const Radius.circular(3)),
-        Paint()..color = const Color(0xFFFBFAF6),
+        Paint()..color = Paper.sheet,
       );
       canvas.drawRRect(
         RRect.fromRectAndRadius(r, const Radius.circular(3)),
