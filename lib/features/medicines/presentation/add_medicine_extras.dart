@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -9,6 +10,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 abstract interface class AddMedicineExtras {
   /// The form section; [enabled] is false while the medicine is being saved.
   Widget buildSection(BuildContext context, {required bool enabled});
+
+  /// True while the section holds something that [saveFor] would save, so
+  /// its step can show as done.
+  ValueListenable<bool> get filled;
 
   /// Saves this section's records for the new medicine. Called inside the
   /// medicine's transaction, so a failure here also undoes the medicine.

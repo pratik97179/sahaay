@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/app/app_theme.dart';
-import 'package:sahaay/design_system/design_system.dart' as legacy;
 import 'package:sahaay_design/sahaay_design.dart';
 
 void main() {
@@ -20,13 +19,6 @@ void main() {
                   : SahaayTheme.dark())
               .colorScheme,
         );
-      });
-
-      test('still carries the old values for screens not yet moved', () {
-        expect(theme.extension<legacy.SahaayColors>(), isNotNull);
-        expect(theme.extension<legacy.SahaaySpacing>(), isNotNull);
-        expect(theme.extension<legacy.SahaayTypography>(), isNotNull);
-        expect(theme.extension<legacy.SahaayShapes>(), isNotNull);
       });
     });
   }

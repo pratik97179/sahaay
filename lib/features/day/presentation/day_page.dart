@@ -326,8 +326,11 @@ class _DayRulerState extends State<_DayRuler>
                             Center(
                               child: meds.isEmpty
                                   ? GestureDetector(
+                                      // `go`, not `push`: the nested route
+                                      // puts Your medicines under it, so
+                                      // its "‹ your medicines" holds.
                                       onTap: () =>
-                                          context.push(AppRoutes.medicines),
+                                          context.go(AppRoutes.addMedicine),
                                       child: Text(
                                         'add a medicine',
                                         style: figtree(

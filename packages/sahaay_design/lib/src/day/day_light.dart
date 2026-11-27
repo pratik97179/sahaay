@@ -12,6 +12,21 @@ import '../foundations/typefaces.dart';
 final class DayLight {
   const DayLight._(this.page, this.ink, this.soft);
 
+  /// Warm off-white paper, or a soft warm dark grey when the phone is in
+  /// dark mode: the colour of screens off the ruler, such as History
+  /// (§18.3).
+  factory DayLight.paper({required bool dark}) => dark
+      ? const DayLight._(
+          Color(0xFF1C1A18),
+          Color(0xFFF1EDE6),
+          Color(0xFFA39D94),
+        )
+      : const DayLight._(
+          Color(0xFFF4F1EA),
+          Color(0xFF1F1C18),
+          Color(0xFF6E6862),
+        );
+
   /// The colour of the day at [hour] (0–24, fractions allowed), blended
   /// smoothly between the stops.
   factory DayLight.at(double hour) {
