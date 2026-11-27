@@ -1,6 +1,5 @@
-// Ported exactly from the reference prototype (prototypes/day_and_history,
-// docs/design-system.md §18), with its sample data replaced by real
-// reminders and prints.
+// Pieces of the day screens (docs/design-system.md §18.3): Today, the
+// reminder page and History.
 import 'dart:async';
 
 import 'package:flutter/material.dart';

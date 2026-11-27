@@ -891,7 +891,7 @@ A critique of the built design (impeccable's method, 25 of 36) found it generic:
 
 ### 18.2 How we work
 
-1. Explore with prototypes (small Flutter web apps run locally) and iterate until a decision is made. The Today and History prototype is kept in `prototypes/day_and_history/` as the reference for the details below; it is not part of the app or the pub workspace.
+1. Explore with prototypes and iterate until a decision is made. Since 2026-11-26 this happens in the real app on the iOS simulator. The first Today and History prototype (a standalone Flutter web app) was ported into the app and then deleted (2026-11-27); this section records what it decided.
 2. Settle a **design philosophy**, then a **design language**.
 3. Update the existing `sahaay_design` package to it. It stays one package; nothing new is created alongside it.
 4. Then move the app's screens to it (§14.2, steps 7b–7g). Until then the app's current screens are left as they are.

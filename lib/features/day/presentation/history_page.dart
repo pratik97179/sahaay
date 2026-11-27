@@ -1,5 +1,4 @@
-// Ported exactly from the reference prototype's HistoryPage
-// (prototypes/day_and_history, docs/design-system.md §18.3), on real prints.
+// History (docs/design-system.md §18.3), on real prints.
 import 'dart:async';
 import 'dart:math' as math;
 

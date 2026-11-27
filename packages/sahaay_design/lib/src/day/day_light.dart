@@ -7,7 +7,7 @@ import '../foundations/typefaces.dart';
 /// afternoon, lilac in the evening, deep blue at night. Never a health or
 /// status colour.
 ///
-/// Values are provisional, taken from the Today prototype; contrast checks
+/// Values are provisional, from the first Today design; contrast checks
 /// are still open (§18.6).
 final class DayLight {
   const DayLight._(this.page, this.ink, this.soft);

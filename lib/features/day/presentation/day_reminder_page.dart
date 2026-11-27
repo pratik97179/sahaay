@@ -1,5 +1,5 @@
-// Ported exactly from the reference prototype's ReminderPage
-// (prototypes/day_and_history, docs/design-system.md §18.3), on real data.
+// The reminder page reached from Today (docs/design-system.md §18.3), on
+// real data.
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

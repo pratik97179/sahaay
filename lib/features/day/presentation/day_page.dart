@@ -1,6 +1,5 @@
-// Ported exactly from the reference prototype's DayRuler
-// (prototypes/day_and_history, docs/design-system.md §18.3), on real
-// reminders and prints.
+// Today's ruler (docs/design-system.md §18.3), on real reminders and
+// prints.
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
@@ -206,7 +205,7 @@ class _DayRulerState extends State<_DayRuler>
           body: Stack(
             children: [
               SafeArea(
-                // Laid out exactly as the prototype wherever it fits; on a
+                // Laid out as designed wherever it fits; on a
                 // small screen or with large text it scrolls instead of
                 // overflowing (§12.1).
                 child: LayoutBuilder(
