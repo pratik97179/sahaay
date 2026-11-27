@@ -146,7 +146,7 @@ void main() {
         expect(await reminders.findForMedicine(id), hasLength(2));
       });
 
-      test('saves nothing when one of them fails (PRD §5.1)', () async {
+      test('saves nothing when one of them fails', () async {
         await expectLater(
           add(
             form: MedicineForm.oral,

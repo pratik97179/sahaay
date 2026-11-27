@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines architectural constraints for Sahaay. It complements `docs/sahaay_prd.md`; it does not replace the PRD or authorize features outside its scope.
+This document defines architectural constraints for Sahaay. It does not authorize features outside the v1 scope (`docs/implementation-plan.md` §11).
 
 Before changing or extending the architecture, inspect the existing repository and follow sound established patterns unless there is a concrete reason to change them.
 
@@ -38,7 +38,7 @@ Owns use cases and workflows that coordinate domain behavior and infrastructure 
 
 Owns product concepts, invariants, and deterministic business rules.
 
-- Models medicines, reminders, and recurrence schedules as required by the PRD.
+- Models medicines, reminders, and recurrence schedules.
 - Enforces rules such as reminder ownership and independent reminder configuration.
 - Contains no Flutter, platform, database, or notification-plugin dependencies.
 - Keeps recurrence and date calculations deterministic and independently testable.
@@ -59,7 +59,7 @@ Potential feature ownership includes:
 
 - Medicines: medicine details, photo reference, and medicine lifecycle.
 - Reminders: reminder configuration, independent management, and recurrence behavior.
-- Prints: the person's own record that a reminder's dose was taken on a day (PRD §3.3, FR-11), and the Today and History views that read them.
+- Prints: the person's own record that a reminder's dose was taken on a day, and the Today and History views that read them.
 - Notifications: platform delivery and notification interaction integration.
 
 Treat these as starting boundaries, not mandatory packages. Adjust them to the repository and actual use cases.
@@ -86,7 +86,7 @@ Cross-cutting code may include persistence coordination, notification scheduling
 
 ## Persistence and local data
 
-- All product data remains on-device, as required by the PRD.
+- All product data remains on-device.
 - Keep persistence mapping separate from domain behavior.
 - Preserve medicine/reminder ownership and independent reminder configuration.
 - Deleting a medicine must remove its associated reminders, their prints, and its photo. Deleting a reminder removes its prints.
@@ -106,7 +106,7 @@ Cross-cutting code may include persistence coordination, notification scheduling
 - Do not infer that a notification was seen or that a medicine was taken. A dose counts as taken only when the person makes a print.
 - Prints never change a reminder's schedule or its notifications.
 
-When a selected monthly or yearly date doesn't exist in a month, the reminder fires on that month's last day. The clamping doesn't carry over to later months (PRD v0.3, FR-03 and AC-12). This is domain behavior: implement and test it there.
+When a selected monthly or yearly date doesn't exist in a month, the reminder fires on that month's last day. The clamping doesn't carry over to later months. This is domain behavior: implement and test it there.
 
 ## Testing
 

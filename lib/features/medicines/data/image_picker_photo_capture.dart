@@ -2,7 +2,7 @@ import 'package:image_picker/image_picker.dart';
 
 import '../application/photo_capture.dart';
 
-/// Camera-only capture through `image_picker` (gallery is out of scope, PRD §7).
+/// Camera-only capture through `image_picker` (gallery is out of scope).
 final class ImagePickerPhotoCapture implements PhotoCapture {
   ImagePickerPhotoCapture([ImagePicker? picker])
     : _picker = picker ?? ImagePicker();

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../../medicines/domain/medicine.dart';
 import '../application/reminder_draft.dart';
 import '../domain/calendar.dart';
 import 'reminder_marks.dart';
@@ -41,12 +42,17 @@ class WhenStep extends StatefulWidget {
   const WhenStep({
     required this.current,
     required this.enabled,
+    this.form,
     this.singleTime = false,
     super.key,
   });
 
   final ValueNotifier<WhenDraft> current;
   final bool enabled;
+
+  /// The medicine's form, shown on the amount card; it picks which units
+  /// the amount dial offers. Null while Add medicine has no form yet.
+  final MedicineForm? form;
 
   /// Editing one saved reminder: one time of day, so no adding or removing
   /// times.
@@ -126,21 +132,24 @@ class _WhenStepState extends State<WhenStep> {
             const SizedBox(height: 12),
             _repeat(context, light),
             const SizedBox(height: 38),
-            SizedBox(
-              height: MediaQuery.textScalerOf(context).scale(20) + 136,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: _AmountCard(
-                      value: _d.quantity,
-                      onChanged: widget.enabled
-                          ? (q) => _set(_d.copyWith(quantity: q))
-                          : null,
-                    ),
+            // Each its own height: the amount only as tall as it needs, the
+            // note a little taller.
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: _AmountCard(
+                    value: _d.quantity,
+                    form: widget.form,
+                    onChanged: widget.enabled
+                        ? (q) => _set(_d.copyWith(quantity: q))
+                        : null,
                   ),
-                  const SizedBox(width: 22),
-                  Expanded(
+                ),
+                const SizedBox(width: 22),
+                Expanded(
+                  child: SizedBox(
+                    height: MediaQuery.textScalerOf(context).scale(20) + 136,
                     child: _StickyNote(
                       text: _d.instruction,
                       onChanged: widget.enabled
@@ -148,8 +157,8 @@ class _WhenStepState extends State<WhenStep> {
                           : null,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ],
         );
@@ -695,7 +704,7 @@ class _YearlyDate extends StatelessWidget {
   final void Function(int month, int day) onChanged;
 
   /// Days in a month; February counts 29, since a yearly date may be the
-  /// 29th (PRD FR-03 moves it to the 28th in other years).
+  /// 29th (it moves to the 28th in other years).
   static int _daysIn(int m) => switch (m) {
     2 => 29,
     4 || 6 || 9 || 11 => 30,
@@ -796,6 +805,7 @@ class _SideDial extends StatelessWidget {
 class _Dial extends StatefulWidget {
   const _Dial({
     required this.items,
+    super.key,
     required this.index,
     required this.size,
     required this.color,
@@ -913,9 +923,18 @@ const _paperSoft = Paper.soft;
 /// How much is taken each time, set on two dials like a combination lock:
 /// a number and what it counts. It starts empty; Sahaay never suggests an
 /// amount, it only records the one the person sets.
+///
+/// Under "each time" it shows the medicine's [form], and the unit dial
+/// offers only that form's units. A unit already recorded is kept on the
+/// dial even if the form doesn't list it, so nothing entered is changed.
 class _AmountCard extends StatefulWidget {
-  const _AmountCard({required this.value, required this.onChanged});
+  const _AmountCard({
+    required this.value,
+    required this.form,
+    required this.onChanged,
+  });
   final String value;
+  final MedicineForm? form;
   final ValueChanged<String>? onChanged;
 
   @override
@@ -946,35 +965,58 @@ class _AmountCardState extends State<_AmountCard> {
     '40',
     '50',
   ];
-  static const _units = ['tablet', 'capsule', 'units', 'drops', 'spoon'];
   static const _countable = {'tablet', 'capsule', 'spoon'};
 
+  static List<String> _unitsFor(MedicineForm? form) => switch (form) {
+    MedicineForm.oral => const ['tablet', 'capsule', 'drops', 'spoon', 'ml'],
+    MedicineForm.injectable => const ['units', 'ml'],
+    null => const ['tablet', 'capsule', 'units', 'drops', 'spoon', 'ml'],
+  };
+
   late int _n;
-  late int _u;
+
+  /// The unit on the dial, singular.
+  late String _unit;
 
   @override
   void initState() {
     super.initState();
-    final (n, u) = _parse(widget.value);
+    final (n, unit) = _parse(widget.value, _unitsFor(widget.form));
     _n = n;
-    _u = u;
+    _unit = unit;
   }
 
-  static (int, int) _parse(String value) {
+  @override
+  void didUpdateWidget(_AmountCard old) {
+    super.didUpdateWidget(old);
+    // The form changed (Add medicine's earlier step): with no amount set,
+    // start the dial on the new form's first unit.
+    if (old.form != widget.form && _n == 0) {
+      _unit = _unitsFor(widget.form).first;
+    }
+  }
+
+  static (int, String) _parse(String value, List<String> units) {
     final parts = value.trim().split(' ');
-    if (parts.length < 2) return (0, 0);
+    if (parts.length < 2) return (0, units.first);
     final n = _numbers.indexOf(parts.first);
     final unit = parts.sublist(1).join(' ');
-    final u = _units.indexWhere((x) => unit == x || unit == '${x}s');
-    return (math.max(n, 0), math.max(u, 0));
+    final known = [..._unitsFor(null), ...units];
+    final match = known.where((x) => unit == x || unit == '${x}s');
+    return (math.max(n, 0), match.isEmpty ? unit : match.first);
+  }
+
+  /// The form's units, plus the recorded one if the form doesn't list it.
+  List<String> get _units {
+    final units = _unitsFor(widget.form);
+    return units.contains(_unit) ? units : [...units, _unit];
   }
 
   void _emit() {
     if (_n == 0) return widget.onChanged?.call('');
     final number = _numbers[_n];
-    final unit = _units[_u];
-    final plural = number != '1' && number != '½' && _countable.contains(unit);
-    widget.onChanged?.call('$number $unit${plural ? 's' : ''}');
+    final plural = number != '1' && number != '½' && _countable.contains(_unit);
+    widget.onChanged?.call('$number $_unit${plural ? 's' : ''}');
   }
 
   @override
@@ -998,7 +1040,36 @@ class _AmountCardState extends State<_AmountCard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('each time', style: figtree(13, FontWeight.w700, _paperSoft)),
-          Expanded(
+          if (widget.form case final form?)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Row(
+                children: [
+                  SizedBox.square(
+                    dimension: MediaQuery.textScalerOf(context).scale(18),
+                    child: CustomPaint(
+                      painter: FormMark(
+                        injectable: form == MedicineForm.injectable,
+                        color: _paperInk,
+                        filled: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Flexible(
+                    child: Text(
+                      form == MedicineForm.injectable ? 'injectable' : 'oral',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: figtree(14, FontWeight.w700, _paperInk),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          // Room for the selected line and a glimpse either side.
+          SizedBox(
+            height: MediaQuery.textScalerOf(context).scale(22) * 1.45 * 2.4,
             child: ClipRect(
               child: Stack(
                 children: [
@@ -1032,14 +1103,16 @@ class _AmountCardState extends State<_AmountCard> {
                       Expanded(
                         flex: 6,
                         child: _Dial(
+                          // A new list (the form changed) starts a new dial.
+                          key: ValueKey(widget.form),
                           items: _units,
-                          index: _u,
+                          index: _units.indexOf(_unit),
                           size: 16,
                           color: _n == 0 ? _paperSoft : _paperInk,
                           onChanged: widget.onChanged == null
                               ? null
                               : (i) {
-                                  setState(() => _u = i);
+                                  setState(() => _unit = _units[i]);
                                   _emit();
                                 },
                         ),

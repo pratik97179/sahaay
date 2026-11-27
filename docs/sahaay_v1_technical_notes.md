@@ -1,6 +1,6 @@
 # Sahaay v1 — Technical Notes (proposal)
 
-Originally written as input for PRD 0.2 and updated for PRD 0.3. Where these notes disagree with the PRD, `docs/architecture.md` or `docs/adr/`, those documents win.
+Where these notes disagree with `docs/architecture.md` or `docs/adr/`, those documents win.
 
 ## 1. Data model
 
@@ -30,7 +30,7 @@ Reminder
   isPaused      bool
   createdAt / updatedAt
 
-Print                                            // PRD 0.4, §3.3: made only by the person
+Print                                            // made only by the person
   id            String (UUID)
   reminderId    String  -> Reminder.id (ON DELETE CASCADE)
   day           Date                             // the day the dose was for
@@ -39,7 +39,7 @@ Print                                            // PRD 0.4, §3.3: made only by
 ```
 
 Notes:
-- Two-times-a-day = two `Reminder` rows (PRD §3.2).
+- Two-times-a-day = two `Reminder` rows.
 - Months are atomic: "every N months" = add N calendar months to the start date's month; a missing day (31 in April, 29 Feb) clamps to the month's last day, and each month is computed from the originally selected day (no carry-over).
 - Times are stored as local wall-clock time (date + minutes). Time zone handling is deferred.
 
@@ -63,9 +63,9 @@ Android specifics: `SCHEDULE_EXACT_ALARM`/`USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPL
 
 ## 4. Screens (minimum for v1)
 
-The screens are being redesigned (`docs/design-system.md` §18). Agreed so far: the home is **Today**, a stepping time ruler of the day's reminders, and **History** shows past prints as a flipbook and a calendar (PRD 0.4, FR-12 and FR-13). The list below is the original minimum and still describes what each screen must offer.
+The screens are being redesigned (`docs/design-system.md` §18). Agreed so far: the home is **Today**, a stepping time ruler of the day's reminders, and **History** shows past prints as a flipbook and a calendar. The list below is the original minimum and still describes what each screen must offer.
 
-0. Today (home) and History (PRD 0.4)
+0. Today (home) and History
 1. Medicine list
 2. Add medicine (name, photo, form, reminder list)
 3. Reminder editor (recurrence-dependent fields, time, start/end date, quantity, instruction)
@@ -74,4 +74,4 @@ The screens are being redesigned (`docs/design-system.md` §18). Agreed so far: 
 
 ## 5. Snooze (decided: not in v1)
 
-The PRD (from 0.3) puts snooze out of scope for v1. If it comes back later, the design would be a notification action ("Snooze 10 min") that schedules one extra notification for the same reminder. The reminder's schedule stays the same, and it records nothing: only the person's own print marks a dose taken (PRD FR-11). The cost: handling the notification action even when the app has been killed, plus a background isolate entry point on Android.
+Snooze is out of scope for v1. If it comes back later, the design would be a notification action ("Snooze 10 min") that schedules one extra notification for the same reminder. The reminder's schedule stays the same, and it records nothing: only the person's own print marks a dose taken. The cost: handling the notification action even when the app has been killed, plus a background isolate entry point on Android.

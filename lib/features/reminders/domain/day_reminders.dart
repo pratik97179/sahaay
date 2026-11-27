@@ -1,8 +1,7 @@
 import 'calendar.dart';
 import 'reminder.dart';
 
-/// The reminders that fall on [day], ordered by time of day, then id
-/// (PRD FR-12).
+/// The reminders that fall on [day], ordered by time of day, then id.
 ///
 /// A paused reminder still falls on its days; it is shown as paused, not
 /// left out.

@@ -4,9 +4,9 @@ import '../domain/print.dart';
 import '../domain/print_repository.dart';
 import '../domain/print_rules.dart';
 
-/// Makes a print, or undoes it if it was already made (PRD FR-11). Only the
+/// Makes a print, or undoes it if it was already made. Only the
 /// person's deliberate hold calls this; nothing else creates or removes
-/// prints (AC-17).
+/// prints.
 final class TogglePrint {
   TogglePrint({required this._prints, required this._now});
 

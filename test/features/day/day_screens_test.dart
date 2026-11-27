@@ -76,9 +76,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('Today opens on the next reminder still to come (AC-18)', (
-    tester,
-  ) async {
+  testWidgets('Today opens on the next reminder still to come', (tester) async {
     await openToday(tester);
 
     expect(find.text('Tuesday, 10 March'), findsOneWidget);
@@ -111,7 +109,7 @@ void main() {
   });
 
   testWidgets(
-    'holding a due reminder\'s photo prints it; holding again undoes it (AC-15)',
+    'holding a due reminder\'s photo prints it; holding again undoes it',
     (tester) async {
       await openToday(tester);
       await swipeRuler(tester, 150); // 7:30 am, already due
@@ -130,9 +128,7 @@ void main() {
     },
   );
 
-  testWidgets('a reminder still to come cannot be printed (AC-16)', (
-    tester,
-  ) async {
+  testWidgets('a reminder still to come cannot be printed', (tester) async {
     await openToday(tester); // opens on 1:00 pm
 
     await holdPhoto(tester);
@@ -158,34 +154,33 @@ void main() {
     await disposeTestApp(tester);
   });
 
-  testWidgets(
-    'History shows the month\'s printed days, without totals (AC-19)',
-    (tester) async {
-      await seed(tester);
-      await runDb(tester, () async {
-        for (final id in ['early', 'noon']) {
-          await prints.add(
-            Print(
-              reminderId: id,
-              day: LocalDate(2026, 3, 9),
-              madeAt: LocalDateTime(LocalDate(2026, 3, 9), LocalTime(9, 0)),
-            ),
-          );
-        }
-      });
-      await pumpTestApp(tester, db: db, initialLocation: AppRoutes.today);
+  testWidgets('History shows the month\'s printed days, without totals', (
+    tester,
+  ) async {
+    await seed(tester);
+    await runDb(tester, () async {
+      for (final id in ['early', 'noon']) {
+        await prints.add(
+          Print(
+            reminderId: id,
+            day: LocalDate(2026, 3, 9),
+            madeAt: LocalDateTime(LocalDate(2026, 3, 9), LocalTime(9, 0)),
+          ),
+        );
+      }
+    });
+    await pumpTestApp(tester, db: db, initialLocation: AppRoutes.today);
 
-      await tester.tap(find.text('history'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('history'));
+    await tester.pumpAndSettle();
 
-      expect(find.text('march.'), findsOneWidget);
-      expect(find.text('your prints, day by day.'), findsOneWidget);
-      expect(find.text('Mar 9'), findsOneWidget);
-      expect(find.text('2 prints'), findsOneWidget);
+    expect(find.text('march.'), findsOneWidget);
+    expect(find.text('your prints, day by day.'), findsOneWidget);
+    expect(find.text('Mar 9'), findsOneWidget);
+    expect(find.text('2 prints'), findsOneWidget);
 
-      await disposeTestApp(tester);
-    },
-  );
+    await disposeTestApp(tester);
+  });
 
   testWidgets('an empty day says so and leads to adding a medicine', (
     tester,

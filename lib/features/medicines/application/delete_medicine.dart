@@ -3,7 +3,7 @@ import 'dart:io';
 import '../domain/medicine_photo_storage.dart';
 import '../domain/medicine_repository.dart';
 
-/// Removes a medicine, all of its reminders and its photo (FR-09).
+/// Removes a medicine, all of its reminders and its photo.
 final class DeleteMedicine {
   DeleteMedicine({required this._medicines, required this._photos});
 

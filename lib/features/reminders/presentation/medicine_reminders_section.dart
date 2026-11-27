@@ -11,11 +11,11 @@ import '../reminders_providers.dart';
 import 'reminder_marks.dart';
 import 'schedule_text.dart';
 
-/// A medicine's reminders on its page (PRD §5.3; docs/design-system.md
+/// A medicine's reminders on its page (docs/design-system.md
 /// §18.3): when in the day they are, then each one as a small print. Tapping
 /// a print opens that reminder; the drawn clock with a plus adds one.
 ///
-/// A medicine with no reminders says so (PRD §3.1).
+/// A medicine with no reminders says so.
 class MedicineRemindersSection extends ConsumerWidget {
   const MedicineRemindersSection({required this.medicineId, super.key});
 

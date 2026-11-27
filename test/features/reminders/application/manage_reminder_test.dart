@@ -88,7 +88,7 @@ void main() {
       expect((await reminders.find('morning'))!.isPaused, isTrue);
     });
 
-    test('leaves sibling reminders unchanged (AC-07)', () async {
+    test('leaves sibling reminders unchanged', () async {
       await manage.update(
         'morning',
         ReminderDetails(
@@ -112,7 +112,7 @@ void main() {
   });
 
   group('pause and resume', () {
-    test('pause stops only this reminder (AC-08)', () async {
+    test('pause stops only this reminder', () async {
       await manage.setPaused('morning', paused: true);
 
       expect((await reminders.find('morning'))!.isPaused, isTrue);
@@ -129,7 +129,7 @@ void main() {
 
   group('delete', () {
     test('removes only this reminder, keeping medicine and siblings '
-        '(AC-09)', () async {
+        '', () async {
       await manage.delete('morning');
 
       expect(await reminders.find('morning'), isNull);

@@ -137,7 +137,7 @@ void main() {
       expect(plan, [single('r1', at(3, 23, 9)), single('r1', at(4, 6, 9))]);
     });
 
-    test('the 31st falls on the last day of shorter months (AC-12)', () {
+    test('the 31st falls on the last day of shorter months', () {
       final plan = planNotifications(
         reminders: [
           aReminder(
@@ -177,7 +177,7 @@ void main() {
       ]);
     });
 
-    test('nothing after the end date (AC-11)', () {
+    test('nothing after the end date', () {
       final plan = planNotifications(
         reminders: [aReminder(start: past, end: LocalDate(2026, 3, 12))],
         now: now,
@@ -190,7 +190,7 @@ void main() {
       ]);
     });
 
-    test('nothing before a future start date (AC-11)', () {
+    test('nothing before a future start date', () {
       final plan = planNotifications(
         reminders: [aReminder(start: LocalDate(2026, 3, 20))],
         now: now,
@@ -216,7 +216,7 @@ void main() {
   });
 
   group('nothing is planned', () {
-    test('for a paused reminder (AC-08)', () {
+    test('for a paused reminder', () {
       expect(
         planNotifications(reminders: [aReminder(paused: true)], now: now),
         isEmpty,

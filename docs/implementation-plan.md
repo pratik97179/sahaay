@@ -6,9 +6,7 @@ This document defines the staged implementation strategy for Sahaay v1.
 
 The objective is to deliver a reliable application through coherent, independently verifiable increments rather than implementing the entire application in one large pass.
 
-The Product Requirements Document (`docs/sahaay_prd.md`) remains the source of truth for product behavior and scope.
-
-The architecture (`docs/architecture.md`) and design language (`docs/design-system.md`) define the engineering and UI constraints.
+Product behavior and scope are defined by this plan (§11 lists what is out of scope), the architecture (`docs/architecture.md`), the design language (`docs/design-system.md`) and the decisions in `docs/adr/`.
 
 This plan defines the order in which the application should be built.
 
@@ -20,7 +18,7 @@ This plan defines the order in which the application should be built.
 4. Complete meaningful vertical slices rather than creating extensive unfinished scaffolding.
 5. Verify each increment before committing it.
 6. Keep every commit focused, coherent, and suitable for pushing.
-7. Do not introduce features or behavior outside the approved PRD.
+7. Do not introduce features or behavior outside the scope in §11.
 8. Resolve blocking product decisions before implementing their dependent behavior.
 9. Revisit this plan when repository findings or product decisions materially change the implementation sequence.
 
@@ -124,7 +122,7 @@ Implement the core product concepts and deterministic recurrence calculations in
 
 ### Domain concepts
 
-Implement the domain model required by the PRD:
+Implement the domain model:
 
 #### Medicine
 
@@ -148,7 +146,7 @@ Implement the domain model required by the PRD:
 
 #### Recurrence
 
-Support the PRD-defined recurrence patterns:
+Support these recurrence patterns:
 
 - One-time: specific date and time.
 - Daily: every day or every N days.
@@ -185,11 +183,11 @@ Cover:
 
 ### Month-end behavior
 
-Resolved in PRD v0.3 (FR-03, AC-12). If a month doesn't have the selected day, the reminder fires on that month's last day. Each month starts again from the originally selected day, so clamping never carries over. A yearly reminder on 29 February fires on 28 February in non-leap years.
+Resolved. If a month doesn't have the selected day, the reminder fires on that month's last day. Each month starts again from the originally selected day, so clamping never carries over. A yearly reminder on 29 February fires on 28 February in non-leap years.
 
 ### Completion criteria
 
-- Domain models express the PRD's concepts and invariants.
+- Domain models express the product's concepts and invariants.
 - Recurrence calculations work independently of the UI and notification platform.
 - Core scheduling tests pass.
 - Tests cover month-end clamping for monthly and yearly reminders, including leap years.
@@ -277,7 +275,7 @@ Implement the user's ability to create, view, and remove medicines.
 - A medicine can have multiple reminders.
 - A medicine can be removed with all associated data.
 
-The medicine creation flow must support creating one or more reminders as required by the PRD.
+The medicine creation flow must support creating one or more reminders.
 
 ### UI requirements
 
@@ -285,9 +283,9 @@ The medicine creation flow must support creating one or more reminders as requir
 - Reuse shared components.
 - Keep feature presentation separate from business logic.
 - Handle loading, empty, and error states.
-- Avoid introducing functionality deferred by the PRD.
+- Avoid introducing functionality deferred in §11.
 
-The PRD defers detailed home-screen and medicine-list design. Implement the minimum functional collection experience without prematurely expanding its visual or functional scope.
+Detailed home-screen and medicine-list design lives in `docs/design-system.md`. Implement the minimum functional collection experience without prematurely expanding its visual or functional scope.
 
 ### Completion criteria
 
@@ -332,7 +330,7 @@ Implement reminder creation and independent reminder management.
 ### Completion criteria
 
 - Users can create multiple independent reminders.
-- All recurrence configuration options required by the PRD are represented.
+- All recurrence configuration options are represented.
 - Reminder changes persist correctly.
 - Individual reminder operations do not affect sibling reminders.
 - Relevant acceptance criteria pass.
@@ -394,9 +392,9 @@ The notification must identify the specific reminder, not merely its medicine.
 
 ### Product decisions
 
-- Snooze is out of scope for v1 (PRD §7, §9). A notification can only be tapped (to open the reminder) or dismissed.
-- Request notification permission when the user saves their first reminder. On Android, request exact-alarm permission at the same time (PRD §10).
-- Permission-denied flows are deferred (PRD §10). Handle a denial without crashing or losing data, and build no further UX for it.
+- Snooze is out of scope for v1. A notification can only be tapped (to open the reminder) or dismissed.
+- Request notification permission when the user saves their first reminder. On Android, request exact-alarm permission at the same time.
+- Permission-denied flows are deferred. Handle a denial without crashing or losing data, and build no further UX for it.
 
 ### Completion criteria
 
@@ -443,7 +441,7 @@ Validate complete application workflows and address integration failures.
 
 ### Completion criteria
 
-- Core PRD workflows work end to end.
+- Core workflows work end to end.
 - Acceptance criteria are verified.
 - No known critical data-integrity issues remain.
 - No out-of-scope functionality has been introduced.
@@ -451,7 +449,7 @@ Validate complete application workflows and address integration failures.
 
 ---
 
-## 10a. Phase 8 — Prints, Today and History (PRD 0.4)
+## 10a. Phase 8 — Prints, Today and History
 
 ### Objective
 
@@ -460,26 +458,26 @@ Let the person record that they took a dose, see today's reminders on a time rul
 ### Scope
 
 - A `Print` record (reminder, day, time made), stored locally and deleted with its reminder or medicine.
-- Making and undoing a print by holding the photo (FR-11); only for due, unpaused reminders and earlier days.
-- Today: the stepping time ruler (FR-12).
-- History: the flipbook and calendar of printed days, opening any day's ruler (FR-13).
+- Making and undoing a print by holding the photo; only for due, unpaused reminders and earlier days.
+- Today: the stepping time ruler.
+- History: the flipbook and calendar of printed days, opening any day's ruler.
 
 ### Requirements
 
-- Prints are created and removed only by the person's action. Nothing infers, totals or scores them.
+- Prints are created and removed only by the person's action. Nothing infers or scores them. Today shows how many of its reminders are printed; nothing else totals them.
 - Prints never change reminders, schedules, notifications, or doses.
 - The screens are built with the redesigned design system (`docs/design-system.md` §18); they wait for it.
 
 ### Completion criteria
 
-- AC-15 to AC-20 pass.
+- Making and undoing a print, Today's stepping, and History's views behave as described above.
 - Domain tests cover which reminders can be printed on a day; persistence tests cover cascading deletes.
 
 ---
 
 ## 11. Product scope restrictions
 
-The following must not be implemented as part of v1 unless the PRD is explicitly revised:
+The following must not be implemented as part of v1 unless this plan is explicitly revised:
 
 - Accounts and authentication.
 - Cloud sync.
@@ -490,8 +488,8 @@ The following must not be implemented as part of v1 unless the PRD is explicitly
 - Drug interaction checking.
 - Automatic medication schedule changes.
 - Treatment completion inference.
-- Inferred dose tracking (a dose counts as taken only when the person makes a print, PRD FR-11).
-- Medication adherence analytics, scores, streaks, or "missed" warnings.
+- Inferred dose tracking (a dose counts as taken only when the person makes a print).
+- Medication adherence analytics, scores, streaks, percentages, or "missed" warnings. (Today's count of printed reminders is allowed: it shows only the person's own prints.)
 - Travel and time-zone handling.
 - Caregiver functionality.
 - Multilingual functionality.
@@ -580,7 +578,7 @@ Do not create artificial commits just to increase commit count.
 
 The application is ready for v1 completion when:
 
-- Required PRD functionality is implemented.
+- Required functionality is implemented.
 - All agreed product decisions have been resolved.
 - Medicine and reminder data persist locally.
 - Recurrence calculations are deterministic and tested.

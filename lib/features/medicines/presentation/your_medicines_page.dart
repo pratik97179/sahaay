@@ -72,7 +72,7 @@ class YourMedicinesPage extends ConsumerWidget {
                             Text(
                               'your medicines.',
                               style: figtree(
-                                44,
+                                40,
                                 FontWeight.w800,
                                 light.ink,
                                 letterSpacing: -1,

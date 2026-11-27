@@ -11,7 +11,7 @@ import '../domain/medicine.dart';
 import '../medicines_providers.dart';
 import 'add_medicine_extras.dart';
 
-/// Adding a medicine in the makeover's language (PRD §5.1, FR-01; §18).
+/// Adding a medicine in the makeover's language (docs/design-system.md §18).
 ///
 /// While the design is being chosen, two directions are shown and a small
 /// switch (debug builds only) flips between them: A, everything on one
@@ -237,7 +237,11 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
                           1 => _nameField(light, size: 36),
                           2 => _formChoice(light),
                           _ =>
-                            _extras?.buildSection(context, enabled: !_busy) ??
+                            _extras?.buildSection(
+                                  context,
+                                  enabled: !_busy,
+                                  form: _form,
+                                ) ??
                                 const SizedBox.shrink(),
                         },
                       ],

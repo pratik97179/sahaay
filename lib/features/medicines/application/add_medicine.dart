@@ -7,7 +7,7 @@ import '../domain/medicine_repository.dart';
 /// the medicine's id. Runs inside the same transaction as the medicine.
 typedef SaveWithMedicine = Future<void> Function(String medicineId);
 
-/// Creates a medicine from user input and a captured photo (FR-01).
+/// Creates a medicine from user input and a captured photo.
 final class AddMedicine {
   AddMedicine({
     required this._medicines,
@@ -26,7 +26,7 @@ final class AddMedicine {
   /// new medicine's id.
   ///
   /// The medicine and whatever [alsoSave] writes are saved together or not at
-  /// all (PRD §5.1). If saving fails, the stored photo copy is removed so no
+  /// all. If saving fails, the stored photo copy is removed so no
   /// orphan remains.
   Future<String> call({
     required MedicineForm form,

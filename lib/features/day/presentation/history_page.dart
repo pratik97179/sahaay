@@ -15,7 +15,7 @@ import 'day_widgets.dart';
 
 /// History: the month's prints as a flipbook. Swipe through the days like a
 /// stack of photos; hold the stack and every day flies out to its place in
-/// the month's calendar. Hold the calendar to gather them back (FR-13).
+/// the month's calendar. Hold the calendar to gather them back.
 class HistoryPage extends ConsumerWidget {
   const HistoryPage({super.key});
 

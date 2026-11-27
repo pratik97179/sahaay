@@ -78,7 +78,7 @@ final dayMarksProvider = Provider.autoDispose
       },
     );
 
-/// Whether [entry] can be printed on [day] at [now] (FR-11).
+/// Whether [entry] can be printed on [day] at [now].
 bool canMark(DayEntry entry, LocalDate day, LocalDateTime now) =>
     canPrint(entry.reminder, day, now);
 

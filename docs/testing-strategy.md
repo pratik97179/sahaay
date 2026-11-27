@@ -17,7 +17,7 @@ The strategy covers:
 - Presentation
 - End-to-end behavior
 
-The PRD (`docs/sahaay_prd.md`) remains the source of truth for expected product behavior.
+Expected product behavior is defined in `docs/implementation-plan.md` and `docs/design-system.md`.
 
 ## 2. Testing principles
 
@@ -162,7 +162,7 @@ Tests must be able to specify the exact current date and time.
 
 ### 4.2 Recurrence test coverage
 
-Test every recurrence pattern defined in the PRD.
+Test every recurrence pattern.
 
 | Recurrence | Required scenarios |
 |---|---|
@@ -191,7 +191,7 @@ Do not substitute fixed-duration arithmetic for calendar-based calculations wher
 
 ### 4.4 Missing-date behavior
 
-PRD v0.3 (FR-03, AC-12): if a month doesn't have the selected day, the reminder fires on that month's last day. The next month starts again from the originally selected day.
+If a month doesn't have the selected day, the reminder fires on that month's last day. The next month starts again from the originally selected day.
 
 Cover:
 
@@ -443,32 +443,30 @@ A high percentage of covered lines does not compensate for missing critical scen
 
 ---
 
-## 13. Acceptance criteria traceability
+## 13. Behaviors to cover
 
-Tests should be traceable to the PRD's acceptance criteria.
+Each of these has a test that names the behavior it checks:
 
-| PRD criteria | Primary verification |
-|---|---|
-| AC-01 | Medicine creation and persistence |
-| AC-02 | Multiple reminder creation |
-| AC-03 | Recurrence calculation and configuration |
-| AC-04 | Independent reminder configuration and persistence |
-| AC-05 | Notification content and delivery integration |
-| AC-06 | Notification interaction and navigation |
-| AC-07 | Reminder update isolation |
-| AC-08 | Reminder pause and notification cancellation |
-| AC-09 | Reminder deletion isolation |
-| AC-10 | Medicine deletion and associated cleanup |
-| AC-11 | Start and end date scheduling boundaries |
-| AC-12 | Monthly and yearly month-end clamping without carry-over |
-| AC-13 | Local persistence across restarts and device reboot |
-| AC-14 | Absence of automated medical calculations or recommendations |
-| AC-15 | Making and undoing a print; a tap makes none |
-| AC-16 | Which reminders can be printed on a day (domain) |
-| AC-17 | No print created, removed or labelled "missed" without the person |
-| AC-18 | Today's starting reminder and stepping |
-| AC-19 | History views and opening a day |
-| AC-20 | Prints deleted with their reminder or medicine (persistence) |
+- Medicine creation and persistence
+- Multiple reminder creation
+- Recurrence calculation and configuration
+- Independent reminder configuration and persistence
+- Notification content and delivery integration
+- Notification interaction and navigation
+- Reminder update isolation
+- Reminder pause and notification cancellation
+- Reminder deletion isolation
+- Medicine deletion and associated cleanup
+- Start and end date scheduling boundaries
+- Monthly and yearly month-end clamping without carry-over
+- Local persistence across restarts and device reboot
+- Absence of automated medical calculations or recommendations
+- Making and undoing a print; a tap makes none
+- Which reminders can be printed on a day (domain)
+- No print created, removed or labelled "missed" without the person
+- Today's starting reminder and stepping
+- History views and opening a day
+- Prints deleted with their reminder or medicine (persistence)
 
 The exact test cases and their locations should evolve with implementation.
 

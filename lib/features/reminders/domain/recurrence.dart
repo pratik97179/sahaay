@@ -10,7 +10,7 @@ final class InvalidScheduleException implements Exception {
   String toString() => 'InvalidScheduleException: $message';
 }
 
-/// The recurrence patterns from PRD FR-03.
+/// The recurrence patterns.
 sealed class Recurrence {
   const Recurrence();
 }
@@ -78,7 +78,7 @@ final class WeeklyRecurrence extends Recurrence {
 /// On [days] of every [interval]th month; the start date's month is month 0.
 ///
 /// A day beyond a month's length fires on that month's last day, without
-/// carrying over to later months (PRD FR-03).
+/// carrying over to later months.
 final class MonthlyRecurrence extends Recurrence {
   MonthlyRecurrence({required Set<int> days, this.interval = 1})
     : days = Set.unmodifiable(days) {

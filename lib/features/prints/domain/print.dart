@@ -1,7 +1,7 @@
 import '../../reminders/domain/calendar.dart';
 
-/// The person's own record that they took one reminder's dose on one day
-/// (PRD §3.3). Sahaay never creates, infers or removes one on its own.
+/// The person's own record that they took one reminder's dose on one day.
+/// Sahaay never creates, infers or removes one on its own.
 final class Print {
   const Print({
     required this.reminderId,

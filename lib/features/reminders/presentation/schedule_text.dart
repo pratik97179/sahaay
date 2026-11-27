@@ -52,7 +52,7 @@ String describeSchedule(
     'Every year on $day ${monthNames[month - 1]}',
 };
 
-/// Explains month-end clamping (PRD FR-03) when it applies to [recurrence],
+/// Explains month-end clamping when it applies to [recurrence],
 /// otherwise `null`.
 String? monthEndNote(Recurrence recurrence) => switch (recurrence) {
   MonthlyRecurrence(:final days) => monthDaysNote(days),

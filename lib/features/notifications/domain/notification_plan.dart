@@ -51,7 +51,7 @@ final class PlannedOccurrence {
 }
 
 /// Decides which notifications should be pending, so they can be handed to
-/// the operating system (PRD FR-05, implementation plan §9).
+/// the operating system (implementation plan §9).
 ///
 /// The operating system only knows about notifications scheduled in advance,
 /// and iOS keeps at most 64 per app. So:

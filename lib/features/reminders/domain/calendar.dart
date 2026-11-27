@@ -17,7 +17,7 @@ final class LocalDate implements Comparable<LocalDate> {
       LocalDate(dateTime.year, dateTime.month, dateTime.day);
 
   /// Builds a date in [month] of [year], using the month's last day when
-  /// [day] is larger than the month (month-end clamping, PRD FR-03).
+  /// [day] is larger than the month (month-end clamping).
   factory LocalDate.clamped(int year, int month, int day) =>
       LocalDate(year, month, day.clamp(1, daysInMonth(year, month)));
 
