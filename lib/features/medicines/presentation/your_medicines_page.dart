@@ -3,15 +3,16 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/time/clock.dart';
-import '../../day/presentation/day_widgets.dart';
 import '../../reminders/domain/calendar.dart';
 import '../../reminders/domain/reminder.dart';
 import '../../reminders/reminders_providers.dart';
 import '../domain/medicine.dart';
 import '../medicines_providers.dart';
+import 'add_medicine_button.dart';
 import 'medicine_labels.dart';
 
 /// The person's medicines as a shelf of prints (docs/design-system.md §18):
@@ -23,7 +24,7 @@ class YourMedicinesPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final light = screenLight;
+    final light = DayLight.screen;
     final now = LocalDateTime.fromDateTime(ref.watch(clockProvider)());
     final medicines = ref.watch(medicinesProvider).value ?? const [];
     final reminders = ref.watch(allRemindersProvider).value ?? const [];
@@ -64,19 +65,24 @@ class YourMedicinesPage extends ConsumerWidget {
                               onTap: () => Navigator.of(context).maybePop(),
                               child: Text(
                                 '‹  today',
-                                style: f(17, FontWeight.w700, light.soft),
+                                style: figtree(17, FontWeight.w700, light.soft),
                               ),
                             ),
                             const SizedBox(height: 10),
                             Text(
                               'your medicines.',
-                              style: f(44, FontWeight.w800, light.ink, ls: -1),
+                              style: figtree(
+                                44,
+                                FontWeight.w800,
+                                light.ink,
+                                letterSpacing: -1,
+                              ),
                             ),
                             Text(
                               meds.isEmpty
                                   ? 'add the first one with its photo.'
                                   : 'tap one to see its reminders.',
-                              style: f(17, FontWeight.w500, light.soft),
+                              style: figtree(17, FontWeight.w500, light.soft),
                             ),
                           ],
                         ),
@@ -126,9 +132,9 @@ final class _Med {
   final List<Reminder> reminders;
 }
 
-const _paper = Color(0xFFFBFAF6);
-const _paperInk = Color(0xFF2A2622);
-const _paperSoft = Color(0xFF6B6660);
+const _paper = Paper.sheet;
+const _paperInk = Paper.ink;
+const _paperSoft = Paper.soft;
 const _paperRadius = 18.0;
 const _photoRadius = 12.0;
 
@@ -176,7 +182,7 @@ class _MedicinePrint extends StatelessWidget {
               Expanded(
                 child: Text(
                   med.medicine.displayName,
-                  style: f(18, FontWeight.w800, _paperInk),
+                  style: figtree(18, FontWeight.w800, _paperInk),
                 ),
               ),
               const SizedBox(width: 6),
@@ -213,7 +219,10 @@ class _MedicinePrint extends StatelessWidget {
             ),
             const SizedBox(height: 6),
           ],
-          Text(_next(context, rs), style: f(13, FontWeight.w600, _paperSoft)),
+          Text(
+            _next(context, rs),
+            style: figtree(13, FontWeight.w600, _paperSoft),
+          ),
         ],
       ),
     );

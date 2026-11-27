@@ -33,6 +33,10 @@ final class DayLight {
     );
   }
 
+  /// The one colour every day screen uses for now: the 1 pm light. The
+  /// colour that follows the hour is on hold (§18.3).
+  static final screen = DayLight.at(13);
+
   static const _stops = <(double, Color)>[
     (0, Color(0xFF101327)),
     (5.5, Color(0xFF1B1F3D)),
@@ -52,6 +56,10 @@ final class DayLight {
 
   /// Quieter text and marks.
   final Color soft;
+
+  /// The same page with other ink, for a screen with its own text colours.
+  DayLight withInk({required Color ink, required Color soft}) =>
+      DayLight._(page, ink, soft);
 
   /// Whether the page is dark, so system chrome can match it.
   bool get isDark => page.computeLuminance() < 0.2;

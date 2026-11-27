@@ -3,9 +3,8 @@ import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
-import 'package:sahaay_design/sahaay_design.dart' show handwritten, rounded;
+import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../day/presentation/day_widgets.dart';
 import '../application/reminder_draft.dart';
 import '../domain/calendar.dart';
 import 'schedule_text.dart';
@@ -83,7 +82,7 @@ class _WhenStepState extends State<WhenStep> {
 
   @override
   Widget build(BuildContext context) {
-    final light = screenLight;
+    final light = DayLight.screen;
     return ValueListenableBuilder(
       valueListenable: widget.current,
       builder: (context, w, _) {
@@ -144,7 +143,7 @@ class _WhenStepState extends State<WhenStep> {
     );
   }
 
-  Widget _repeat(BuildContext context, Light light) => Column(
+  Widget _repeat(BuildContext context, DayLight light) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [
       _Words<RepeatType>(
@@ -207,10 +206,10 @@ class _WhenStepState extends State<WhenStep> {
 class _Context extends StatelessWidget {
   const _Context(this.text, this.light);
   final String text;
-  final Light light;
+  final DayLight light;
   @override
   Widget build(BuildContext context) =>
-      Text(text, style: f(18, FontWeight.w600, light.soft));
+      Text(text, style: figtree(18, FontWeight.w600, light.soft));
 }
 
 /// The times of day as pills, the one on the ruler inked; a drawn clock
@@ -226,7 +225,7 @@ class _TimeRow extends StatelessWidget {
   });
   final List<LocalTime> times;
   final int selected;
-  final Light light;
+  final DayLight light;
   final ValueChanged<int> onSelect;
   final ValueChanged<int>? onRemove;
   final VoidCallback? onAdd;
@@ -238,7 +237,7 @@ class _TimeRow extends StatelessWidget {
         child: times.isEmpty
             ? Text(
                 'slide the ruler to set a time',
-                style: f(20, FontWeight.w800, light.soft),
+                style: figtree(20, FontWeight.w800, light.soft),
               )
             : Wrap(
                 spacing: 8,
@@ -292,7 +291,7 @@ class _TimePill extends StatelessWidget {
   });
   final String text;
   final bool selected;
-  final Light light;
+  final DayLight light;
   final VoidCallback onTap;
   final VoidCallback? onRemove;
 
@@ -321,7 +320,7 @@ class _TimePill extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ExcludeSemantics(
-                child: Text(text, style: f(20, FontWeight.w800, fg)),
+                child: Text(text, style: figtree(20, FontWeight.w800, fg)),
               ),
               if (selected && onRemove != null)
                 Semantics(
@@ -367,7 +366,7 @@ class _AddTimeStamp extends CustomPainter {
     // The plus, on a paper ring that bites into the clock.
     final p = c.translate(r * 0.78, -r * 0.78);
     final pr = r * 0.5;
-    canvas.drawCircle(p, pr + 2.5, Paint()..color = screenLight.page);
+    canvas.drawCircle(p, pr + 2.5, Paint()..color = DayLight.screen.page);
     canvas.drawCircle(p, pr, Paint()..color = ink);
     final plus = Paint()
       ..strokeWidth = 2.2
@@ -408,7 +407,7 @@ class _Words<T> extends StatelessWidget {
   });
   final Map<T, String> options;
   final T value;
-  final Light light;
+  final DayLight light;
   final ValueChanged<T> onChanged;
 
   @override
@@ -437,13 +436,13 @@ class _Words<T> extends StatelessWidget {
                           opacity: 0,
                           child: Text(
                             label,
-                            style: f(18, FontWeight.w800, light.ink),
+                            style: figtree(18, FontWeight.w800, light.ink),
                           ),
                         ),
                       ),
                       Text(
                         label,
-                        style: f(
+                        style: figtree(
                           18,
                           key == value ? FontWeight.w800 : FontWeight.w600,
                           key == value ? light.ink : light.soft,
@@ -478,7 +477,7 @@ class _Weekdays extends StatelessWidget {
     required this.onChanged,
   });
   final Set<int> value;
-  final Light light;
+  final DayLight light;
   final ValueChanged<Set<int>> onChanged;
 
   @override
@@ -500,7 +499,7 @@ class _MonthDays extends StatelessWidget {
     required this.onChanged,
   });
   final Set<int> value;
-  final Light light;
+  final DayLight light;
   final ValueChanged<Set<int>> onChanged;
 
   @override
@@ -529,7 +528,7 @@ class _DayTrack extends StatelessWidget {
   /// Each day: its value, what the cell shows, and its spoken name.
   final List<(int, String, String)> days;
   final Set<int> value;
-  final Light light;
+  final DayLight light;
   final ValueChanged<Set<int>> onChanged;
 
   /// A fixed cell width for a track that scrolls; otherwise cells share
@@ -571,7 +570,7 @@ class _DayTrack extends StatelessWidget {
                 child: Text(
                   text,
                   maxLines: 1,
-                  style: f(
+                  style: figtree(
                     16,
                     on ? FontWeight.w800 : FontWeight.w600,
                     on ? light.page : light.soft,
@@ -614,7 +613,7 @@ class _DailyPreview extends StatelessWidget {
   });
   final int interval;
   final LocalDate start;
-  final Light light;
+  final DayLight light;
   final ValueChanged<int> onChanged;
 
   @override
@@ -648,7 +647,7 @@ class _DailyPreview extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('every', style: f(18, FontWeight.w600, light.soft)),
+          Text('every', style: figtree(18, FontWeight.w600, light.soft)),
           const SizedBox(width: 8),
           step(false),
           ConstrainedBox(
@@ -658,7 +657,7 @@ class _DailyPreview extends StatelessWidget {
             child: Text(
               '$interval',
               textAlign: TextAlign.center,
-              style: f(24, FontWeight.w800, light.ink),
+              style: figtree(24, FontWeight.w800, light.ink),
             ),
           ),
           step(true),
@@ -667,7 +666,7 @@ class _DailyPreview extends StatelessWidget {
             width: MediaQuery.textScalerOf(context).scale(18) * 2.6,
             child: Text(
               interval == 1 ? 'day' : 'days',
-              style: f(18, FontWeight.w600, light.soft),
+              style: figtree(18, FontWeight.w600, light.soft),
             ),
           ),
         ],
@@ -712,7 +711,7 @@ class _YearlyDate extends StatelessWidget {
   });
   final int month;
   final int day;
-  final Light light;
+  final DayLight light;
   final void Function(int month, int day) onChanged;
 
   /// Days in a month; February counts 29, since a yearly date may be the
@@ -767,7 +766,7 @@ class _YearlyDate extends StatelessWidget {
 /// bottom centre marking the chosen value, and faded ends.
 class _SideDial extends StatelessWidget {
   const _SideDial({required this.light, required this.child});
-  final Light light;
+  final DayLight light;
   final Widget child;
 
   @override
@@ -876,7 +875,7 @@ class _DialState extends State<_Dial> {
             child: Text(
               widget.items[i],
               maxLines: 1,
-              style: f(widget.size, FontWeight.w800, widget.color),
+              style: figtree(widget.size, FontWeight.w800, widget.color),
             ),
           );
           return widget.horizontal
@@ -927,9 +926,9 @@ class _SlidingState extends State<_Sliding> {
 
 // ---- The amount: a small print with two dials. ----
 
-const _paper = Color(0xFFFBFAF6);
-const _paperInk = Color(0xFF2A2622);
-const _paperSoft = Color(0xFF6B6660);
+const _paper = Paper.sheet;
+const _paperInk = Paper.ink;
+const _paperSoft = Paper.soft;
 
 /// How much is taken each time, set on two dials like a combination lock:
 /// a number and what it counts. It starts empty; Sahaay never suggests an
@@ -1018,7 +1017,7 @@ class _AmountCardState extends State<_AmountCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('each time', style: f(13, FontWeight.w700, _paperSoft)),
+          Text('each time', style: figtree(13, FontWeight.w700, _paperSoft)),
           Expanded(
             child: ClipRect(
               child: Stack(
@@ -1543,7 +1542,7 @@ class _TimeRuler extends StatefulWidget {
   });
   final LocalTime? time;
   final List<LocalTime> others;
-  final Light light;
+  final DayLight light;
   final ValueChanged<LocalTime>? onChanged;
 
   @override
@@ -1615,7 +1614,7 @@ class _TimeRulerPainter extends CustomPainter {
   final double minutes;
   final bool set;
   final List<int> others;
-  final Light light;
+  final DayLight light;
   final double hourPx;
   final TextScaler scaler;
   final bool use24;
@@ -1655,7 +1654,11 @@ class _TimeRulerPainter extends CustomPainter {
         final tp = TextPainter(
           text: TextSpan(
             text: label,
-            style: f(13, FontWeight.w700, light.soft.withValues(alpha: edge)),
+            style: figtree(
+              13,
+              FontWeight.w700,
+              light.soft.withValues(alpha: edge),
+            ),
           ),
           textDirection: TextDirection.ltr,
           textScaler: scaler,

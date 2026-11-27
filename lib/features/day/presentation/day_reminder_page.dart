@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
 import '../../prints/prints_providers.dart';
@@ -49,7 +50,7 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
       });
       return const SizedBox.shrink();
     }
-    final light = screenLight;
+    final light = DayLight.screen;
     final marks = ref.watch(dayMarksProvider(widget.day));
     final taken = marks[m.reminder.id];
     final takenAt = taken == null
@@ -110,16 +111,16 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                           const SizedBox(height: 18),
                           Text(
                             _weekdays[widget.day.weekday - 1],
-                            style: f(18, FontWeight.w600, light.soft),
+                            style: figtree(18, FontWeight.w600, light.soft),
                           ),
                           Text(
                             '${clockText(context, m.reminder.schedule.time.hour, m.reminder.schedule.time.minute)}.',
-                            style: f(
+                            style: figtree(
                               60,
                               FontWeight.w800,
                               light.ink,
-                              h: 1.05,
-                              ls: -2,
+                              height: 1.05,
+                              letterSpacing: -2,
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -142,16 +143,21 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                           const SizedBox(height: 24),
                           Text(
                             m.name,
-                            style: f(36, FontWeight.w800, light.ink, ls: -0.5),
+                            style: figtree(
+                              36,
+                              FontWeight.w800,
+                              light.ink,
+                              letterSpacing: -0.5,
+                            ),
                           ),
                           Text(
                             m.paused ? 'Paused, won’t notify' : m.note,
-                            style: f(21, FontWeight.w500, light.ink),
+                            style: figtree(21, FontWeight.w500, light.ink),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             schedule,
-                            style: f(17, FontWeight.w500, light.soft),
+                            style: figtree(17, FontWeight.w500, light.soft),
                           ),
                           const SizedBox(height: 22),
                           TakenNote(
@@ -172,7 +178,11 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                                     ),
                                 child: Text(
                                   m.paused ? 'Resume' : 'Pause',
-                                  style: f(19, FontWeight.w700, light.ink),
+                                  style: figtree(
+                                    19,
+                                    FontWeight.w700,
+                                    light.ink,
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 36),
@@ -183,7 +193,11 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                                 ),
                                 child: Text(
                                   'Edit',
-                                  style: f(19, FontWeight.w700, light.ink),
+                                  style: figtree(
+                                    19,
+                                    FontWeight.w700,
+                                    light.ink,
+                                  ),
                                 ),
                               ),
                             ],
@@ -192,7 +206,7 @@ class _DayReminderPageState extends ConsumerState<DayReminderPage>
                           Center(
                             child: Text(
                               'swipe down to go back',
-                              style: f(14, FontWeight.w600, light.soft),
+                              style: figtree(14, FontWeight.w600, light.soft),
                             ),
                           ),
                         ],

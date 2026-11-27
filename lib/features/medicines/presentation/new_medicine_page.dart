@@ -4,9 +4,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
-import '../../day/presentation/day_widgets.dart';
 import '../domain/medicine.dart';
 import '../medicines_providers.dart';
 import 'add_medicine_extras.dart';
@@ -108,7 +108,7 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final light = screenLight;
+    final light = DayLight.screen;
     return Scaffold(
       backgroundColor: light.page,
       body: SafeArea(child: _stepByStep(light)),
@@ -117,23 +117,27 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
 
   // ---- The steps' contents. ----
 
-  Widget _photo(Light light) => _PhotoSlot(
+  Widget _photo(DayLight light) => _PhotoSlot(
     path: _photoPath,
     light: light,
     missing: _showErrors && _photoPath == null,
     onTap: _busy ? null : _takePhoto,
   );
 
-  Widget _nameField(Light light, {double size = 30}) => TextField(
+  Widget _nameField(DayLight light, {double size = 30}) => TextField(
     controller: _name,
     enabled: !_busy,
     textCapitalization: TextCapitalization.sentences,
     textInputAction: TextInputAction.done,
-    style: f(size, FontWeight.w800, light.ink, ls: -0.5),
+    style: figtree(size, FontWeight.w800, light.ink, letterSpacing: -0.5),
     cursorColor: light.ink,
     decoration: InputDecoration(
       hintText: 'its name',
-      hintStyle: f(size, FontWeight.w800, light.soft.withValues(alpha: 0.5)),
+      hintStyle: figtree(
+        size,
+        FontWeight.w800,
+        light.soft.withValues(alpha: 0.5),
+      ),
       border: UnderlineInputBorder(
         borderSide: BorderSide(color: light.soft.withValues(alpha: 0.3)),
       ),
@@ -149,7 +153,7 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
     ),
   );
 
-  Widget _formChoice(Light light) => _FormChoice(
+  Widget _formChoice(DayLight light) => _FormChoice(
     value: _form,
     light: light,
     missing: _showErrors && _form == null,
@@ -165,7 +169,7 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
     ('when?', 'you can also do this later.'),
   ];
 
-  Widget _stepByStep(Light light) {
+  Widget _stepByStep(DayLight light) {
     final saved = _savedId != null;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -183,7 +187,7 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
                       : () => _goTo(_step - 1),
                   child: Text(
                     _step == 0 || saved ? '‹  your medicines' : '‹  back',
-                    style: f(17, FontWeight.w700, light.soft),
+                    style: figtree(17, FontWeight.w700, light.soft),
                   ),
                 ),
               ),
@@ -215,10 +219,18 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
                       children: [
                         Text(
                           q,
-                          style: f(40, FontWeight.w800, light.ink, ls: -1),
+                          style: figtree(
+                            40,
+                            FontWeight.w800,
+                            light.ink,
+                            letterSpacing: -1,
+                          ),
                         ),
                         if (note.isNotEmpty)
-                          Text(note, style: f(17, FontWeight.w500, light.soft)),
+                          Text(
+                            note,
+                            style: figtree(17, FontWeight.w500, light.soft),
+                          ),
                         const SizedBox(height: 28),
                         switch (i) {
                           0 => _photo(light),
@@ -279,7 +291,7 @@ class _PhotoSlot extends StatelessWidget {
     required this.onTap,
   });
   final String? path;
-  final Light light;
+  final DayLight light;
   final bool missing;
   final VoidCallback? onTap;
 
@@ -311,7 +323,7 @@ class _PhotoSlot extends StatelessWidget {
                             const SizedBox(height: 10),
                             Text(
                               'take its photo',
-                              style: f(18, FontWeight.w800, light.ink),
+                              style: figtree(18, FontWeight.w800, light.ink),
                             ),
                           ],
                         ),
@@ -324,7 +336,7 @@ class _PhotoSlot extends StatelessWidget {
               path == null
                   ? (missing ? 'a photo is needed.' : 'with the camera')
                   : 'tap the photo to take it again',
-              style: f(
+              style: figtree(
                 15,
                 missing ? FontWeight.w700 : FontWeight.w500,
                 missing ? light.ink : light.soft,
@@ -347,7 +359,7 @@ class _FormChoice extends StatelessWidget {
     required this.onChanged,
   });
   final MedicineForm? value;
-  final Light light;
+  final DayLight light;
   final bool missing;
   final ValueChanged<MedicineForm>? onChanged;
 
@@ -388,7 +400,7 @@ class _FormChoice extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       word,
-                      style: f(
+                      style: figtree(
                         18,
                         value == form ? FontWeight.w800 : FontWeight.w500,
                         value == form ? light.ink : light.soft,
@@ -405,7 +417,7 @@ class _FormChoice extends StatelessWidget {
           padding: const EdgeInsets.only(top: 10),
           child: Text(
             'choose how it’s taken.',
-            style: f(15, FontWeight.w700, light.ink),
+            style: figtree(15, FontWeight.w700, light.ink),
           ),
         ),
     ],
@@ -501,7 +513,7 @@ class _StepIndicator extends StatelessWidget {
   });
   final PageController controller;
   final int step;
-  final Light light;
+  final DayLight light;
   final List<String> labels;
   final ValueChanged<int> onSelect;
 
@@ -568,7 +580,7 @@ class _StepMark extends CustomPainter {
   final Color ink;
   final double size;
 
-  static const _paper = Color(0xFFFBFAF6);
+  static const _paper = Paper.sheet;
 
   @override
   void paint(Canvas canvas, Size box) {
@@ -701,7 +713,7 @@ class _Saved extends StatelessWidget {
   final String? photoPath;
   final String name;
   final bool saving;
-  final Light light;
+  final DayLight light;
   final VoidCallback? onOpen;
 
   @override
@@ -714,11 +726,11 @@ class _Saved extends StatelessWidget {
         children: [
           Text(
             saving ? 'saving…' : 'it’s saved.',
-            style: f(40, FontWeight.w800, light.ink, ls: -1),
+            style: figtree(40, FontWeight.w800, light.ink, letterSpacing: -1),
           ),
           Text(
             'you’ll find it in your medicines.',
-            style: f(17, FontWeight.w500, light.soft),
+            style: figtree(17, FontWeight.w500, light.soft),
           ),
           const SizedBox(height: 28),
           if (path != null)
@@ -730,7 +742,7 @@ class _Saved extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFBFAF6),
+                      color: Paper.sheet,
                       borderRadius: BorderRadius.circular(18),
                       boxShadow: [
                         BoxShadow(
@@ -753,11 +765,7 @@ class _Saved extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                           name.isEmpty ? 'unnamed' : name,
-                          style: f(
-                            18,
-                            FontWeight.w800,
-                            const Color(0xFF2A2622),
-                          ),
+                          style: figtree(18, FontWeight.w800, Paper.ink),
                         ),
                       ],
                     ),
@@ -776,7 +784,7 @@ class _Saved extends StatelessWidget {
                 onTap: onOpen,
                 child: Text(
                   'see its reminders  ›',
-                  style: f(17, FontWeight.w700, light.ink),
+                  style: figtree(17, FontWeight.w700, light.ink),
                 ),
               ),
             ),

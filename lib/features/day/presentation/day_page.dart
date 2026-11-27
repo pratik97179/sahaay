@@ -6,6 +6,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:sahaay_design/sahaay_design.dart';
 
 import '../../../app/routes.dart';
 import '../../prints/prints_providers.dart';
@@ -36,7 +37,7 @@ class DayPage extends ConsumerWidget {
         marks: ref.watch(dayMarksProvider(day)),
         onToggle: (e) => ref.read(togglePrintProvider)(e.reminder, day),
       ),
-      _ => ColoredBox(color: screenLight.page),
+      _ => ColoredBox(color: DayLight.screen.page),
     };
   }
 }
@@ -183,7 +184,7 @@ class _DayRulerState extends State<_DayRuler>
 
   @override
   Widget build(BuildContext context) {
-    final light = screenLight;
+    final light = DayLight.screen;
     final d = widget.day;
     final date =
         '${_weekdays[d.weekday - 1]}, ${d.day} ${_months[d.month - 1]}';
@@ -230,7 +231,7 @@ class _DayRulerState extends State<_DayRuler>
                                             children: [
                                               Text(
                                                 date,
-                                                style: f(
+                                                style: figtree(
                                                   17,
                                                   FontWeight.w600,
                                                   light.soft,
@@ -238,11 +239,11 @@ class _DayRulerState extends State<_DayRuler>
                                               ),
                                               Text(
                                                 _greeting,
-                                                style: f(
+                                                style: figtree(
                                                   40,
                                                   FontWeight.w800,
                                                   light.ink,
-                                                  ls: -1,
+                                                  letterSpacing: -1,
                                                 ),
                                               ),
                                             ],
@@ -289,7 +290,7 @@ class _DayRulerState extends State<_DayRuler>
                                               Navigator.of(context).pop(),
                                           child: Text(
                                             '‹  ${_months[d.month - 1].toLowerCase()}',
-                                            style: f(
+                                            style: figtree(
                                               17,
                                               FontWeight.w700,
                                               light.soft,
@@ -299,7 +300,7 @@ class _DayRulerState extends State<_DayRuler>
                                         const SizedBox(height: 4),
                                         Text(
                                           date,
-                                          style: f(
+                                          style: figtree(
                                             17,
                                             FontWeight.w600,
                                             light.soft,
@@ -307,11 +308,11 @@ class _DayRulerState extends State<_DayRuler>
                                         ),
                                         Text(
                                           '${d.day} ${_months[d.month - 1].toLowerCase()}.',
-                                          style: f(
+                                          style: figtree(
                                             40,
                                             FontWeight.w800,
                                             light.ink,
-                                            ls: -1,
+                                            letterSpacing: -1,
                                           ),
                                         ),
                                       ],
@@ -330,7 +331,7 @@ class _DayRulerState extends State<_DayRuler>
                                           context.push(AppRoutes.medicines),
                                       child: Text(
                                         'add a medicine',
-                                        style: f(
+                                        style: figtree(
                                           14,
                                           FontWeight.w600,
                                           light.soft,
@@ -339,7 +340,11 @@ class _DayRulerState extends State<_DayRuler>
                                     )
                                   : Text(
                                       'swipe the ruler  ·  tap the photo to open',
-                                      style: f(14, FontWeight.w600, light.soft),
+                                      style: figtree(
+                                        14,
+                                        FontWeight.w600,
+                                        light.soft,
+                                      ),
                                     ),
                             ),
                             const SizedBox(height: 12),
@@ -366,14 +371,14 @@ class _DayRulerState extends State<_DayRuler>
         : 'good evening.';
   }
 
-  Widget _empty(Light light) => Center(
+  Widget _empty(DayLight light) => Center(
     child: Text(
       _isToday ? 'nothing for today.' : 'nothing on this day.',
-      style: f(22, FontWeight.w700, light.ink),
+      style: figtree(22, FontWeight.w700, light.ink),
     ),
   );
 
-  List<Widget> _ruler(Light light) {
+  List<Widget> _ruler(DayLight light) {
     final m = _med;
     final takenAt = _takenAt(m);
     final markable = canMark(m, widget.day, widget.now);
@@ -469,7 +474,13 @@ class _DayRulerState extends State<_DayRuler>
                   m.reminder.schedule.time.minute,
                 )
               : _clock(_hour.value),
-          style: f(56, FontWeight.w800, light.ink, h: 1.05, ls: -2),
+          style: figtree(
+            56,
+            FontWeight.w800,
+            light.ink,
+            height: 1.05,
+            letterSpacing: -2,
+          ),
         ),
       ),
       AnimatedOpacity(
@@ -485,12 +496,12 @@ class _DayRulerState extends State<_DayRuler>
               Text(
                 '${m.name}  ·  $_when',
                 textAlign: TextAlign.center,
-                style: f(22, FontWeight.w700, light.ink),
+                style: figtree(22, FontWeight.w700, light.ink),
               ),
               Text(
                 m.paused ? 'Paused, won’t notify' : m.note,
                 textAlign: TextAlign.center,
-                style: f(18, FontWeight.w500, light.soft),
+                style: figtree(18, FontWeight.w500, light.soft),
               ),
               const SizedBox(height: 18),
               TakenNote(takenAt: takenAt, canMark: markable, light: light),
