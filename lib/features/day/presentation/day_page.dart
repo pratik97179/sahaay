@@ -245,23 +245,6 @@ class _DayRulerState extends State<_DayRuler>
                                                   letterSpacing: -1,
                                                 ),
                                               ),
-                                              if (meds.isNotEmpty)
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        top: 12,
-                                                      ),
-                                                  child: PrintedMarks(
-                                                    light: light,
-                                                    printed: [
-                                                      for (final e in meds)
-                                                        widget.marks
-                                                            .containsKey(
-                                                              e.reminder.id,
-                                                            ),
-                                                    ],
-                                                  ),
-                                                ),
                                             ],
                                           ),
                                         ),

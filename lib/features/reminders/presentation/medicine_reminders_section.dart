@@ -12,7 +12,7 @@ import 'reminder_marks.dart';
 import 'schedule_text.dart';
 
 /// A medicine's reminders on its page (docs/design-system.md
-/// §18.3): when in the day they are, then each one as a small print. Tapping
+/// §3): when in the day they are, then each one as a small print. Tapping
 /// a print opens that reminder; the drawn clock with a plus adds one.
 ///
 /// A medicine with no reminders says so.

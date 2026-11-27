@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This document defines architectural constraints for Sahaay. It does not authorize features outside the v1 scope (`docs/implementation-plan.md` §11).
+This document defines architectural constraints for Sahaay.
 
 Before changing or extending the architecture, inspect the existing repository and follow sound established patterns unless there is a concrete reason to change them.
 

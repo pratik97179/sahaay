@@ -36,7 +36,7 @@ final class WhenDraft {
 }
 
 /// The "when?" step: the whole reminder on one screen (docs/design-system.md
-/// §18.3). The time on a ruler like Today's; how often in a few words; the
+/// §3). The time on a ruler like Today's; how often in a few words; the
 /// amount and a pinned note side by side.
 class WhenStep extends StatefulWidget {
   const WhenStep({

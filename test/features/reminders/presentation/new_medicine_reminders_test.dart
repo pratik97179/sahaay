@@ -11,7 +11,7 @@ import '../../../support/fakes.dart';
 import '../../../support/test_app.dart';
 import '../../../support/test_database.dart';
 
-/// The "when?" step of adding a medicine (docs/design-system.md §18.3):
+/// The "when?" step of adding a medicine (docs/design-system.md §3):
 /// reminders are set on the step itself and saved with the medicine.
 void main() {
   late AppDatabase db;

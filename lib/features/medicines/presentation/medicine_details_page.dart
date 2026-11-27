@@ -9,7 +9,7 @@ import '../medicines_providers.dart';
 import 'medicine_labels.dart';
 
 /// One medicine: its photo, its form and its reminders
-/// (docs/design-system.md §18.3).
+/// (docs/design-system.md §3).
 ///
 /// The reminders feature supplies [reminders], so this feature does not
 /// depend on it; reminders depend on medicines, not the other way round.

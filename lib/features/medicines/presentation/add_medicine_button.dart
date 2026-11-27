@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
 /// A small drawn capsule and a tablet with a plus: adds a medicine. Same size
-/// as Today's history and medicines buttons (docs/design-system.md §18.3).
+/// as Today's history and medicines buttons (docs/design-system.md §3).
 class AddMedicineButton extends StatelessWidget {
   const AddMedicineButton({
     required this.light,

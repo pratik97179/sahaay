@@ -1,98 +1,10 @@
-// Pieces of the day screens (docs/design-system.md §18.3): Today, the
+// Pieces of the day screens (docs/design-system.md §3): Today, the
 // reminder page and History.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sahaay_design/sahaay_design.dart';
-
-/// How the day's reminders stand: one small mark each, in time order. A
-/// solid stamp with a tick once the person has printed it, a plain ring
-/// until then. Only the person's own prints show; an unprinted reminder is
-/// neutral, never "missed" or "late", and there is no number or percentage
-/// (docs/design-system.md §18.3).
-class PrintedMarks extends StatelessWidget {
-  const PrintedMarks({required this.printed, required this.light, super.key});
-
-  /// One entry per reminder, in time order: whether it has been printed.
-  final List<bool> printed;
-  final DayLight light;
-
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.textScalerOf(context).scale(20);
-    final still = MediaQuery.disableAnimationsOf(context);
-    final count = printed.where((p) => p).length;
-    return Semantics(
-      label: '$count of ${printed.length} printed',
-      excludeSemantics: true,
-      // Wraps onto a second line with many reminders or large text.
-      child: Wrap(
-        spacing: size * 0.4,
-        runSpacing: size * 0.4,
-        children: [
-          for (final p in printed)
-            TweenAnimationBuilder<double>(
-              tween: Tween(end: p ? 1 : 0),
-              duration: still
-                  ? Duration.zero
-                  : const Duration(milliseconds: 380),
-              curve: Curves.easeOutCubic,
-              builder: (context, t, _) => SizedBox.square(
-                dimension: size,
-                child: CustomPaint(painter: _PrintedMark(t, light.ink)),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One mark: a ring at [t] = 0, a solid stamp with a paper tick at [t] = 1.
-class _PrintedMark extends CustomPainter {
-  _PrintedMark(this.t, this.ink);
-  final double t;
-  final Color ink;
-
-  @override
-  void paint(Canvas canvas, Size box) {
-    final c = box.center(Offset.zero);
-    final r = box.width / 2 - 1.5;
-    canvas.drawCircle(
-      c,
-      r,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.6
-        ..color = ink.withValues(alpha: 0.38 + 0.62 * t),
-    );
-    if (t == 0) return;
-    // The stamp grows from the middle; its tick draws in after it.
-    canvas.drawCircle(c, r * t, Paint()..color = ink);
-    final tick = ((t - 0.5) * 2).clamp(0.0, 1.0);
-    if (tick == 0) return;
-    final u = box.width / 24;
-    final path = Path()
-      ..moveTo(c.dx - 4.6 * u, c.dy + 0.2 * u)
-      ..lineTo(c.dx - 1.4 * u, c.dy + 3.4 * u)
-      ..lineTo(c.dx + 4.8 * u, c.dy - 3.4 * u);
-    for (final m in path.computeMetrics()) {
-      canvas.drawPath(
-        m.extractPath(0, m.length * tick),
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2.2 * u
-          ..strokeCap = StrokeCap.round
-          ..strokeJoin = StrokeJoin.round
-          ..color = Paper.sheet,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(_PrintedMark old) => old.t != t || old.ink != ink;
-}
 
 /// The medicine photo. A quick tap opens it; holding it prints it (or, if
 /// it already was, undoes the print). Letting go early rolls back.

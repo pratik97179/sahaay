@@ -12,7 +12,7 @@ import '../reminders_providers.dart';
 import 'when_step.dart';
 
 /// Adds reminders to an existing medicine (docs/design-system.md
-/// §18.3), with the same controls as Add medicine's
+/// §3), with the same controls as Add medicine's
 /// "when?" step. Each time of day becomes its own reminder. The drawn tick
 /// at the top right saves them; it shows once a time is set.
 class NewReminderPage extends ConsumerStatefulWidget {

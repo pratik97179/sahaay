@@ -11,11 +11,7 @@ import '../domain/medicine.dart';
 import '../medicines_providers.dart';
 import 'add_medicine_extras.dart';
 
-/// Adding a medicine in the makeover's language (docs/design-system.md §18).
-///
-/// While the design is being chosen, two directions are shown and a small
-/// switch (debug builds only) flips between them: A, everything on one
-/// page; B, one step at a time.
+/// Adding a medicine, one step at a time (docs/design-system.md §3).
 class NewMedicinePage extends ConsumerStatefulWidget {
   const NewMedicinePage({this.createExtras, super.key});
 

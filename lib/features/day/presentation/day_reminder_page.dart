@@ -1,4 +1,4 @@
-// The reminder page reached from Today (docs/design-system.md §18.3), on
+// The reminder page reached from Today (docs/design-system.md §3), on
 // real data.
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';

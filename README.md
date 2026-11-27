@@ -8,8 +8,6 @@ Sahaay is a reminder tool only: it does not give medical advice or calculate dos
 
 - [Architecture](docs/architecture.md)
 - [Design system](docs/design-system.md)
-- [Implementation plan](docs/implementation-plan.md)
-- [Testing strategy](docs/testing-strategy.md)
 - [Technology decisions](docs/adr/0001-technology-choices.md)
 
 ## Getting Started

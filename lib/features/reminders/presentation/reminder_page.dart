@@ -17,7 +17,7 @@ import '../reminders_providers.dart';
 import 'when_step.dart';
 
 /// One reminder (docs/design-system.md
-/// §18.3): the medicine it is for, then the reminder itself, set the same
+/// §3): the medicine it is for, then the reminder itself, set the same
 /// way as on Add medicine's "when?" step. Every change is saved as it is
 /// made. Pause or resume and delete sit at the top right. Notifications open
 /// this screen.

@@ -24,7 +24,6 @@ environment:
 # Local packages resolved together with the app (one lockfile).
 workspace:
   - packages/sahaay_design
-  - widgetbook
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
