@@ -1,16 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:sahaay_design/sahaay_design.dart';
 
-/// A small drawn capsule and a tablet with a plus: adds a medicine. Same size
-/// as Today's history and medicines buttons (docs/design-system.md §3).
+import 'day_light.dart';
+import 'day_marks.dart';
+
+/// A small drawn capsule and a tablet with a plus, with a word under it:
+/// adds a medicine. Same size as Today's history and medicines buttons
+/// (docs/design-system.md §3). In a header it says "add"; on its own, such
+/// as on an empty Today, it says "add a medicine" and sits centred.
 class AddMedicineButton extends StatelessWidget {
   const AddMedicineButton({
     required this.light,
     required this.onTap,
+    this.label = 'add',
+    this.padding = const EdgeInsets.fromLTRB(12, 6, 0, 12),
     super.key,
   });
   final DayLight light;
   final VoidCallback onTap;
+
+  /// The word under the mark.
+  final String label;
+
+  /// Around the mark and word; part of what can be tapped. The default
+  /// lines it up with the other header buttons.
+  final EdgeInsets padding;
   @override
   Widget build(BuildContext context) => Semantics(
     button: true,
@@ -20,7 +33,7 @@ class AddMedicineButton extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 6, 0, 12),
+        padding: padding,
         child: Column(
           children: [
             SizedBox(
@@ -29,7 +42,7 @@ class AddMedicineButton extends StatelessWidget {
               child: CustomPaint(painter: _AddPrint(light.ink)),
             ),
             const SizedBox(height: 4),
-            Text('add', style: figtree(13, FontWeight.w700, light.ink)),
+            Text(label, style: figtree(13, FontWeight.w700, light.ink)),
           ],
         ),
       ),

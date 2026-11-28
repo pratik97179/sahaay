@@ -78,6 +78,16 @@ class _DayRulerState extends State<_DayRuler>
     with SingleTickerProviderStateMixin {
   static const pxPerHour = 64.0;
 
+  /// The last minute of the day: an empty ruler moves freely up to it.
+  static const _lastMinute = 24 - 1 / 60;
+
+  /// How the ruler comes to rest, on a reminder or anywhere in the day.
+  static final _settle = SpringDescription.withDampingRatio(
+    mass: 1,
+    stiffness: 170,
+    ratio: 0.92,
+  );
+
   List<DayEntry> get meds => widget.meds;
   bool get _isToday => widget.day == widget.now.date;
   double get nowHour => nowHourOn(widget.day, widget.now);
@@ -85,7 +95,7 @@ class _DayRulerState extends State<_DayRuler>
   late int _index = _start();
   late final AnimationController _hour = AnimationController.unbounded(
     vsync: this,
-    value: meds.isEmpty ? nowHour.clamp(0, 23.99) : meds[_index].hour,
+    value: meds.isEmpty ? nowHour.clamp(0, _lastMinute) : meds[_index].hour,
   )..addListener(() => setState(() {}));
   bool _dragging = false;
   double _dragDx = 0;
@@ -101,7 +111,7 @@ class _DayRulerState extends State<_DayRuler>
 
   void _land() {
     final box = _rulerBox.currentContext?.findRenderObject() as RenderBox?;
-    if (meds.isEmpty || box == null || !box.hasSize) {
+    if (box == null || !box.hasSize) {
       widget.onLanding!(const LaunchLanding.none());
       return;
     }
@@ -142,11 +152,16 @@ class _DayRulerState extends State<_DayRuler>
     _dragDx = 0;
   }
 
+  /// How far the ruler moves before it holds back: from the first reminder
+  /// to the last, or the whole day when there are none.
+  (double, double) get _range =>
+      meds.isEmpty ? (0, _lastMinute) : (meds.first.hour, meds.last.hour);
+
   void _onDragUpdate(DragUpdateDetails d) {
-    if (meds.isEmpty) return;
     _dragDx += d.delta.dx;
     var next = _hour.value - d.delta.dx / pxPerHour;
-    if (next < meds.first.hour || next > meds.last.hour) {
+    final (first, last) = _range;
+    if (next < first || next > last) {
       next = _hour.value - d.delta.dx / pxPerHour * 0.3;
     }
     _hour.value = next;
@@ -155,6 +170,10 @@ class _DayRulerState extends State<_DayRuler>
   void _onDragEnd(DragEndDetails d) {
     _dragging = false;
     final v = d.velocity.pixelsPerSecond.dx;
+    if (meds.isEmpty) {
+      _glide(-v / pxPerHour);
+      return;
+    }
     var step = 0;
     if (_dragDx < -24 || v < -300) step = 1;
     if (_dragDx > 24 || v > 300) step = -1;
@@ -171,18 +190,36 @@ class _DayRulerState extends State<_DayRuler>
       return;
     }
     _hour.animateWith(
-      SpringSimulation(
-        SpringDescription.withDampingRatio(
-          mass: 1,
-          stiffness: 170,
-          ratio: 0.92,
-        ),
-        _hour.value,
-        meds[target].hour,
-        velocity,
-      ),
+      SpringSimulation(_settle, _hour.value, meds[target].hour, velocity),
     );
   }
+
+  /// With no reminders to settle on, the ruler glides on from a swipe and
+  /// eases to a stop, springing back if it went past either end of the day.
+  void _glide(double velocity, [double? to]) {
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _hour.value = (to ?? _hour.value).clamp(0, _lastMinute);
+      return;
+    }
+    _hour.animateWith(
+      to == null
+          ? BouncingScrollSimulation(
+              position: _hour.value,
+              velocity: velocity,
+              leadingExtent: 0,
+              trailingExtent: _lastMinute,
+              spring: _settle,
+              tolerance: const Tolerance(distance: 1e-3, velocity: 1e-2),
+            )
+          : SpringSimulation(_settle, _hour.value, to.clamp(0, _lastMinute), 0),
+    );
+  }
+
+  /// One step along the ruler: the next reminder, or the next hour when
+  /// there are none.
+  void _step(int by) => meds.isEmpty
+      ? _glide(0, (_hour.value.round() + by).toDouble())
+      : _go(_index + by);
 
   void _open() => AppNavigator.of(
     context,
@@ -215,8 +252,8 @@ class _DayRulerState extends State<_DayRuler>
         autofocus: true,
         onKeyEvent: (node, e) {
           if (e is! KeyDownEvent) return KeyEventResult.ignored;
-          if (e.logicalKey == LogicalKeyboardKey.arrowRight) _go(_index + 1);
-          if (e.logicalKey == LogicalKeyboardKey.arrowLeft) _go(_index - 1);
+          if (e.logicalKey == LogicalKeyboardKey.arrowRight) _step(1);
+          if (e.logicalKey == LogicalKeyboardKey.arrowLeft) _step(-1);
           return KeyEventResult.handled;
         },
         child: Scaffold(
@@ -332,27 +369,22 @@ class _DayRulerState extends State<_DayRuler>
                             ),
                             const Spacer(),
                             if (meds.isEmpty)
-                              _empty(light)
+                              ..._empty(light)
                             else
                               ..._ruler(light),
                             const Spacer(),
                             Center(
                               child: meds.isEmpty
-                                  ? GestureDetector(
+                                  ? AddMedicineButton(
+                                      light: light,
+                                      label: 'add a medicine',
+                                      padding: const EdgeInsets.all(12),
                                       // `reset`, not `open`: Your medicines
                                       // goes beneath it, so its
                                       // "‹ your medicines" holds.
                                       onTap: () => AppNavigator.of(
                                         context,
                                       ).reset(const AddMedicineDestination()),
-                                      child: Text(
-                                        'add a medicine',
-                                        style: figtree(
-                                          14,
-                                          FontWeight.w600,
-                                          light.soft,
-                                        ),
-                                      ),
                                     )
                                   : Text(
                                       'swipe the ruler  ·  tap the photo to open',
@@ -387,12 +419,69 @@ class _DayRulerState extends State<_DayRuler>
         : 'good evening.';
   }
 
-  Widget _empty(DayLight light) => Center(
-    child: Text(
-      _isToday ? 'nothing for today.' : 'nothing on this day.',
-      style: figtree(22, FontWeight.w700, light.ink),
+  /// The ruler itself, the same with reminders or without.
+  Widget _dial(DayLight light) => GestureDetector(
+    key: const ValueKey('ruler'),
+    behavior: HitTestBehavior.opaque,
+    onHorizontalDragStart: _onDragStart,
+    onHorizontalDragUpdate: _onDragUpdate,
+    onHorizontalDragEnd: _onDragEnd,
+    child: _Revealed(
+      reveal: widget.reveal,
+      child: SizedBox(
+        key: _rulerBox,
+        height: 96,
+        child: ShaderMask(
+          blendMode: BlendMode.dstIn,
+          shaderCallback: (r) => const LinearGradient(
+            colors: [
+              Colors.transparent,
+              Colors.black,
+              Colors.black,
+              Colors.transparent,
+            ],
+            stops: [0, 0.28, 0.72, 1],
+          ).createShader(r),
+          child: CustomPaint(
+            size: Size.infinite,
+            painter: RulerPainter(
+              _hour.value,
+              pxPerHour,
+              light.ink,
+              light.soft,
+              _index,
+              [for (final e in meds) e.hour],
+              {
+                for (final (i, e) in meds.indexed)
+                  if (widget.marks.containsKey(e.reminder.id)) i,
+              },
+              _isToday ? nowHour : null,
+              MediaQuery.textScalerOf(context),
+              MediaQuery.alwaysUse24HourFormatOf(context),
+            ),
+          ),
+        ),
+      ),
     ),
   );
+
+  /// No reminders: the sky over the ruler, the sun or moon at the hour
+  /// under the needle, and the ruler free across the whole day.
+  List<Widget> _empty(DayLight light) => [
+    Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 28),
+      child: DaySky(hour: _hour, light: light),
+    ),
+    const SizedBox(height: 28),
+    _dial(light),
+    const SizedBox(height: 18),
+    Center(
+      child: Text(
+        _isToday ? 'nothing for today.' : 'nothing on this day.',
+        style: figtree(22, FontWeight.w700, light.ink),
+      ),
+    ),
+  ];
 
   List<Widget> _ruler(DayLight light) {
     final m = _med;
@@ -440,50 +529,7 @@ class _DayRulerState extends State<_DayRuler>
         ),
       ),
       const SizedBox(height: 28),
-      GestureDetector(
-        key: const ValueKey('ruler'),
-        behavior: HitTestBehavior.opaque,
-        onHorizontalDragStart: _onDragStart,
-        onHorizontalDragUpdate: _onDragUpdate,
-        onHorizontalDragEnd: _onDragEnd,
-        child: _Revealed(
-          reveal: widget.reveal,
-          child: SizedBox(
-            key: _rulerBox,
-            height: 96,
-            child: ShaderMask(
-              blendMode: BlendMode.dstIn,
-              shaderCallback: (r) => const LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.black,
-                  Colors.black,
-                  Colors.transparent,
-                ],
-                stops: [0, 0.28, 0.72, 1],
-              ).createShader(r),
-              child: CustomPaint(
-                size: Size.infinite,
-                painter: RulerPainter(
-                  _hour.value,
-                  pxPerHour,
-                  light.ink,
-                  light.soft,
-                  _index,
-                  [for (final e in meds) e.hour],
-                  {
-                    for (final (i, e) in meds.indexed)
-                      if (widget.marks.containsKey(e.reminder.id)) i,
-                  },
-                  _isToday ? nowHour : null,
-                  MediaQuery.textScalerOf(context),
-                  MediaQuery.alwaysUse24HourFormatOf(context),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+      _dial(light),
       const SizedBox(height: 18),
       Center(
         child: Text(

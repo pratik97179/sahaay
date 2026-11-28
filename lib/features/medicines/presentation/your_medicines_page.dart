@@ -12,7 +12,6 @@ import '../../reminders/reminders_providers.dart';
 import '../domain/medicine.dart';
 import '../medicines_destinations.dart';
 import '../medicines_providers.dart';
-import 'add_medicine_button.dart';
 import 'medicine_labels.dart';
 
 /// The person's medicines as a shelf of prints (docs/design-system.md §3):
@@ -94,6 +93,19 @@ class YourMedicinesPage extends ConsumerWidget {
                     spacing: 18,
                     runSpacing: 26,
                     children: [
+                      if (meds.isEmpty)
+                        SizedBox(
+                          width: width,
+                          child: Transform.rotate(
+                            angle: 0.022,
+                            child: _EmptyPrint(
+                              light: light,
+                              onTap: () =>
+                                  AppNavigator.of(context)
+                                      .open(const AddMedicineDestination()),
+                            ),
+                          ),
+                        ),
                       for (final (i, m) in meds.indexed)
                         SizedBox(
                           width: width,
@@ -118,6 +130,99 @@ class YourMedicinesPage extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// The first slot on an empty shelf: a blank print with a dashed edge, a
+/// camera where the photo goes and a scribble where the name goes. Tapping
+/// it adds a medicine.
+class _EmptyPrint extends StatelessWidget {
+  const _EmptyPrint({required this.light, required this.onTap});
+  final DayLight light;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scale = MediaQuery.textScalerOf(context);
+    return Semantics(
+      button: true,
+      label: 'Add a medicine',
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: CustomPaint(
+          painter: DashedFrame(light.soft, _paperRadius),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: light.soft.withValues(alpha: 0.07),
+                      borderRadius: BorderRadius.circular(_photoRadius),
+                    ),
+                    child: Center(
+                      child: SizedBox.square(
+                        dimension: 40,
+                        child: CustomPaint(painter: CameraMark(light.soft)),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  height: scale.scale(22),
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: _Scribble(light.soft.withValues(alpha: 0.5), 0.7),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: scale.scale(16),
+                  width: double.infinity,
+                  child: CustomPaint(
+                    painter: _Scribble(light.soft.withValues(alpha: 0.3), 0.45),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One loose handwritten line across [reach] of the width: something goes
+/// here.
+class _Scribble extends CustomPainter {
+  _Scribble(this.color, this.reach);
+  final Color color;
+  final double reach;
+  @override
+  void paint(Canvas canvas, Size s) {
+    final y = s.height / 2;
+    final path = Path()..moveTo(0, y);
+    for (var x = 0.0; x <= s.width * reach; x += 2) {
+      path.lineTo(x, y + math.sin(x / 2.6) * 1.8);
+    }
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.4
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round
+        ..color = color,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_Scribble old) => old.color != color || old.reach != reach;
 }
 
 /// One medicine with what its print shows.

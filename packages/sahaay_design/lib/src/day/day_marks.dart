@@ -329,3 +329,76 @@ class FormMark extends CustomPainter {
       old.color != color ||
       old.filled != filled;
 }
+
+/// A small drawn camera.
+class CameraMark extends CustomPainter {
+  const CameraMark(this.ink);
+  final Color ink;
+  @override
+  void paint(Canvas canvas, Size s) {
+    final stroke = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.2
+      ..strokeJoin = StrokeJoin.round
+      ..color = ink;
+    final body = RRect.fromRectAndRadius(
+      Rect.fromLTWH(
+        s.width * 0.08,
+        s.height * 0.28,
+        s.width * 0.84,
+        s.height * 0.56,
+      ),
+      Radius.circular(s.width * 0.12),
+    );
+    canvas.drawRRect(body, stroke);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(
+          s.width * 0.34,
+          s.height * 0.16,
+          s.width * 0.32,
+          s.height * 0.14,
+        ),
+        Radius.circular(s.width * 0.04),
+      ),
+      stroke,
+    );
+    canvas.drawCircle(
+      Offset(s.width / 2, s.height * 0.56),
+      s.width * 0.16,
+      stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CameraMark old) => old.ink != ink;
+}
+
+/// A dashed rounded edge: a place for something not there yet.
+class DashedFrame extends CustomPainter {
+  const DashedFrame(this.color, this.radius);
+  final Color color;
+  final double radius;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          (Offset.zero & size).deflate(1),
+          Radius.circular(radius),
+        ),
+      );
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.8
+      ..color = color.withValues(alpha: 0.7);
+    for (final m in path.computeMetrics()) {
+      for (var d = 0.0; d < m.length; d += 12) {
+        canvas.drawPath(m.extractPath(d, math.min(d + 6, m.length)), paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(DashedFrame old) => old.color != color;
+}
