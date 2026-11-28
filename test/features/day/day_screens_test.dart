@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:sahaay/app/routes.dart';
 import 'package:sahaay/core/database/app_database.dart';
+import 'package:sahaay/features/day/day_destinations.dart';
 import 'package:sahaay/features/day/presentation/day_widgets.dart';
 import 'package:sahaay/features/medicines/data/drift_medicine_repository.dart';
 import 'package:sahaay/features/prints/data/drift_print_repository.dart';
@@ -54,7 +54,7 @@ void main() {
 
   Future<void> openToday(WidgetTester tester) async {
     await seed(tester);
-    await pumpTestApp(tester, db: db, initialLocation: AppRoutes.today);
+    await pumpTestApp(tester, db: db, start: const TodayDestination());
   }
 
   Future<void> swipeRuler(WidgetTester tester, double dx) async {
@@ -169,7 +169,7 @@ void main() {
         );
       }
     });
-    await pumpTestApp(tester, db: db, initialLocation: AppRoutes.today);
+    await pumpTestApp(tester, db: db, start: const TodayDestination());
 
     await tester.tap(find.text('history'));
     await tester.pumpAndSettle();
@@ -185,7 +185,7 @@ void main() {
   testWidgets('an empty day says so and leads to adding a medicine', (
     tester,
   ) async {
-    await pumpTestApp(tester, db: db, initialLocation: AppRoutes.today);
+    await pumpTestApp(tester, db: db, start: const TodayDestination());
 
     expect(find.text('nothing for today.'), findsOneWidget);
     await tester.tap(find.text('add a medicine'));

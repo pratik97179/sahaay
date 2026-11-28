@@ -5,17 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
 import '../../../core/launch/launch_handoff.dart';
+import '../../../core/navigation/navigation.dart';
+import '../../medicines/medicines_destinations.dart';
 import '../../prints/prints_providers.dart';
 import '../../reminders/domain/calendar.dart';
+import '../day_destinations.dart';
 import 'day_data.dart';
-import 'day_reminder_page.dart';
 import 'day_widgets.dart';
-import 'history_page.dart';
 
 /// A day's ruler: Today (the home screen) or an earlier day
 /// opened from History.
@@ -185,30 +184,9 @@ class _DayRulerState extends State<_DayRuler>
     );
   }
 
-  void _open() {
-    final e = _med;
-    Navigator.of(context).push(
-      PageRouteBuilder<void>(
-        transitionDuration: const Duration(milliseconds: 380),
-        reverseTransitionDuration: const Duration(milliseconds: 300),
-        pageBuilder: (context, a, b) =>
-            DayReminderPage(day: widget.day, reminderId: e.reminder.id),
-        transitionsBuilder: (context, a, b, child) => FadeTransition(
-          opacity: CurvedAnimation(parent: a, curve: Curves.easeOut),
-          child: SlideTransition(
-            position: Tween(begin: const Offset(0, 0.04), end: Offset.zero)
-                .animate(
-                  CurvedAnimation(
-                    parent: a,
-                    curve: const Cubic(0.23, 1, 0.32, 1),
-                  ),
-                ),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
+  void _open() => AppNavigator.of(
+    context,
+  ).open(DayReminderDestination(day: widget.day, reminderId: _med.reminder.id));
 
   String get _when {
     if (!_isToday) return _weekdays[widget.day.weekday - 1].toLowerCase();
@@ -303,17 +281,20 @@ class _DayRulerState extends State<_DayRuler>
                                             children: [
                                               MedicinesButton(
                                                 light: light,
-                                                onTap: () => context.push(
-                                                  AppRoutes.medicines,
-                                                ),
+                                                onTap: () =>
+                                                    AppNavigator.of(
+                                                      context,
+                                                    ).open(
+                                                      const MedicinesDestination(),
+                                                    ),
                                               ),
                                               HistoryButton(
                                                 light: light,
                                                 onTap: () =>
-                                                    Navigator.of(context).push(
-                                                      growRoute(
-                                                        const HistoryPage(),
-                                                      ),
+                                                    AppNavigator.of(
+                                                      context,
+                                                    ).open(
+                                                      const HistoryDestination(),
                                                     ),
                                               ),
                                             ],
@@ -325,17 +306,8 @@ class _DayRulerState extends State<_DayRuler>
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        GestureDetector(
-                                          onTap: () =>
-                                              Navigator.of(context).pop(),
-                                          child: Text(
-                                            '‹  ${_months[d.month - 1].toLowerCase()}',
-                                            style: figtree(
-                                              17,
-                                              FontWeight.w700,
-                                              light.soft,
-                                            ),
-                                          ),
+                                        BackLink(
+                                          _months[d.month - 1].toLowerCase(),
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
@@ -367,11 +339,12 @@ class _DayRulerState extends State<_DayRuler>
                             Center(
                               child: meds.isEmpty
                                   ? GestureDetector(
-                                      // `go`, not `push`: the nested route
-                                      // puts Your medicines under it, so
-                                      // its "‹ your medicines" holds.
-                                      onTap: () =>
-                                          context.go(AppRoutes.addMedicine),
+                                      // `reset`, not `open`: Your medicines
+                                      // goes beneath it, so its
+                                      // "‹ your medicines" holds.
+                                      onTap: () => AppNavigator.of(
+                                        context,
+                                      ).reset(const AddMedicineDestination()),
                                       child: Text(
                                         'add a medicine',
                                         style: figtree(

@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../../../core/navigation/navigation.dart';
 import '../../medicines/domain/medicine.dart';
 import '../application/reminder_draft.dart';
 import '../domain/calendar.dart';
@@ -1170,15 +1171,15 @@ class _StickyNoteState extends State<_StickyNote> {
   }
 
   Future<void> _open() async {
-    final result = await Navigator.of(context).push<String>(
-      PageRouteBuilder(
-        opaque: false,
-        transitionDuration: const Duration(milliseconds: 420),
-        reverseTransitionDuration: const Duration(milliseconds: 340),
-        pageBuilder: (context, animation, _) =>
-            _NoteDialog(tag: _tag, live: _live, animation: animation),
-        transitionsBuilder: (context, animation, _, child) => child,
+    final result = await AppNavigator.of(context).overlay<String>(
+      (context, animation, close) => _NoteDialog(
+        tag: _tag,
+        live: _live,
+        animation: animation,
+        close: close,
       ),
+      duration: const Duration(milliseconds: 420),
+      reverseDuration: const Duration(milliseconds: 340),
     );
     if (result != null) widget.onChanged?.call(result.trim());
   }
@@ -1338,10 +1339,14 @@ class _NoteDialog extends StatefulWidget {
     required this.tag,
     required this.live,
     required this.animation,
+    required this.close,
   });
   final Object tag;
   final ValueNotifier<String> live;
   final Animation<double> animation;
+
+  /// Takes the note back down with what was written.
+  final void Function([String? result]) close;
 
   @override
   State<_NoteDialog> createState() => _NoteDialogState();
@@ -1374,7 +1379,7 @@ class _NoteDialogState extends State<_NoteDialog> {
 
   void _done() {
     _focus.unfocus();
-    Navigator.of(context).pop(_c.text);
+    widget.close(_c.text);
   }
 
   @override

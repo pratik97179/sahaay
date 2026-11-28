@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../day/day_light.dart';
 import '../foundations/typefaces.dart';
-import 'lift_transition.dart';
+import 'screen_change_transition.dart';
 
 /// The app theme (`docs/design-system.md` §3): warm paper, light only.
 ///
@@ -25,12 +25,12 @@ abstract final class SahaayTheme {
           surfaceTint: Colors.transparent,
         );
     return ThemeData(
-      // Every screen change lifts in as a card (§3).
+      // One screen change everywhere: grow and fade about the centre (§3).
       pageTransitionsTheme: const PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: LiftPageTransitionsBuilder(),
-          TargetPlatform.iOS: LiftPageTransitionsBuilder(),
-          TargetPlatform.macOS: LiftPageTransitionsBuilder(),
+          TargetPlatform.android: ScreenChangeTransitionsBuilder(),
+          TargetPlatform.iOS: ScreenChangeTransitionsBuilder(),
+          TargetPlatform.macOS: ScreenChangeTransitionsBuilder(),
         },
       ),
       useMaterial3: true,

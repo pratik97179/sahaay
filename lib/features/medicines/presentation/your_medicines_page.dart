@@ -2,15 +2,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
+import '../../../core/navigation/navigation.dart';
 import '../../../core/time/clock.dart';
 import '../../reminders/domain/calendar.dart';
 import '../../reminders/domain/reminder.dart';
 import '../../reminders/reminders_providers.dart';
 import '../domain/medicine.dart';
+import '../medicines_destinations.dart';
 import '../medicines_providers.dart';
 import 'add_medicine_button.dart';
 import 'medicine_labels.dart';
@@ -61,13 +61,7 @@ class YourMedicinesPage extends ConsumerWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            GestureDetector(
-                              onTap: () => Navigator.of(context).maybePop(),
-                              child: Text(
-                                '‹  today',
-                                style: figtree(17, FontWeight.w700, light.soft),
-                              ),
-                            ),
+                            const BackLink('today'),
                             const SizedBox(height: 10),
                             Text(
                               'your medicines.',
@@ -89,7 +83,9 @@ class YourMedicinesPage extends ConsumerWidget {
                       ),
                       AddMedicineButton(
                         light: light,
-                        onTap: () => context.push(AppRoutes.addMedicine),
+                        onTap: () =>
+                            AppNavigator.of(context)
+                                .open(const AddMedicineDestination()),
                       ),
                     ],
                   ),
@@ -105,9 +101,9 @@ class YourMedicinesPage extends ConsumerWidget {
                             // Alternate a slight tilt, as if set down by hand.
                             angle: (i.isEven ? 1 : -1) * 0.022,
                             child: GestureDetector(
-                              onTap: () => context.push(
-                                AppRoutes.medicine(m.medicine.id),
-                              ),
+                              onTap: () =>
+                                  AppNavigator.of(context)
+                                      .open(MedicineDestination(m.medicine.id)),
                               child: _MedicinePrint(med: m, now: now),
                             ),
                           ),

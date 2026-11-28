@@ -2,10 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
+import '../../../core/navigation/navigation.dart';
 import '../../../core/time/clock.dart';
 import '../../medicines/domain/medicine.dart';
 import '../../medicines/medicines_providers.dart';
@@ -130,15 +129,11 @@ class _ReminderViewState extends ConsumerState<_ReminderView> {
 
   Future<void> _delete() async {
     _save?.cancel();
-    final router = GoRouter.of(context);
-    final medicineId = widget.reminder.medicineId;
+    // Taken before the wait: this page may be gone once the reminder is.
+    final navigator = AppNavigator.of(context);
     try {
       await _manage.delete(widget.reminder.id);
-      if (router.canPop()) {
-        router.pop();
-      } else {
-        router.go(AppRoutes.medicine(medicineId));
-      }
+      navigator.back();
     } on Exception {
       _say("the reminder couldn't be deleted.");
     }
@@ -175,15 +170,7 @@ class _ReminderViewState extends ConsumerState<_ReminderView> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).maybePop(),
-                      child: Text(
-                        '‹  ${medicine.displayName}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: figtree(17, FontWeight.w700, light.soft),
-                      ),
-                    ),
+                    BackLink(medicine.displayName),
                     const SizedBox(height: 10),
                     Text(
                       'reminder',
@@ -503,13 +490,7 @@ class _Message extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).maybePop(),
-            child: Text(
-              '‹  back',
-              style: figtree(17, FontWeight.w700, light.soft),
-            ),
-          ),
+          const BackLink('back'),
           const SizedBox(height: 24),
           Text(text, style: figtree(20, FontWeight.w700, light.ink)),
         ],

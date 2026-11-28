@@ -2,24 +2,26 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
 import '../core/launch/launch_handoff.dart';
+import '../core/navigation/go_router_navigator.dart';
+import '../core/navigation/navigation.dart';
+import '../features/day/day_destinations.dart';
 import '../features/notifications/notifications_providers.dart';
+import '../features/reminders/reminders_destinations.dart';
+import 'app_screens.dart';
 import 'launch_curtain.dart';
-import 'router.dart';
-import 'routes.dart';
 
 class SahaayApp extends ConsumerStatefulWidget {
   const SahaayApp({
-    this.initialLocation = AppRoutes.today,
+    this.start = const TodayDestination(),
     this.launchCurtain = true,
     super.key,
   });
 
   /// Where the app opens; tests start some flows elsewhere.
-  final String initialLocation;
+  final Destination start;
 
   /// Carries the launch screen into the first screen; tests leave it out.
   final bool launchCurtain;
@@ -29,8 +31,9 @@ class SahaayApp extends ConsumerStatefulWidget {
 }
 
 class _SahaayAppState extends ConsumerState<SahaayApp> {
-  late final GoRouter _router = createRouter(
-    initialLocation: widget.initialLocation,
+  late final GoRouterNavigator _navigator = GoRouterNavigator(
+    screens: appScreens(),
+    start: widget.start,
   );
   late final StreamSubscription<String> _taps;
 
@@ -56,26 +59,30 @@ class _SahaayAppState extends ConsumerState<SahaayApp> {
     );
   }
 
-  void _openReminder(String id) => _router.go(AppRoutes.reminder(id));
+  void _openReminder(String id) => _navigator.reset(ReminderDestination(id));
 
   @override
   void dispose() {
     _lifecycle.dispose();
     unawaited(_taps.cancel());
-    _router.dispose();
+    _navigator.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     ref.watch(notificationsInSyncProvider);
-    return MaterialApp.router(
-      title: 'sahaay',
-      theme: SahaayTheme.light(),
-      routerConfig: _router,
-      builder: widget.launchCurtain
-          ? (context, child) => Stack(children: [?child, const LaunchCurtain()])
-          : null,
+    return NavigationScope(
+      navigator: _navigator,
+      child: MaterialApp.router(
+        title: 'sahaay',
+        theme: SahaayTheme.light(),
+        routerConfig: _navigator.router,
+        builder: widget.launchCurtain
+            ? (context, child) =>
+                  Stack(children: [?child, const LaunchCurtain()])
+            : null,
+      ),
     );
   }
 }

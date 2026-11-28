@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../../../core/navigation/navigation.dart';
 import '../../../core/time/clock.dart';
 import '../../medicines/medicines_providers.dart';
 import '../../medicines/presentation/medicine_labels.dart';
@@ -44,7 +44,7 @@ class _NewReminderPageState extends ConsumerState<NewReminderPage> {
       for (final d in details) {
         await create(medicineId: widget.medicineId, details: d);
       }
-      if (mounted) context.pop();
+      if (mounted) AppNavigator.of(context).back();
     } on Exception {
       if (!mounted) return;
       setState(() => _busy = false);
@@ -81,15 +81,7 @@ class _NewReminderPageState extends ConsumerState<NewReminderPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).maybePop(),
-                          child: Text(
-                            '‹  ${medicine?.displayName ?? 'back'}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: figtree(17, FontWeight.w700, light.soft),
-                          ),
-                        ),
+                        BackLink(medicine?.displayName ?? 'back'),
                         const SizedBox(height: 10),
                         Text(
                           'new reminder',
