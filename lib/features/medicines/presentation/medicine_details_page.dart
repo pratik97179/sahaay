@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
+import '../../../core/navigation/navigation.dart';
 import '../domain/medicine.dart';
 import '../medicines_providers.dart';
 import 'medicine_labels.dart';
@@ -26,7 +25,7 @@ class MedicineDetailsPage extends ConsumerWidget {
   Future<void> _delete(BuildContext context, WidgetRef ref, Medicine m) async {
     try {
       await ref.read(deleteMedicineProvider)(m.id);
-      if (context.mounted) context.go(AppRoutes.medicines);
+      if (context.mounted) AppNavigator.of(context).back();
     } on Exception {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -111,13 +110,7 @@ class _Header extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: () => Navigator.of(context).maybePop(),
-          child: Text(
-            '‹  your medicines',
-            style: figtree(17, FontWeight.w700, light.soft),
-          ),
-        ),
+        const BackLink('your medicines'),
         const SizedBox(height: 10),
         Text(
           medicine.displayName,
@@ -159,13 +152,7 @@ class _Message extends StatelessWidget {
   Widget build(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      GestureDetector(
-        onTap: () => Navigator.of(context).maybePop(),
-        child: Text(
-          '‹  your medicines',
-          style: figtree(17, FontWeight.w700, light.soft),
-        ),
-      ),
+      const BackLink('your medicines'),
       const SizedBox(height: 24),
       Text(text, style: figtree(20, FontWeight.w700, light.ink)),
     ],

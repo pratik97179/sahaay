@@ -84,6 +84,20 @@ Cross-cutting code may include persistence coordination, notification scheduling
 - Compose concrete implementations at the application's composition boundary.
 - Make dependencies explicit and avoid hidden global state.
 
+## Navigation
+
+Navigation is a cross-cutting module in `lib/core/navigation/` (ADR 0002). Its rules are built so that several people can add screens at once without editing the same file, and so that a mistake fails at launch or at the check, not on some later tap.
+
+- **One contract.** Widgets move between screens only through `AppNavigator.of(context)`: `open`, `replace`, `reset`, `back` and `overlay`. The contract is small and does not grow when screens are added.
+- **Destinations are a feature's navigation contract.** Each screen is a `final class` extending `Destination`, holding only the values it needs, in its feature's `<feature>_destinations.dart`. Another feature opens it by importing that file and nothing else of the feature.
+- **Screens are registered next to their feature.** `<feature>_screens.dart` lists a `ScreenRoute` per destination: its path part under its parent, its parent destination type, how its values go into and come out of the location, and the page it builds. Places another feature fills (a medicine's reminders) are parameters of the list, filled by the app.
+- **The app composes, once per feature.** `lib/app/app_screens.dart` has one line per feature. Adding a screen never touches it.
+- **Checked at launch.** The screen table rejects a duplicate destination, a missing or looping parent, a misplaced `/`, two siblings on one path, a value name used twice, and a destination whose values don't match its placeholders. Fixed paths are ordered before values among siblings automatically.
+- **One transition.** Every screen is a page with the theme's screen change (`docs/design-system.md`, Motion). No screen builds its own route or transition. A see-through layer that animates itself, such as the lifted note, uses `AppNavigator.overlay`.
+- **Back is one widget.** Every screen's "‹ …" is `BackLink`.
+- **Enforced.** `tool/check_navigation.sh` runs with analyze. Outside `lib/core/navigation/` it rejects go_router, Flutter's `Navigator`, page routes, dialog and sheet helpers, destinations outside `*_destinations.dart`, screen routes outside `*_screens.dart`, and one feature importing another's `*_screens.dart`.
+- **A screen not built yet** gets its destination, its `ScreenRoute` and an empty page in one small change first. After that, people working on its widgets each edit only their own files.
+
 ## Persistence and local data
 
 - All product data remains on-device.

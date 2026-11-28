@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
+import '../../../core/navigation/navigation.dart';
 import '../../../core/time/clock.dart';
 import '../domain/calendar.dart';
 import '../domain/reminder.dart';
+import '../reminders_destinations.dart';
 import '../reminders_providers.dart';
 import 'reminder_marks.dart';
 import 'schedule_text.dart';
@@ -50,7 +50,9 @@ class MedicineRemindersSection extends ConsumerWidget {
               excludeSemantics: true,
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () => context.push(AppRoutes.newReminder(medicineId)),
+                onTap: () =>
+                    AppNavigator.of(context)
+                        .open(NewReminderDestination(medicineId)),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 12),
                   child: SizedBox.square(
@@ -92,7 +94,9 @@ class MedicineRemindersSection extends ConsumerWidget {
                     angle: (i.isEven ? -1 : 1) * 0.012,
                     child: _ReminderPrint(
                       reminder: r,
-                      onTap: () => context.push(AppRoutes.reminder(r.id)),
+                      onTap: () =>
+                          AppNavigator.of(context)
+                              .open(ReminderDestination(r.id)),
                     ),
                   ),
                 ),

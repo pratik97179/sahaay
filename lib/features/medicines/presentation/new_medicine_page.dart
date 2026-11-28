@@ -3,11 +3,11 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
-import '../../../app/routes.dart';
+import '../../../core/navigation/navigation.dart';
 import '../domain/medicine.dart';
+import '../medicines_destinations.dart';
 import '../medicines_providers.dart';
 import 'add_medicine_extras.dart';
 
@@ -176,16 +176,9 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: _step == 0 || saved
-                      ? () => Navigator.of(context).maybePop()
-                      : () => _goTo(_step - 1),
-                  child: Text(
-                    _step == 0 || saved ? '‹  your medicines' : '‹  back',
-                    style: figtree(17, FontWeight.w700, light.soft),
-                  ),
-                ),
+                child: _step == 0 || saved
+                    ? const BackLink('your medicines')
+                    : BackLink('back', onTap: () => _goTo(_step - 1)),
               ),
             ],
           ),
@@ -249,9 +242,9 @@ class _NewMedicinePageState extends ConsumerState<NewMedicinePage> {
                   saving: !saved,
                   light: light,
                   onOpen: saved
-                      ? () => context.pushReplacement(
-                          AppRoutes.medicine(_savedId!),
-                        )
+                      ? () =>
+                            AppNavigator.of(context)
+                                .replace(MedicineDestination(_savedId!))
                       : null,
                 ),
               ],

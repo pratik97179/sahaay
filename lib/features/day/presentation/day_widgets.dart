@@ -508,25 +508,3 @@ class PrintStack extends CustomPainter {
   @override
   bool shouldRepaint(PrintStack old) => old.ink != ink;
 }
-
-/// Opens by fading in and growing from the centre (History, a past day).
-Route<void> growRoute(Widget page, {double from = 0.9}) =>
-    PageRouteBuilder<void>(
-      transitionDuration: const Duration(milliseconds: 360),
-      reverseTransitionDuration: const Duration(milliseconds: 260),
-      pageBuilder: (context, a, b) => page,
-      transitionsBuilder: (context, a, b, child) {
-        final curved = CurvedAnimation(
-          parent: a,
-          curve: const Cubic(0.23, 1, 0.32, 1),
-          reverseCurve: Curves.easeIn,
-        );
-        return FadeTransition(
-          opacity: curved,
-          child: ScaleTransition(
-            scale: Tween(begin: from, end: 1.0).animate(curved),
-            child: child,
-          ),
-        );
-      },
-    );

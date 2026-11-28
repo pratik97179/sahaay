@@ -16,6 +16,19 @@ final class LocalDate implements Comparable<LocalDate> {
   factory LocalDate.fromDateTime(DateTime dateTime) =>
       LocalDate(dateTime.year, dateTime.month, dateTime.day);
 
+  /// Reads the `yyyy-mm-dd` form that [toString] writes.
+  factory LocalDate.parse(String text) {
+    final parts = text.split('-');
+    if (parts.length != 3) {
+      throw FormatException('Not a yyyy-mm-dd date', text);
+    }
+    return LocalDate(
+      int.parse(parts[0]),
+      int.parse(parts[1]),
+      int.parse(parts[2]),
+    );
+  }
+
   /// Builds a date in [month] of [year], using the month's last day when
   /// [day] is larger than the month (month-end clamping).
   factory LocalDate.clamped(int year, int month, int day) =>

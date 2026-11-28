@@ -3,10 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sahaay/app/app.dart';
-import 'package:sahaay/app/routes.dart';
 import 'package:sahaay/core/database/app_database.dart';
 import 'package:sahaay/core/database/database_provider.dart';
+import 'package:sahaay/core/navigation/destination.dart';
 import 'package:sahaay/core/time/clock.dart';
+import 'package:sahaay/features/medicines/medicines_destinations.dart';
 import 'package:sahaay/features/medicines/medicines_providers.dart';
 import 'package:sahaay/features/notifications/notifications_providers.dart';
 
@@ -22,7 +23,7 @@ Future<void> pumpTestApp(
   FakePhotoCapture? capture,
   FakePhotoStorage? photos,
   DateTime? now,
-  String initialLocation = AppRoutes.medicines,
+  Destination start = const MedicinesDestination(),
 }) async {
   // A typical phone screen (360 x 780 logical pixels).
   tester.view
@@ -42,7 +43,7 @@ Future<void> pumpTestApp(
           photos ?? FakePhotoStorage(),
         ),
       ],
-      child: SahaayApp(initialLocation: initialLocation, launchCurtain: false),
+      child: SahaayApp(start: start, launchCurtain: false),
     ),
   );
   await tester.pumpAndSettle();

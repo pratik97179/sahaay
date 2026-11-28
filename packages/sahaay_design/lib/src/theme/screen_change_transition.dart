@@ -1,25 +1,41 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 
 /// Sahaay's screen change (`docs/design-system.md` §3): the new screen
-/// rises as a rounded card, a little small, low and clear, and settles flat
-/// while its corners square off; the screen behind sinks back and dims. One
-/// continuous springy motion, mirrored on the way back.
+/// grows from slightly small to full size about the screen's centre while it
+/// fades in. Going back, the leaving screen shrinks and fades out, the exact
+/// reverse in the same time. Only that one screen moves: the screen beneath
+/// stays still.
+///
+/// The two screens never show through each other. A veil of page paper,
+/// full size and still, washes the screen beneath out in the first half;
+/// the new screen fades in over that clean paper. Going back, the leaving
+/// screen fades out first and the veil clears last.
 ///
 /// Swiping in from the left edge takes the screen back, the finger driving
 /// the same motion.
-class LiftPageTransitionsBuilder extends PageTransitionsBuilder {
-  const LiftPageTransitionsBuilder();
+class ScreenChangeTransitionsBuilder extends PageTransitionsBuilder {
+  const ScreenChangeTransitionsBuilder();
 
-  /// A soft spring: quick to start, a long gentle settle.
-  static const _curve = Cubic(0.2, 0.9, 0.25, 1);
+  /// Forward eases out; going back plays the same curve flipped, so the
+  /// motion back is the motion forward, reversed.
+  static const _curve = Curves.easeOutCubic;
+
+  static const _duration = Duration(milliseconds: 420);
+
+  /// How small the screen is when it is fully faded.
+  static const _smallest = 0.92;
+
+  /// The veil is whole by this point of the change.
+  static const _veiled = 0.5;
+
+  /// The screen's own fade starts at this point of the change.
+  static const _showing = 0.2;
 
   @override
-  Duration get transitionDuration => const Duration(milliseconds: 520);
+  Duration get transitionDuration => _duration;
 
   @override
-  Duration get reverseTransitionDuration => const Duration(milliseconds: 380);
+  Duration get reverseTransitionDuration => _duration;
 
   @override
   Widget buildTransitions<T>(
@@ -30,59 +46,40 @@ class LiftPageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     final reduced = MediaQuery.disableAnimationsOf(context);
+    final paper = Theme.of(context).scaffoldBackgroundColor;
     return _BackSwipe(
       route: route,
       child: AnimatedBuilder(
-        animation: Listenable.merge([animation, secondaryAnimation]),
+        animation: animation,
         child: child,
         builder: (context, child) {
           final gesture = route.navigator?.userGestureInProgress ?? false;
-          double eased(Animation<double> a) => gesture
-              ? a.value
-              : (a.status == AnimationStatus.reverse
-                    ? Curves.easeInCubic.flipped.transform(a.value)
-                    : _curve.transform(a.value));
-          final t = eased(animation); // this screen coming in
-          final s = eased(secondaryAnimation); // a screen over this one
-          if (reduced) {
-            return Opacity(opacity: t.clamp(0.0, 1.0), child: child);
-          }
-          final radius = 34 * (1 - t) + 26 * s;
-          return Transform.translate(
-            offset: Offset(0, 48 * (1 - t)),
-            child: Transform.scale(
-              scale: (0.9 + 0.1 * t) * (1 - 0.06 * s),
-              child: Opacity(
-                opacity: (t * 1.6).clamp(0.0, 1.0),
-                child: DecoratedBox(
-                  position: DecorationPosition.foreground,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.18 * s),
-                    borderRadius: BorderRadius.circular(radius),
-                  ),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(radius),
-                      boxShadow: [
-                        if (t < 1)
-                          BoxShadow(
-                            color: Colors.black.withValues(
-                              alpha: 0.22 * math.sin(math.pi * t),
-                            ),
-                            blurRadius: 40,
-                            offset: const Offset(0, 16),
-                          ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(radius),
-                      clipBehavior: radius > 0.5 ? Clip.antiAlias : Clip.none,
-                      child: child,
-                    ),
-                  ),
+          final t = gesture
+              ? animation.value
+              : (animation.status == AnimationStatus.reverse
+                    ? _curve.flipped.transform(animation.value)
+                    : _curve.transform(animation.value));
+          final veil = (t / _veiled).clamp(0.0, 1.0);
+          final shown = ((t - _showing) / (1 - _showing)).clamp(0.0, 1.0);
+          final faded = Opacity(opacity: shown, child: child);
+          return Stack(
+            fit: StackFit.passthrough,
+            children: [
+              // Always present, so the screen's own state is never rebuilt
+              // when the change ends.
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: ColoredBox(color: paper.withValues(alpha: veil)),
                 ),
               ),
-            ),
+              if (reduced)
+                faded
+              else
+                Transform.scale(
+                  scale: _smallest + (1 - _smallest) * t,
+                  child: faded,
+                ),
+            ],
           );
         },
       ),

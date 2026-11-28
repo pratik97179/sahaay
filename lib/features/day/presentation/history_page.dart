@@ -8,10 +8,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sahaay_design/sahaay_design.dart';
 
+import '../../../core/navigation/navigation.dart';
 import '../../reminders/domain/calendar.dart';
+import '../day_destinations.dart';
 import 'day_data.dart';
 import 'day_page.dart';
-import 'day_widgets.dart';
 
 /// History: the month's prints as a flipbook. Swipe through the days like a
 /// stack of photos; hold the stack and every day flies out to its place in
@@ -61,10 +62,10 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
     reverseDuration: const Duration(milliseconds: 240),
   )..addListener(_redraw);
   Rect _stackRect = Rect.zero;
-  // 0 = flipbook, 1 = calendar.
+  // 0 = flipbook, 1 = calendar. Quick: the switch answers at once.
   late final AnimationController _grid = AnimationController(
     vsync: this,
-    duration: const Duration(milliseconds: 720),
+    duration: const Duration(milliseconds: 480),
   )..addListener(_redraw);
   Timer? _hold;
   bool _held =
@@ -223,12 +224,8 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
 
   void _openDay(int day) {
     if (_held) return;
-    Navigator.of(context).push(
-      growRoute(
-        DayPage(day: LocalDate(_month.year, _month.month, day)),
-        from: 0.94,
-      ),
-    );
+    AppNavigator.of(context)
+        .open(PastDayDestination(LocalDate(_month.year, _month.month, day)));
   }
 
   // ---- Layout. ----
@@ -245,13 +242,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GestureDetector(
-                onTap: () => Navigator.of(context).pop(),
-                child: Text(
-                  '‹  today',
-                  style: figtree(17, FontWeight.w700, light.soft),
-                ),
-              ),
+              const BackLink('today'),
               const SizedBox(height: 10),
               Text(
                 '${monthName(_month.month).toLowerCase()}.',
@@ -288,6 +279,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
               Center(
                 child: _ViewSwitch(
                   value: g,
+                  toCalendar: _grid.status != AnimationStatus.reverse,
                   light: light,
                   onSelect: (calendar) {
                     if (calendar != (_grid.value >= 0.5)) _toggle();
@@ -430,7 +422,7 @@ class _HistoryPageState extends State<_History> with TickerProviderStateMixin {
                     ? () => _openDay(d)
                     : (d == today
                           ? () {
-                              if (!_held) Navigator.of(context).pop();
+                              if (!_held) AppNavigator.of(context).back();
                             }
                           : null),
                 child: Container(
@@ -762,18 +754,25 @@ class _Chevron extends CustomPainter {
 class _ViewSwitch extends StatelessWidget {
   const _ViewSwitch({
     required this.value,
+    required this.toCalendar,
     required this.light,
     required this.onSelect,
   });
   final double value; // 0 = flipbook, 1 = calendar
+  final bool toCalendar; // which way the transition is running
   final DayLight light;
   final ValueChanged<bool> onSelect;
 
   static const _seg = 34.0;
 
+  // The prints' own curve: the thumb leaves at once and settles softly,
+  // whichever way it is going.
+  static const _curve = Cubic(0.23, 1, 0.32, 1);
+
   @override
   Widget build(BuildContext context) {
-    final t = Curves.easeInOut.transform(value.clamp(0.0, 1.0));
+    final v = value.clamp(0.0, 1.0);
+    final t = toCalendar ? _curve.transform(v) : 1 - _curve.transform(1 - v);
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
